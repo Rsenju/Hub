@@ -1,0 +1,13 @@
+{
+  "name": "deutsch-hub",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "devDependencies": {
+    "vercel": "^44.0.0"
+  }
+}
