@@ -902,6 +902,7 @@
   <div class="topbar-nav">
     <button class="nav-pill active" onclick="showPage('home')">Início</button>
     <button class="nav-pill" onclick="showPage('flashcards')">Flashcards</button>
+    <button class="nav-pill" onclick="showPage('biblioteca')">Biblioteca</button>
     <button class="nav-pill" onclick="showPage('chat')">Chatbot</button>
     <button class="nav-pill" onclick="showPage('notas')">Notas</button>
     <button class="nav-pill" onclick="showPage('review')">📋 Erros</button>
@@ -1105,6 +1106,22 @@
       </div>
 
       <div class="flashcard-grid" id="flashcardGrid"></div>
+    </div>
+
+    <!-- STUDY LIBRARY PAGE -->
+    <div class="page" id="page-biblioteca">
+      <div style="margin-bottom:24px;">
+        <div class="section-eyebrow">Aulas curtas</div>
+        <div class="section-title">Biblioteca de Estudos</div>
+        <p style="color:var(--muted);font-size:14px;max-width:680px;">Capítulos rápidos com exemplos, frases úteis e exercícios para sua trilha A1 até B1.</p>
+      </div>
+      <div class="filter-bar" id="libraryFilters">
+        <button class="filter-chip active" onclick="filterStudyLibrary('all')" data-library-filter="all">Todos</button>
+        <button class="filter-chip" onclick="filterStudyLibrary('A1')" data-library-filter="A1">A1</button>
+        <button class="filter-chip" onclick="filterStudyLibrary('A2')" data-library-filter="A2">A2</button>
+        <button class="filter-chip" onclick="filterStudyLibrary('B1')" data-library-filter="B1">B1</button>
+      </div>
+      <div id="studyLibraryGrid" style="display:grid;gap:14px;"></div>
     </div>
 
     <!-- CHATBOT PAGE -->
@@ -1398,9 +1415,10 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-pill').forEach(el => el.classList.remove('active'));
   document.getElementById('page-' + p).classList.add('active');
-  const idx = ['home','flashcards','chat','notas','review'].indexOf(p);
+  const idx = ['home','flashcards','biblioteca','chat','notas','review'].indexOf(p);
   document.querySelectorAll('.nav-pill')[idx]?.classList.add('active');
   if (p === 'flashcards') renderFlashcards();
+  if (p === 'biblioteca') loadStudyLibrary();
   if (p === 'notas') loadNotes();
   if (p === 'review') loadErrorReview();
 }
@@ -2728,7 +2746,12 @@ const DH_V2 = {
   apiDefaultsApplied: false,
   contentLoaded: false,
   challengesLoaded: false,
-  curatedChallenges: []
+  curatedChallenges: [],
+  studyLoaded: false,
+  studyFilter: 'all',
+  studyModules: [],
+  studyLessons: [],
+  studyExercises: []
 };
 
 const DH_LOCAL_API_DEFAULTS = {
@@ -3131,6 +3154,160 @@ Inicie o dialogo em alemao com a primeira fala obrigatoria. Seja direto, natural
   localStorage.setItem('dh-char-histories', JSON.stringify(charHistories));
 }
 window.startCuratedChallenge = startCuratedChallenge;
+
+async function loadStudyLibrary() {
+  if (!DH_V2.studyLoaded) {
+    DH_V2.studyLoaded = true;
+    try {
+      const [modules, lessons, exercises] = await Promise.all([
+        sbFetch('study_modules?active=eq.true&order=sort_order.asc'),
+        sbFetch('study_lessons?active=eq.true&order=sort_order.asc'),
+        sbFetch('study_exercises?active=eq.true&order=sort_order.asc')
+      ]);
+      DH_V2.studyModules = Array.isArray(modules) ? modules : [];
+      DH_V2.studyLessons = Array.isArray(lessons) ? lessons : [];
+      DH_V2.studyExercises = Array.isArray(exercises) ? exercises : [];
+    } catch(e) {
+      console.warn('Study library unavailable:', e);
+    }
+  }
+  renderStudyLibrary();
+}
+
+function filterStudyLibrary(level) {
+  DH_V2.studyFilter = level;
+  document.querySelectorAll('[data-library-filter]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.libraryFilter === level);
+  });
+  renderStudyLibrary();
+}
+window.filterStudyLibrary = filterStudyLibrary;
+
+function renderStudyLibrary() {
+  const grid = document.getElementById('studyLibraryGrid');
+  if (!grid) return;
+  const modules = DH_V2.studyModules.filter(m => DH_V2.studyFilter === 'all' || m.level === DH_V2.studyFilter);
+  if (!modules.length) {
+    grid.innerHTML = '<div style="padding:28px;border:1px solid var(--border);border-radius:12px;color:var(--muted);background:var(--surface);">Rode o SQL study_library_phase4.sql no Supabase para carregar a Biblioteca de Estudos.</div>';
+    return;
+  }
+  grid.innerHTML = modules.map(module => {
+    const lessons = DH_V2.studyLessons.filter(l => l.module_slug === module.slug);
+    return `
+      <section style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:var(--accent);">${module.level} · Cap. ${module.chapter_number}</div>
+            <div style="font-family:'Inter Tight',sans-serif;font-weight:800;font-size:21px;margin-top:2px;">${escHtml(module.title_pt)}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">${escHtml(module.focus)}</div>
+          </div>
+          <button class="fc-audio-btn" onclick="createFlashcardsFromModule('${module.slug}')">+ Flashcards</button>
+        </div>
+        <div style="display:grid;gap:12px;">
+          ${lessons.map(renderStudyLesson).join('')}
+        </div>
+      </section>
+    `;
+  }).join('');
+  makeWordsHoverable(grid);
+}
+
+function renderStudyLesson(lesson) {
+  const examples = Array.isArray(lesson.examples) ? lesson.examples : [];
+  const phrases = Array.isArray(lesson.key_phrases) ? lesson.key_phrases : [];
+  const notes = Array.isArray(lesson.mini_notes) ? lesson.mini_notes : [];
+  const exercises = DH_V2.studyExercises.filter(e => e.lesson_slug === lesson.slug);
+  return `
+    <article style="border:1px solid var(--border);border-radius:10px;background:var(--bg);padding:14px;">
+      <div style="font-weight:800;font-size:16px;margin-bottom:6px;">${escHtml(lesson.title_pt)}</div>
+      <p style="font-size:14px;color:var(--muted);margin:0 0 10px;">${escHtml(lesson.summary_pt)}</p>
+      <div style="padding:10px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:14px;font-weight:700;margin-bottom:12px;">${escHtml(lesson.quick_rule_pt)}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px;">
+        ${examples.map(ex => `
+          <div style="border:1px solid var(--border);border-radius:10px;padding:10px;">
+            <div class="chat-bubble" style="display:inline-block;margin-bottom:6px;">${escHtml(ex.de || '')}</div>
+            <div style="font-size:13px;color:var(--muted);">${escHtml(ex.pt || '')}</div>
+            <div style="font-size:12px;color:var(--accent);margin-top:6px;">${escHtml(ex.note || '')}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px;">
+        <div>
+          <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">Frases úteis</div>
+          ${phrases.map(p => `<div style="font-size:13px;margin-bottom:5px;"><strong>${escHtml(p.de || '')}</strong><br><span style="color:var(--muted);">${escHtml(p.pt || '')}</span></div>`).join('')}
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">Notas rápidas</div>
+          ${notes.map(n => `<div style="font-size:13px;margin-bottom:5px;">· ${escHtml(n)}</div>`).join('')}
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;">
+        <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px;">Exercícios rápidos</div>
+        <div style="display:grid;gap:8px;">${exercises.map(renderStudyExercise).join('')}</div>
+      </div>
+    </article>
+  `;
+}
+
+function renderStudyExercise(ex) {
+  const options = Array.isArray(ex.options) ? ex.options : [];
+  const input = ex.exercise_type === 'choose_option'
+    ? `<select id="ex-${ex.slug}" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);"><option value="">Escolha...</option>${options.map(o => `<option value="${escHtml(o)}">${escHtml(o)}</option>`).join('')}</select>`
+    : `<input id="ex-${ex.slug}" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);" placeholder="Sua resposta...">`;
+  return `
+    <div style="display:grid;gap:8px;border:1px solid var(--border);border-radius:10px;padding:10px;">
+      <div style="font-size:14px;">${escHtml(ex.prompt_pt)}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        ${input}
+        <button class="fc-audio-btn" onclick="checkStudyExercise('${ex.slug}')">Validar</button>
+      </div>
+      <div id="fb-${ex.slug}" style="font-size:13px;"></div>
+    </div>
+  `;
+}
+
+async function checkStudyExercise(slug) {
+  const ex = DH_V2.studyExercises.find(item => item.slug === slug);
+  const input = document.getElementById(`ex-${slug}`);
+  const fb = document.getElementById(`fb-${slug}`);
+  if (!ex || !input || !fb) return;
+  const value = input.value.trim();
+  if (!value) return;
+  const normalized = s => s.toLowerCase().normalize('NFC').replace(/[.!?]/g,'').trim();
+  const ok = ex.exercise_type === 'free_answer'
+    ? normalized(value).includes(normalized(ex.answer))
+    : normalized(value) === normalized(ex.answer);
+  fb.innerHTML = ok
+    ? `<span style="color:var(--green);font-weight:800;">Correto! +${ex.xp_reward} XP</span> <span style="color:var(--muted);">${escHtml(ex.explanation_pt)}</span>`
+    : `<span style="color:var(--red);font-weight:800;">Revise:</span> <span style="color:var(--muted);">${escHtml(ex.explanation_pt)} Resposta: ${escHtml(ex.answer)}</span>`;
+  if (ok) await updateXP(ex.xp_reward || 10, `Biblioteca: ${ex.prompt_pt.slice(0, 40)}`);
+}
+window.checkStudyExercise = checkStudyExercise;
+
+function createFlashcardsFromModule(moduleSlug) {
+  const lessons = DH_V2.studyLessons.filter(l => l.module_slug === moduleSlug);
+  const created = [];
+  lessons.forEach(lesson => {
+    const phrases = Array.isArray(lesson.key_phrases) ? lesson.key_phrases : [];
+    phrases.forEach((p, idx) => {
+      if (!p.de || !p.pt) return;
+      const id = `lib-${lesson.slug}-${idx}`;
+      if (CARDS.some(c => c.id === id)) return;
+      CARDS.push({
+        id,
+        nivel: lesson.level,
+        tema: 'biblioteca',
+        frente: p.de,
+        verso: p.pt,
+        leigo: lesson.quick_rule_pt
+      });
+      created.push(id);
+    });
+  });
+  showNotification(`${created.length} flashcards adicionados desta aula.`, 'success');
+  showPage('flashcards');
+}
+window.createFlashcardsFromModule = createFlashcardsFromModule;
 
 // Replace the old image tooltip with a fast PT-BR word tooltip.
 const DH_WORD_PT_V2 = {
