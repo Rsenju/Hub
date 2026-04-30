@@ -5,7 +5,7 @@
 -- =====================================================
 
 create table if not exists profiles (
-  user_id text primary key default 'rebeca',
+  user_id text primary key,
   display_name text default 'Rebeca',
   current_level text not null default 'A1',
   total_xp integer not null default 0,
@@ -17,13 +17,11 @@ create table if not exists profiles (
   updated_at timestamptz default now()
 );
 
-insert into profiles (user_id, display_name)
-values ('rebeca', 'Rebeca')
-on conflict (user_id) do nothing;
+-- Seed removido. O profile é criado automaticamente pelo frontend no primeiro login.
 
 create table if not exists chat_history (
   id uuid default gen_random_uuid() primary key,
-  user_id text not null default 'rebeca',
+  user_id text not null,
   character text not null,
   role text not null check (role in ('user', 'assistant', 'system')),
   content text not null,
@@ -37,7 +35,7 @@ create index if not exists chat_history_user_character_created_idx
 
 create table if not exists srs_progress (
   id uuid default gen_random_uuid() primary key,
-  user_id text not null default 'rebeca',
+  user_id text not null,
   card_id text not null,
   rating text,
   interval_days numeric not null default 1,
@@ -52,7 +50,7 @@ create table if not exists srs_progress (
 
 create table if not exists achievements (
   id uuid default gen_random_uuid() primary key,
-  user_id text not null default 'rebeca',
+  user_id text not null,
   code text not null,
   title text not null,
   description text,
@@ -63,7 +61,7 @@ create table if not exists achievements (
 
 create table if not exists notes (
   id uuid default gen_random_uuid() primary key,
-  user_id text not null default 'rebeca',
+  user_id text not null,
   bucket text not null,
   content text not null default '',
   created_at timestamptz default now(),
@@ -73,7 +71,7 @@ create table if not exists notes (
 
 create table if not exists flashcard_media (
   id uuid default gen_random_uuid() primary key,
-  user_id text not null default 'rebeca',
+  user_id text not null,
   card_id text not null,
   term text not null,
   image_url text,

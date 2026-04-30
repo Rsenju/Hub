@@ -6,7 +6,7 @@
 -- 1. Progresso do usuário por nível
 CREATE TABLE IF NOT EXISTS user_progress (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id TEXT NOT NULL DEFAULT 'rebeca',
+  user_id TEXT NOT NULL,
   level TEXT NOT NULL DEFAULT 'A1',         -- A1, A2, B1, B2
   xp INTEGER NOT NULL DEFAULT 0,
   xp_to_next INTEGER NOT NULL DEFAULT 500,
@@ -16,15 +16,13 @@ CREATE TABLE IF NOT EXISTS user_progress (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Seed inicial
-INSERT INTO user_progress (user_id, level, xp, xp_to_next)
-VALUES ('rebeca', 'A1', 0, 500)
-ON CONFLICT DO NOTHING;
+
+-- Seed: Removido. O registro é criado automaticamente no primeiro login.
 
 -- 2. Log de XP detalhado
 CREATE TABLE IF NOT EXISTS xp_log (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id TEXT NOT NULL DEFAULT 'rebeca',
+  user_id TEXT NOT NULL,
   amount INTEGER NOT NULL,
   reason TEXT NOT NULL,
   character TEXT,
@@ -35,7 +33,7 @@ CREATE TABLE IF NOT EXISTS xp_log (
 -- 3. Log de erros gramaticais (LanguageTool)
 CREATE TABLE IF NOT EXISTS grammar_errors (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id TEXT NOT NULL DEFAULT 'rebeca',
+  user_id TEXT NOT NULL,
   original_text TEXT NOT NULL,
   error_message TEXT NOT NULL,
   error_type TEXT,
@@ -50,7 +48,7 @@ CREATE TABLE IF NOT EXISTS grammar_errors (
 -- 4. Sessões de Shadowing
 CREATE TABLE IF NOT EXISTS shadowing_sessions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id TEXT NOT NULL DEFAULT 'rebeca',
+  user_id TEXT NOT NULL,
   phrase TEXT NOT NULL,
   accuracy NUMERIC(5,2),
   level TEXT,
@@ -60,7 +58,7 @@ CREATE TABLE IF NOT EXISTS shadowing_sessions (
 -- 5. Boss Fight results
 CREATE TABLE IF NOT EXISTS boss_fights (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id TEXT NOT NULL DEFAULT 'rebeca',
+  user_id TEXT NOT NULL,
   level TEXT NOT NULL,
   score INTEGER,
   passed BOOLEAN DEFAULT false,
