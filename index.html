@@ -616,7 +616,7 @@
   <!-- HEADER: Perfil -->
   <header style="position:relative;z-index:1;padding:24px 24px 0;flex-shrink:0;">
     <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:48px;height:48px;border-radius:16px;background:#f2c7ba url('/avatar.png') center/cover;flex-shrink:0;"></div>
+      <div style="width:48px;height:48px;border-radius:16px;background:#f2c7ba;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:18px;">R</div>
       <div>
         <div style="font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--muted);text-transform:uppercase;">Deutsch Learner</div>
         <div style="font-size:14px;font-weight:500;color:var(--ink);margin-top:2px;">Seu Nome</div>
@@ -1228,14 +1228,15 @@ function updateXPUI() {
   // Atualiza streak (se existir)
   const streakNum = document.getElementById('streak-num');
   if (streakNum) streakNum.textContent = Store.getStreak();
-}
 
-const sbFill = document.getElementById('sb-xp-fill');
-if (sbFill) sbFill.style.width = pct + '%';
-const sbXpLabel = document.getElementById('sb-xp-label');
-if (sbXpLabel) sbXpLabel.textContent = `${xp} / 500 XP`;
-const sbStreak = document.getElementById('sb-streak');
-if (sbStreak) sbStreak.textContent = Store.getStreak();
+  // Atualiza sidebar (se existir)
+  const sbFill = document.getElementById('sb-xp-fill');
+  if (sbFill) sbFill.style.width = pct + '%';
+  const sbXpLabel = document.getElementById('sb-xp-label');
+  if (sbXpLabel) sbXpLabel.textContent = `${xp} / 500 XP`;
+  const sbStreak = document.getElementById('sb-streak');
+  if (sbStreak) sbStreak.textContent = Store.getStreak();
+}
 
 // ===================================================
 // THEME
@@ -2606,7 +2607,7 @@ window.sendAIMessage = async function(userMsg, isChallenge, challengeLabel) {
 // =====================================================
 // PHASE 2 OVERLAY - persistence, preflight grammar, SRS, media
 // =====================================================
-const DH_V2 = {
+var DH_V2 = {
   userId: getUserId(),
   contentLoaded: false,
   challengesLoaded: false,
@@ -2615,7 +2616,8 @@ const DH_V2 = {
   studyFilter: 'all',
   studyModules: [],
   studyLessons: [],
-  studyExercises: []
+  studyExercises: [],
+  grammarCache: new Map()
 };
 
 function dhGrammarCacheKey(text, character) {
@@ -2998,6 +3000,7 @@ Inicie o dialogo em alemao com a primeira fala obrigatoria. Seja direto, natural
 window.startCuratedChallenge = startCuratedChallenge;
 
 async function loadStudyLibrary() {
+  console.log('loadStudyLibrary called', 'studyLoaded:', DH_V2.studyLoaded);
   if (!DH_V2.studyLoaded) {
     DH_V2.studyLoaded = true;
     try {
@@ -3006,11 +3009,13 @@ async function loadStudyLibrary() {
         sbFetch('study_lessons?active=eq.true&order=sort_order.asc'),
         sbFetch('study_exercises?active=eq.true&order=sort_order.asc')
       ]);
+      console.log('sbFetch results:', 'modules:', modules?.length, 'lessons:', lessons?.length, 'exercises:', exercises?.length);
       DH_V2.studyModules = Array.isArray(modules) ? modules : [];
       DH_V2.studyLessons = Array.isArray(lessons) ? lessons : [];
       DH_V2.studyExercises = Array.isArray(exercises) ? exercises : [];
     } catch(e) {
-      console.warn('Study library unavailable:', e);
+      console.error('Study library error:', e);
+      DH_V2.studyLoaded = false;
     }
   }
   renderStudyLibrary();
@@ -3026,32 +3031,37 @@ function filterStudyLibrary(level) {
 window.filterStudyLibrary = filterStudyLibrary;
 
 function renderStudyLibrary() {
-  const grid = document.getElementById('studyLibraryGrid');
-  if (!grid) return;
-  const modules = DH_V2.studyModules.filter(m => DH_V2.studyFilter === 'all' || m.level === DH_V2.studyFilter);
-  if (!modules.length) {
-    grid.innerHTML = '<div style="padding:28px;border:1px solid var(--border);border-radius:12px;color:var(--muted);background:var(--surface);">Rode o SQL study_library_phase4.sql no Supabase para carregar a Biblioteca de Estudos.</div>';
-    return;
-  }
-  grid.innerHTML = modules.map(module => {
-    const lessons = DH_V2.studyLessons.filter(l => l.module_slug === module.slug);
-    return `
-      <section style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
-          <div>
-            <div style="font-size:12px;font-weight:800;color:var(--accent);">${module.level} · Cap. ${module.chapter_number}</div>
-            <div style="font-family:'Inter Tight',sans-serif;font-weight:800;font-size:21px;margin-top:2px;">${escHtml(module.title_pt)}</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:4px;">${escHtml(module.focus)}</div>
+  try {
+    const grid = document.getElementById('studyLibraryGrid');
+    if (!grid) { console.error('studyLibraryGrid not found'); return; }
+    console.log('renderStudyLibrary', DH_V2.studyModules.length, 'modules', DH_V2.studyLessons.length, 'lessons', DH_V2.studyExercises.length, 'exercises');
+    const modules = DH_V2.studyModules.filter(m => DH_V2.studyFilter === 'all' || m.level === DH_V2.studyFilter);
+    if (!modules.length) {
+      grid.innerHTML = '<div style="padding:28px;border:1px solid var(--border);border-radius:12px;color:var(--muted);background:var(--surface);">Rode o SQL study_library_phase4.sql no Supabase para carregar a Biblioteca de Estudos.</div>';
+      return;
+    }
+    grid.innerHTML = modules.map(module => {
+      const lessons = DH_V2.studyLessons.filter(l => l.module_slug === module.slug);
+      return `
+        <section style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px;font-weight:800;color:var(--accent);">${module.level} · Cap. ${module.chapter_number}</div>
+              <div style="font-family:'Inter Tight',sans-serif;font-weight:800;font-size:21px;margin-top:2px;">${escHtml(module.title_pt)}</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:4px;">${escHtml(module.focus)}</div>
+            </div>
+            <button class="fc-audio-btn" onclick="createFlashcardsFromModule('${module.slug}')">+ Flashcards</button>
           </div>
-          <button class="fc-audio-btn" onclick="createFlashcardsFromModule('${module.slug}')">+ Flashcards</button>
-        </div>
-        <div style="display:grid;gap:12px;">
-          ${lessons.map(renderStudyLesson).join('')}
-        </div>
-      </section>
-    `;
-  }).join('');
-  makeWordsHoverable(grid);
+          <div style="display:grid;gap:12px;">
+            ${lessons.map(renderStudyLesson).join('')}
+          </div>
+        </section>
+      `;
+    }).join('');
+    makeWordsHoverable(grid);
+  } catch(e) {
+    console.error('renderStudyLibrary error:', e);
+  }
 }
 
 function renderStudyLesson(lesson) {
