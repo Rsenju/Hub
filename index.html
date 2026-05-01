@@ -871,6 +871,9 @@ style="width:100%;padding:7px 10px 7px 30px;border-radius:10px;border:1px solid 
         <button class="filter-chip" onclick="filterStudyLibrary('B1')" data-library-filter="B1">B1</button>
       </div>
       <div id="studyLibraryGrid" style="display:grid;gap:14px;"></div>
+      <div id="module-display" style="margin-top:24px;">
+        <h1 id="module-title">Carregando conteúdo...</h1>
+      </div>
     </div>
 
     <!-- CHATBOT PAGE -->
@@ -2031,6 +2034,27 @@ let currentLevelXP = 0;
 // =====================================================
 // SUPABASE HELPERS
 // =====================================================
+// Nova função para o schema study_modules_hub.sql
+async function loadModuleContent(chapterId) {
+  try {
+    const data = await sbFetch(`study_modules?chapter=eq.${encodeURIComponent(chapterId)}`);
+    if (!data || data.length === 0) {
+      console.warn('Nenhum módulo encontrado para o capítulo:', chapterId);
+      return null;
+    }
+    const module = data[0];
+    const titleElement = document.getElementById('module-title');
+    if (titleElement && module.content) {
+      titleElement.innerText = module.content['1.1'] || module.title;
+    }
+    return module;
+  } catch (e) {
+    console.error('Erro ao buscar dados:', e);
+    return null;
+  }
+}
+window.loadModuleContent = loadModuleContent;
+
 async function sbFetch(path, opts={}) {
   const res = await fetch(`${CREDS.supabaseUrl}/rest/v1/${path}`, {
     headers: {
@@ -3004,15 +3028,9 @@ async function loadStudyLibrary() {
   if (!DH_V2.studyLoaded) {
     DH_V2.studyLoaded = true;
     try {
-      const [modules, lessons, exercises] = await Promise.all([
-        sbFetch('study_modules?active=eq.true&order=sort_order.asc'),
-        sbFetch('study_lessons?active=eq.true&order=sort_order.asc'),
-        sbFetch('study_exercises?active=eq.true&order=sort_order.asc')
-      ]);
-      console.log('sbFetch results:', 'modules:', modules?.length, 'lessons:', lessons?.length, 'exercises:', exercises?.length);
+      const modules = await sbFetch('study_modules?order=chapter.asc');
+      console.log('sbFetch results:', 'modules:', modules?.length);
       DH_V2.studyModules = Array.isArray(modules) ? modules : [];
-      DH_V2.studyLessons = Array.isArray(lessons) ? lessons : [];
-      DH_V2.studyExercises = Array.isArray(exercises) ? exercises : [];
     } catch(e) {
       console.error('Study library error:', e);
       DH_V2.studyLoaded = false;
@@ -3034,12 +3052,32 @@ function renderStudyLibrary() {
   try {
     const grid = document.getElementById('studyLibraryGrid');
     if (!grid) { console.error('studyLibraryGrid not found'); return; }
-    console.log('renderStudyLibrary', DH_V2.studyModules.length, 'modules', DH_V2.studyLessons.length, 'lessons', DH_V2.studyExercises.length, 'exercises');
+    console.log('renderStudyLibrary', DH_V2.studyModules.length, 'modules');
     const modules = DH_V2.studyModules.filter(m => DH_V2.studyFilter === 'all' || m.level === DH_V2.studyFilter);
     if (!modules.length) {
-      grid.innerHTML = '<div style="padding:28px;border:1px solid var(--border);border-radius:12px;color:var(--muted);background:var(--surface);">Rode o SQL study_library_phase4.sql no Supabase para carregar a Biblioteca de Estudos.</div>';
+      grid.innerHTML = '<div style="padding:28px;border:1px solid var(--border);border-radius:12px;color:var(--muted);background:var(--surface);">Rode o SQL study_modules_hub.sql no Supabase para carregar a Biblioteca de Estudos.</div>';
       return;
     }
+    grid.innerHTML = modules.map(module => {
+      const contentKeys = module.content ? Object.keys(module.content) : [];
+      return `
+        <section style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px;font-weight:800;color:var(--accent);">${escHtml(module.level)} · Cap. ${escHtml(module.chapter)}</div>
+              <div style="font-family:'Inter Tight',sans-serif;font-weight:800;font-size:21px;margin-top:2px;">${escHtml(module.title)}</div>
+            </div>
+            <button class="fc-audio-btn" onclick="loadModuleContent('${escHtml(module.chapter)}')">Abrir</button>
+          </div>
+          ${contentKeys.length ? `<div style="font-size:13px;color:var(--muted);margin-top:8px;">Seções: ${contentKeys.join(', ')}</div>` : ''}
+        </section>
+      `;
+    }).join('');
+    makeWordsHoverable(grid);
+  } catch(e) {
+    console.error('renderStudyLibrary error:', e);
+  }
+}
     grid.innerHTML = modules.map(module => {
       const lessons = DH_V2.studyLessons.filter(l => l.module_slug === module.slug);
       return `
