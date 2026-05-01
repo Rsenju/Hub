@@ -1593,10 +1593,7 @@ async function callAI(messages, systemPrompt) {
     try {
       return await callHuggingFace(messages, systemPrompt);
     } catch(e2) {
-      return `Entschuldigung, Rebeca. Die Verbindung ist gerade nicht stabil.
-Bitte antworte trotzdem auf Deutsch: Was brauchst du in dieser Situation?
----KORREKTUR---
-Servidor local sem API ativa. Para respostas completas da IA, abra pelo Vercel oder rode o dev server.`;
+      return 'Entschuldigung, Rebeca. Die Verbindung ist gerade nicht stabil. Bitte antworte trotzdem auf Deutsch!';
     }
   }
 }
@@ -1606,7 +1603,7 @@ Servidor local sem API ativa. Para respostas completas da IA, abra pelo Vercel o
 // ===================================================
 function awardXP(reason, amount) {
   Store.addXP(amount);
-  const entry = { reason, amount, char: currentChar, time: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) };
+  const entry = { reason: reason, amount: amount, char: currentChar, time: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) };
   xpLog.unshift(entry);
   if (xpLog.length > 100) xpLog = xpLog.slice(0,100);
   localStorage.setItem('dh-xp-log', JSON.stringify(xpLog));
@@ -1972,10 +1969,10 @@ function importBackup(input) {
 document.addEventListener('DOMContentLoaded', () => {
   window.scrollTo(0, 0);
   if (history.scrollRestoration) history.scrollRestoration = 'manual';
+  initAuth();
+  initKeys();
+  updateXPUI();
 });
-initAuth();
-initKeys();
-updateXPUI();
 
 
 // =====================================================
@@ -2583,7 +2580,7 @@ const _origAwardXP = typeof awardXP === 'function' ? awardXP : null;
 function awardXPEnhanced(reason, amount) {
   // Local store
   if (typeof Store !== 'undefined') Store.addXP(amount);
-  const entry = { reason, amount, char: currentChar, time: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) };
+  const entry = { reason: reason, amount: amount, char: currentChar, time: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) };
   if (typeof xpLog !== 'undefined') { xpLog.unshift(entry); localStorage.setItem('dh-xp-log', JSON.stringify(xpLog)); }
   // Supabase push (async, non-blocking)
   pushXPToSupabase(amount, reason).catch(()=>{});
@@ -3065,62 +3062,16 @@ function renderStudyLibrary() {
     console.error('renderStudyLibrary error:', e);
   }
 }
-    grid.innerHTML = modules.map(module => {
-      const lessons = DH_V2.studyLessons.filter(l => l.module_slug === module.slug);
-      return `
-        <section style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
-            <div>
-              <div style="font-size:12px;font-weight:800;color:var(--accent);">${module.level} · Cap. ${module.chapter_number}</div>
-              <div style="font-family:'Inter Tight',sans-serif;font-weight:800;font-size:21px;margin-top:2px;">${escHtml(module.title_pt)}</div>
-              <div style="font-size:13px;color:var(--muted);margin-top:4px;">${escHtml(module.focus)}</div>
-            </div>
-            <button class="fc-audio-btn" onclick="createFlashcardsFromModule('${module.slug}')">+ Flashcards</button>
-          </div>
-          <div style="display:grid;gap:12px;">
-            ${lessons.map(renderStudyLesson).join('')}
-          </div>
-        </section>
-      `;
-    }).join('');
-    makeWordsHoverable(grid);
-  } catch(e) {
-    console.error('renderStudyLibrary error:', e);
-  }
-}
 
-function renderStudyLesson(lesson) {
-  const examples = Array.isArray(lesson.examples) ? lesson.examples : [];
-  const phrases = Array.isArray(lesson.key_phrases) ? lesson.key_phrases : [];
-  const notes = Array.isArray(lesson.mini_notes) ? lesson.mini_notes : [];
-  const exercises = DH_V2.studyExercises.filter(e => e.lesson_slug === lesson.slug);
+
+function renderStudyLesson(module) {
+  const content = module.content || {};
+  const keys = Object.keys(content);
   return `
     <article style="border:1px solid var(--border);border-radius:10px;background:var(--bg);padding:14px;">
-      <div style="font-weight:800;font-size:16px;margin-bottom:6px;">${escHtml(lesson.title_pt)}</div>
-      <p style="font-size:14px;color:var(--muted);margin:0 0 10px;">${escHtml(lesson.summary_pt)}</p>
-      <div style="padding:10px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:14px;font-weight:700;margin-bottom:12px;">${escHtml(lesson.quick_rule_pt)}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px;">
-        ${examples.map(ex => `
-          <div style="border:1px solid var(--border);border-radius:10px;padding:10px;">
-            <div class="chat-bubble" style="display:inline-block;margin-bottom:6px;">${escHtml(ex.de || '')}</div>
-            <div style="font-size:13px;color:var(--muted);">${escHtml(ex.pt || '')}</div>
-            <div style="font-size:12px;color:var(--accent);margin-top:6px;">${escHtml(ex.note || '')}</div>
-          </div>
-        `).join('')}
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px;">
-        <div>
-          <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">Frases úteis</div>
-          ${phrases.map(p => `<div style="font-size:13px;margin-bottom:5px;"><strong>${escHtml(p.de || '')}</strong><br><span style="color:var(--muted);">${escHtml(p.pt || '')}</span></div>`).join('')}
-        </div>
-        <div>
-          <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">Notas rápidas</div>
-          ${notes.map(n => `<div style="font-size:13px;margin-bottom:5px;">· ${escHtml(n)}</div>`).join('')}
-        </div>
-      </div>
-      <div style="border-top:1px solid var(--border);padding-top:12px;">
-        <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px;">Exercícios rápidos</div>
-        <div style="display:grid;gap:8px;">${exercises.map(renderStudyExercise).join('')}</div>
+      <div style="font-weight:800;font-size:16px;margin-bottom:6px;">${escHtml(module.title)}</div>
+      <div style="display:grid;gap:8px;">
+        ${keys.map(k => `<div style="font-size:13px;"><strong>${escHtml(k)}:</strong> ${escHtml(content[k])}</div>`).join('')}
       </div>
     </article>
   `;
