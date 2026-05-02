@@ -47,9 +47,10 @@ BEGIN
     'deutsch_challenges', 'notes'
   ]
   LOOP
-    EXECUTE format('DROP POLICY IF EXISTS "allow all"      ON public.%I', tbl);
-    EXECUTE format('DROP POLICY IF EXISTS "user_isolation" ON public.%I', tbl);
+    EXECUTE format('DROP POLICY IF EXISTS "allow all"            ON public.%I', tbl);
+    EXECUTE format('DROP POLICY IF EXISTS "user_isolation"        ON public.%I', tbl);
     EXECUTE format('DROP POLICY IF EXISTS "Allow public read access" ON public.%I', tbl);
+    EXECUTE format('DROP POLICY IF EXISTS "public_read"           ON public.%I', tbl);
   END LOOP;
 END $$;
 
