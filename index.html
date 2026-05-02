@@ -871,28 +871,28 @@ style="width:100%;padding:7px 10px 7px 30px;border-radius:10px;border:1px solid 
       <!-- Character Selector -->
 <div class="char-selector" id="charSelector">
   <button class="char-btn active" data-char="hans" onclick="selectChar('hans')">
-    <img class="char-photo" src="/img/hans.png" alt="Hans" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <img class="char-photo" src="https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/hans.png" alt="Hans" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <div class="char-avatar" style="display:none;font-size:28px;">🧔</div>
     <div class="char-name">Hans</div>
     <div class="char-role">O Mentor</div>
   </button>
 
   <button class="char-btn" data-char="lukas" onclick="selectChar('lukas')">
-    <img class="char-photo" src="/img/lukas.png" alt="Lukas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <img class="char-photo" src="https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/lukas.png" alt="Lukas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <div class="char-avatar" style="display:none;font-size:28px;">🧢</div>
     <div class="char-name">Lukas</div>
     <div class="char-role">O Jovem</div>
   </button>
 
   <button class="char-btn" data-char="heidi" onclick="selectChar('heidi')">
-    <img class="char-photo" src="/img/heidi.png" alt="Heidi" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <img class="char-photo" src="https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/heidi.png" alt="Heidi" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <div class="char-avatar" style="display:none;font-size:28px;">✈️</div>
     <div class="char-name">Heidi</div>
     <div class="char-role">A Viajante</div>
   </button>
 
   <button class="char-btn" data-char="petra" onclick="selectChar('petra')">
-    <img class="char-photo" src="/img/petra.png" alt="Petra" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <img class="char-photo" src="https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/petra.png" alt="Petra" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <div class="char-avatar" style="display:none;font-size:28px;">📚</div>
     <div class="char-name">Petra</div>
     <div class="char-role">A Analítica</div>
@@ -901,7 +901,7 @@ style="width:100%;padding:7px 10px 7px 30px;border-radius:10px;border:1px solid 
 
       <!-- Active character info bar -->
 <div class="char-active-bar" id="charActiveBar">
-  <img class="char-active-photo" id="charActiveImg" src="/img/hans.png" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0;" onerror="this.style.display='none';document.getElementById('charActiveEmoji').style.display='flex';">
+  <img class="char-active-photo" id="charActiveImg" src="https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/hans.png" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0;" onerror="this.style.display='none';document.getElementById('charActiveEmoji').style.display='flex';">
   <div id="charActiveEmoji" style="display:none;font-size:28px;width:40px;height:40px;align-items:center;justify-content:center;flex-shrink:0;">🧔</div>
   <div class="char-active-info">
     <div class="char-active-name" id="charActiveName">Hans – O Mentor</div>
@@ -1056,7 +1056,7 @@ style="width:100%;padding:7px 10px 7px 30px;border-radius:10px;border:1px solid 
 <!-- CALL MODAL -->
 <div class="call-modal" id="callModal">
   <div class="call-box">
-    <img class="call-avatar" id="callAvatar" src="/img/hans.png" alt="hans">
+    <img class="call-avatar" id="callAvatar" src="https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/hans.png" alt="hans">
     <div class="call-name" id="callName">Hans</div>
     <div class="call-status" id="callStatus">Conectando...</div>
     <div class="call-wave" id="callWave">
@@ -1364,10 +1364,10 @@ function resetSRS() {
 // CHARACTERS CONFIG (full lore + hybrid brain)
 // ===================================================
 const CHAR_AVATARS = {
-  hans: '/img/hans.png',
-  lukas: '/img/lukas.png',
-  heidi: '/img/heidi.png',
-  petra: '/img/petra.png',
+  hans: 'https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/hans.png',
+  lukas: 'https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/lukas.png',
+  heidi: 'https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/heidi.png',
+  petra: 'https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/petra.png',
 };
 
 const CHARACTERS = {
@@ -1481,10 +1481,10 @@ function onVoiceToggle() {
 // CHARACTER SELECTION (per-char history)
 // ===================================================
 const CHAR_PHOTOS = {
-  hans: '/img/hans.png',
-  lukas: '/img/lukas.png',
-  heidi: '/img/heidi.png',
-  petra: '/img/petra.png'
+  hans: 'https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/hans.png',
+  lukas: 'https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/lukas.png',
+  heidi: 'https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/heidi.png',
+  petra: 'https://htefiqaxilufnewmycut.supabase.co/storage/v1/object/public/avatars/petra.png'
 };
 
 const CHAR_EMOJIS = {
@@ -2062,7 +2062,7 @@ function renderStudyModuleContent(module) {
         <h4 style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:17px;margin:0 0 8px 0;">${escHtml(lesson.title_pt)}</h4>
         <p style="font-size:13px;color:var(--muted);margin:0 0 10px 0;">${escHtml(lesson.summary_pt || '')}</p>
         ${lesson.quick_rule_pt ? `<div style="background:var(--bg);padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;"><strong>Regra:</strong> ${escHtml(lesson.quick_rule_pt)}</div>` : ''}
-        ${lesson.examples ? `<div style="font-size:13px;margin-top:8px;"><strong>Exemplos:</strong><ul style="margin:6px 0;padding-left:18px;">${( Array.isArray(lesson.examples) ? lesson.examples : JSON.parse(lesson.examples) ).slice(0,3).map(ex => `<li><span class="de-word">${escHtml(ex.de)}</span> — ${escHtml(ex.pt)}</li>`).join('')}</ul></div>` : ''}
+        ${lesson.examples ? `<div style="font-size:13px;margin-top:8px;"><strong>Exemplos:</strong><ul style="margin:6px 0;padding-left:18px;">${JSON.parse(lesson.examples).slice(0,3).map(ex => `<li><span class="de-word">${escHtml(ex.de)}</span> — ${escHtml(ex.pt)}</li>`).join('')}</ul></div>` : ''}
         ${lesson.exercises && lesson.exercises.length ? `<div style="margin-top:12px;"><strong style="font-size:13px;">Exercícios:</strong>${lesson.exercises.map((ex,i) => `<div style="background:var(--bg);padding:8px 12px;border-radius:8px;margin-top:6px;font-size:13px;"><span style="color:var(--accent);">${i+1}.</span> ${escHtml(ex.prompt_pt)} <span style="color:var(--muted);">(${ex.exercise_type})</span></div>`).join('')}</div>` : ''}
       </section>
     `).join('')}
@@ -2826,13 +2826,11 @@ async function generatePexelsFlashcardImage(card) {
       photographer: photo.photographer,
       pexels_url: photo.url
     };
-    try {
-      await sbFetch('flashcard_media', {
-        method: 'POST',
-        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify(payload)
-      });
-    } catch(_) { /* RLS ou Pexels indisponivel — silencioso */ }
+    await sbFetch('flashcard_media?on_conflict=user_id,card_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify(payload)
+    });
     return payload;
   } catch(e) { return null; }
 }
