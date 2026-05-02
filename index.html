@@ -856,9 +856,7 @@ style="width:100%;padding:7px 10px 7px 30px;border-radius:10px;border:1px solid 
         <button class="filter-chip" onclick="filterStudyLibrary('B1')" data-library-filter="B1">B1</button>
       </div>
       <div id="studyLibraryGrid" style="display:grid;gap:14px;"></div>
-      <div id="module-display" style="margin-top:24px;">
-        <h1 id="module-title">Carregando conteúdo...</h1>
-      </div>
+      <div id="module-display" style="display:none;"></div>
     </div>
 
     <!-- CHATBOT PAGE -->
@@ -2063,11 +2061,41 @@ function renderStudyModuleContent(module) {
         <p style="font-size:13px;color:var(--muted);margin:0 0 10px 0;">${escHtml(lesson.summary_pt || '')}</p>
         ${lesson.quick_rule_pt ? `<div style="background:var(--bg);padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;"><strong>Regra:</strong> ${escHtml(lesson.quick_rule_pt)}</div>` : ''}
         ${lesson.examples ? `<div style="font-size:13px;margin-top:8px;"><strong>Exemplos:</strong><ul style="margin:6px 0;padding-left:18px;">${(Array.isArray(lesson.examples) ? lesson.examples : JSON.parse(lesson.examples)).slice(0,3).map(ex => `<li><span class="de-word">${escHtml(ex.de)}</span> — ${escHtml(ex.pt)}</li>`).join('')}</ul></div>` : ''}
-        ${lesson.exercises && lesson.exercises.length ? `<div style="margin-top:12px;"><strong style="font-size:13px;">Exercícios:</strong>${lesson.exercises.map((ex,i) => `<div style="background:var(--bg);padding:8px 12px;border-radius:8px;margin-top:6px;font-size:13px;"><span style="color:var(--accent);">${i+1}.</span> ${escHtml(ex.prompt_pt)} <span style="color:var(--muted);">(${ex.exercise_type})</span></div>`).join('')}</div>` : ''}
+        ${lesson.exercises && lesson.exercises.length ? `<div style="margin-top:14px;"><strong style="font-size:13px;margin-bottom:8px;display:block;">Exercícios:</strong>${lesson.exercises.map((ex,i) => {
+          const opts = Array.isArray(ex.options) ? ex.options : (ex.options ? JSON.parse(ex.options) : []);
+          const inputHtml = ex.exercise_type === 'choose_option'
+            ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">${opts.map(o => `<button onclick="checkLibExercise(this,'${ex.slug}','${o.replace(/'/g,"\'")}','${(ex.answer||'').replace(/'/g,"\'")}','${(ex.explanation_pt||'').replace(/'/g,"\'")}',event)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;font-size:13px;">${escHtml(o)}</button>`).join('')}</div>`
+            : `<div style="display:flex;gap:8px;margin-top:6px;"><input id="lib-ex-${ex.slug}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-size:13px;" placeholder="Sua resposta..."><button onclick="checkLibExercise(document.getElementById('lib-ex-${ex.slug}'),'${ex.slug}',document.getElementById('lib-ex-${ex.slug}').value,'${(ex.answer||'').replace(/'/g,"\'")}','${(ex.explanation_pt||'').replace(/'/g,"\'")}',event)" style="padding:8px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:13px;">✓</button></div>`;
+          return `<div style="background:var(--bg);padding:12px;border-radius:10px;margin-top:8px;border:1px solid var(--border);">
+            <div style="font-size:13px;margin-bottom:4px;"><span style="color:var(--accent);font-weight:700;">${i+1}.</span> ${escHtml(ex.prompt_pt)}</div>
+            ${inputHtml}
+            <div id="lib-fb-${ex.slug}" style="font-size:12px;margin-top:6px;"></div>
+          </div>`;
+        }).join('')}</div>` : ''}
       </section>
     `).join('')}
   `;
 }
+function checkLibExercise(inputOrBtn, slug, value, answer, explanation, event) {
+  if (event) event.stopPropagation();
+  const val = typeof value === 'string' ? value : (inputOrBtn?.value || '');
+  const fb = document.getElementById('lib-fb-' + slug);
+  if (!fb || !val.trim()) return;
+  const norm = s => s.toLowerCase().normalize('NFC').replace(/[.!?]/g,'').trim();
+  const ok = norm(val).includes(norm(answer)) || norm(val) === norm(answer);
+  fb.innerHTML = ok
+    ? `<span style="color:var(--green);font-weight:700;">✓ Correto!</span> <span style="color:var(--muted);">${explanation}</span>`
+    : `<span style="color:var(--red);font-weight:700;">✗ Revise:</span> <span style="color:var(--muted);">${explanation} Resposta: <strong>${answer}</strong></span>`;
+  if (ok) updateXP(10, 'Exercício da Biblioteca ✓').catch(()=>{});
+  // Marca botão escolhido
+  if (event?.target?.tagName === 'BUTTON') {
+    event.target.style.background = ok ? 'var(--green)' : 'var(--red)';
+    event.target.style.color = '#fff';
+    event.target.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  }
+}
+window.checkLibExercise = checkLibExercise;
+
 window.loadModuleContent = loadModuleContent;
 
 async function sbFetch(path, opts = {}) {
