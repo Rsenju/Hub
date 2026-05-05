@@ -46,7 +46,7 @@
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-    @font-face {
+  @font-face {
   font-family:  "OpenMoji ";
   src: url( "https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/font/OpenMoji-color-glyf_colr_0/OpenMoji-color-glyf_colr_0.woff2 ") format( "woff2 ");
   unicode-range: U+23, U+2A, U+2D, U+30-39, U+A9, U+AE, U+200D, U+203C, U+2049, U+20E3, U+2117, U+2120, U+2122, U+2139, U+2194-2199, U+21A9, U+21AA, U+229C, U+231A, U+231B, U+2 328, U+23CF, U+23E9-23F3, U+23F8-23FE, U+24C2, U+25A1, U+25AA-25AE, U+25B6, U+25C0, U+25C9, U+25D0, U+25D1, U+25E7-25EA, U+25ED, U+25EE, U+25FB-25FE, U+2600-2605, U+260E, U+2611, U +2614, U+2615, U+2618, U+2620, U+2622, U+2623, U+2626, U+2628, U+262A, U+262E, U+262F, U+2638-263A, U+2640, U+2642, U+2648-2653, U+265F, U+2660, U+2663, U+2665, U+2666, U+2668, U+2 67B, U+267E, U+267F, U+2691-2697, U+2699, U+269B, U+269C, U+26A0, U+26A1, U+26A7, U+26AA, U+26AB, U+26B0, U+26B1, U+26BD, U+26BE, U+26C4, U+26C5, U+26C8, U+26CE, U+26CF, U+26D1, U+ 26D3, U+26D4, U+26E9, U+26EA, U+26F0-26F5, U+26F7-26FA, U+26FD, U+2702, U+2705, U+2708-270D, U+270F, U+2712, U+2714, U+2716, U+271D, U+2721, U+2728, U+2733, U+2734, U+2744, U+2747,  U+274C, U+274E, U+2753-2755, U+2757, U+2763, U+2764, U+2795-2797, U+27A1, U+27B0, U+27BF, U+2934, U+2935, U+2B05-2B07, U+2B0C, U+2B0D, U+2B1B, U+2B1C, U+2B1F-2B24, U+2B2E, U+2B2F,  U+2B50, U+2B55, U+2B58, U+2B8F, U+2BBA-2BBC, U+2BC3, U+2BC4, U+2BEA, U+2BEB, U+3030, U+303D, U+3297, U+3299, U+E000-E009, U+E010, U+E011, U+E040-E06D, U+E080-E0B4, U+E0C0-E0CC, U+ E0FF-E10D, U+E140-E14A, U+E150-E157, U+E181-E189, U+E1C0-E1C4, U+E1C6-E1D9, U+E200-E216, U+E240-E269, U+E280-E283, U+E2C0-E2C4, U+E2C6-E2DA, U+E300-E303, U+E305-E30F, U+E312-E316,  U+E318-E322, U+E324-E329, U+E32B, U+E340-E348, U+E380, U+E381, U+F000, U+F77A, U+F8FF, U+FE0F, U+1F004, U+1F0CF, U+1F10D-1F10F, U+1F12F, U+1F16D-1F171, U+1F17E, U+1F17F, U+1F18E, U +1F191-1F19A, U+1F1E6-1F1FF, U+1F201, U+1F202, U+1F21A, U+1F22F, U+1F232-1F23A, U+1F250, U+1F251, U+1F260-1F265, U+1F300-1F321, U+1F324-1F393, U+1F396, U+1F397, U+1F399-1F39B, U+1F 39E-1F3F0, U+1F3F3-1F3F5, U+1F3F7-1F4FD, U+1F4FF-1F53D, U+1F549-1F54E, U+1F550-1F567, U+1F56F, U+1F570, U+1F573-1F57A, U+1F587, U+1F58A-1F58D, U+1F590, U+1F595, U+1F596, U+1F5A4, U +1F5A5, U+1F5A8, U+1F5B1, U+1F5B2, U+1F5BC, U+1F5C2-1F5C4, U+1F5D1-1F5D3, U+1F5DC-1F5DE, U+1F5E1, U+1F5E3, U+1F5E8, U+1F5EF, U+1F5F3, U+1F5FA-1F64F, U+1F680-1F6C5, U+1F6CB-1F6D2, U +1F6D5-1F6D7, U+1F6DC-1F6E5, U+1F6E9, U+1F6EB, U+1F6EC, U+1F6F0, U+1F6F3-1F6FC, U+1F7E0-1F7EB, U+1F7F0, U+1FA0C-1FAAC, U+1FAB0-1FAB6, U+1FACE-1FADC, U+1FADF-1FAE9, U+1FAF0-1FAF8, U +1FBC5-1FBC9, U+E0061-E0067, U+E0069, U+E006C-E0079, U+E007F;
@@ -218,29 +218,45 @@ body {
 /* ===== TOPBAR ===== */
 .topbar {
   position: sticky; top: 0; z-index: 100;
-  background: var(--bg); border-bottom: 1px solid var(--border);
-  padding: 0 24px; height: 56px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 60px;
   display: flex; align-items: center; gap: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .topbar-logo {
   display: flex; align-items: center; gap: 10px;
   font-family: 'Rambla', sans-serif; font-weight: 700; font-size: 18px;
-  color: var(--ink); text-decoration: none;
+  color: var(--ink); text-decoration: none; flex-shrink: 0;
 }
 .topbar-logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: grid; place-items: center; font-size: 16px; }
 .topbar-spacer { flex: 1; }
-.topbar-nav { display: flex; gap: 4px; }
-.nav-pill {
-  padding: 6px 14px; border-radius: 999px;
-  font-size: 14px; font-weight: 500;
-  border: none; background: transparent;
-  color: var(--muted); cursor: pointer; transition: all 0.2s;
+
+/* Nav principal com pill-group */
+.topbar-nav {
+  display: flex; gap: 2px;
+  background: var(--surface); border-radius: 999px;
+  padding: 4px; border: 1px solid var(--border);
 }
-.nav-pill:hover { color: var(--ink); background: var(--surface); }
-.nav-pill.active { background: var(--surface2); color: var(--ink); }
+.nav-pill {
+  padding: 6px 18px; border-radius: 999px;
+  font-size: 13px; font-weight: 600;
+  border: none; background: transparent;
+  color: var(--muted); cursor: pointer;
+  transition: all 0.18s; white-space: nowrap;
+}
+.nav-pill:hover { color: var(--ink); }
+.nav-pill.active {
+  background: var(--bg); color: var(--ink);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+
+/* Controles à direita da navbar */
+.topbar-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
 /* ===== LAYOUT ===== */
-.layout { display: flex; height: calc(100vh - 56px); overflow: hidden; }
+.layout { display: flex; height: calc(100vh - 60px); overflow: hidden; }
 
 /* ===== MAIN CONTENT ===== */
 .main-content { flex: 1; padding: 40px; width: 900px; overflow-y: auto; }
@@ -248,36 +264,45 @@ body {
 .page.active { display: block; }
 
 /* ===== HERO ===== */
-.hero { margin-bottom: 40px; }
+.hero { margin-bottom: 48px; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 5px 14px; border-radius: 999px;
   background: var(--accent-soft); color: var(--accent);
   font-size: 13px; font-weight: 600; margin-bottom: 20px;
-} 
-.hero-badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
-.hero h1 { 
-  font-family: 'Lora', serif; 
-  font-weight: 600; 
-  font-size: clamp(32px, 5vw, 52px); 
-  line-height: 1.1; 
-  margin-bottom: 16px; 
-  font-optical-sizing: auto;
 }
-.hero p { font-size: 17px; color: var(--muted); max-width: 560px; line-height: 1.65; }
-.hero-btns { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+.hero-badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-weight: 600;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.1;
+  margin-bottom: 16px;
+  font-optical-sizing: auto;
+  max-width: 600px;
+}
+.hero p {
+  font-size: 17px; color: var(--muted);
+  max-width: 480px; line-height: 1.65;
+}
+
+/* Botões hero: CTA primário em destaque, secundário discreto */
+.hero-btns { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; align-items: center; }
+
 .btn-primary {
-  padding: 12px 24px; background: var(--ink); color: var(--bg);
-  border-radius: 999px; font-size: 15px; font-weight: 600;
+  padding: 13px 28px; background: var(--accent); color: #fff;
+  border-radius: 999px; font-size: 15px; font-weight: 700;
   border: none; cursor: pointer; transition: opacity 0.2s;
 }
-.btn-primary:hover { opacity: 0.85; }
+.btn-primary:hover { opacity: 0.88; }
+
+/* Botão secundário menos chamativo — fica no segundo plano */
 .btn-secondary {
-  padding: 12px 24px; background: transparent; color: var(--ink); 
-  border-radius: 999px; font-size: 15px; font-weight: 600;
-  border: 1px solid var(--border); cursor: pointer; transition: background 0.2s;
+  padding: 13px 24px; background: transparent; color: var(--muted);
+  border-radius: 999px; font-size: 15px; font-weight: 500;
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
 }
-.btn-secondary:hover { background: var(--surface); }
+.btn-secondary:hover { color: var(--ink); background: var(--surface); }
 
 /* ===== CATEGORY CARDS ===== */
 .category-grid { display: grid; gap: 12px; margin-bottom: 40px; }
@@ -371,6 +396,20 @@ body {
 .xp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #7c8ef7); border-radius: 999px; transition: width 0.4s; }
 .xp-label { font-size: 13px; font-weight: 600; color: var(--muted); }
 .streak-badge { font-size: 13px; font-weight: 700; color: var(--gold); }
+
+/* Estado motivacional quando XP = 0 (dia zero) */
+.xp-panel.empty .xp-fill { width: 0 !important; }
+.xp-panel.empty .xp-track {
+  position: relative; overflow: visible;
+}
+.xp-panel.empty .xp-track::after {
+  content: "Comece agora — seu progresso aparece aqui";
+  position: absolute; top: 12px; left: 0;
+  font-size: 11px; color: var(--muted); white-space: nowrap;
+  font-style: italic;
+}
+/* Streak zero: mensagem motivacional no lugar do número */
+.streak-badge.zero { color: var(--muted); font-weight: 500; font-size: 12px; }
 
 /* Character selector */
 .char-btn img.char-photo { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); transition: border-color 0.2s; }
@@ -475,19 +514,34 @@ input:checked + .voice-slider:before { transform: translateX(24px); }
 .clear-hist-btn:hover{border-color:var(--red);color:var(--red);}
 
 /* ===== CHARACTER SELECTOR ===== */
-.char-selector { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.char-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
 .char-btn {
   display: flex; flex-direction: column; align-items: center;
-  gap: 6px; padding: 12px 16px; border-radius: var(--radius-sm);
+  gap: 6px; padding: 16px 12px 12px; border-radius: var(--radius-sm);
   border: 2px solid var(--border); background: var(--card-bg);
-  color: var(--ink); cursor: pointer; transition: all 0.2s; flex: 1; min-width: 100px;
+  color: var(--ink); cursor: pointer; transition: all 0.2s;
+  text-align: center;
 }
 .char-btn:hover { border-color: var(--accent); background: var(--surface); }
 .char-btn.active { border-color: var(--accent); background: var(--accent-soft); }
 .char-btn.active .char-name { color: var(--accent); }
 .char-avatar { font-size: 28px; line-height: 1; }
 .char-name { font-size: 13px; font-weight: 700; }
-.char-role { font-size: 11px; color: var(--muted); text-align: center; }
+.char-role { font-size: 11px; color: var(--muted); }
+
+/* Prévia de frase do personagem — aparece no card */
+.char-preview {
+  display: none;
+  margin-top: 8px; padding: 8px 10px;
+  border-radius: 8px; background: var(--surface2);
+  font-size: 11px; color: var(--muted);
+  line-height: 1.4; font-style: italic;
+  border-left: 2px solid var(--accent);
+  text-align: left; width: 100%;
+}
+.char-btn:hover .char-preview,
+.char-btn.active .char-preview { display: block; }
+
 .char-active-bar {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 16px; border-radius: var(--radius-sm);
@@ -599,9 +653,46 @@ input:checked + .voice-slider:before { transform: translateX(24px); }
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
   .sidebar { display: none; }
-  .main-content { padding: 20px 16px; }
-  .topbar { padding: 0 16px; }
-  .chatbot-wrap { height: calc(100vh - 260px); }
+  .main-content { padding: 20px 16px 80px; }
+  .topbar { padding: 0 16px; height: 56px; }
+
+  /* Esconde nav pill na topbar — substitui pela bottom nav */
+  .topbar-nav { display: none; }
+
+  /* Ajusta altura do layout para bottom nav */
+  .layout { height: calc(100vh - 56px); }
+  .chatbot-wrap { height: calc(100vh - 200px); }
+}
+
+/* ===== BOTTOM NAV (mobile only) ===== */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 60px; z-index: 99;
+  background: var(--bg); border-top: 1px solid var(--border);
+  padding: 0 8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+@media (max-width: 768px) {
+  .bottom-nav { display: flex; align-items: center; justify-content: space-around; }
+}
+.bottom-nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 6px 14px; border-radius: 10px;
+  border: none; background: transparent; cursor: pointer;
+  color: var(--muted); font-size: 10px; font-weight: 600;
+  transition: all 0.18s; flex: 1;
+}
+.bottom-nav-item:hover { color: var(--ink); }
+.bottom-nav-item.active { color: var(--accent); }
+.bottom-nav-icon {
+  width: 22px; height: 22px; display: grid; place-items: center;
+  font-size: 16px; line-height: 1;
+}
+.bottom-nav-item.active .bottom-nav-icon {
+  background: var(--accent-soft);
+  border-radius: 8px;
 }
 
 /* ===== BOSS FIGHT ===== */
@@ -1020,454 +1111,462 @@ background:transparent;color:var(--muted);font-size:13px;transition:all 0.15s;
 <!-- Tooltip Pexels (Dicionário Visual) -->
 <div id="pexelsTooltip"></div>
 <script>
-// 1. CONFIGURAÇÃO DO SUPABASE
-const supabaseUrl = 'https://htefiqaxilufnewmycut.supabase.co';
-const supabaseKey = 'sb_publishable__1bxoDUtOWsghhgfOpSz2A_qlwCtTo0'; // Sua chave pública
-const client = supabase.createClient(supabaseUrl, supabaseKey);
+// 🔑 CONFIGURAÇÃO
+const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
+const SUPABASE_KEY = 'sb_publishable__1bxoDUtOWsghhgfOpSz2A_qlwCtTo0';
+const LT_ENDPOINT = '/api/languagetool';
+const PEXELS_ENDPOINT = '/api/pexels';
 
-// ===================================================
-// ESTADO GLOBAL
-// ===================================================
+// 🌐 INIT SUPABASE CLIENT
+let supabaseClient = null;
+function getSupabase() {
+  if (!supabaseClient) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+  return supabaseClient;
+}
+
+// 📦 STATE GLOBAL
 let state = {
-    user: null,
-    xp: 0,
-    streak: 0,
-    level: 'A1', // A1, A2, B1
-    srsProgress: {}, // { cardId: { interval: 1, ease: 2.5, nextReview: timestamp } }
-    activePersona: 'hans',
-    chatHistory: []
+  user: null,
+  xp: 0,
+  streak: 0,
+  level: 'A1',
+  srsProgress: {},
+  activePersona: 'hans',
+  chatHistory: [],
+  flashcards: [],
+  modules: [],
+  lessons: [],
+  exercises: [],
+  bossState: { active: false, round: 0, score: 0, phrases: [], total: 5 },
+  shadowState: { active: false, phrase: '', recognition: null }
 };
 
-// Cache de DOM
+// 🖼️ CACHE DE DOM
 const DOM = {
-    xpNum: document.getElementById('xp-num'),
-    streakNum: document.getElementById('streak-num'),
-    levelLabel: document.getElementById('levelLabel'),
-    progressBar: document.getElementById('levelProgressBar'),
-    flashcardGrid: document.getElementById('flashcardGrid'),
-    chatMessages: document.getElementById('chatMessages'),
-    chatInput: document.getElementById('chatInput'),
-    sendBtn: document.getElementById('chatSendBtn'),
-    libraryGrid: document.getElementById('studyLibraryGrid'),
-    bossModal: document.getElementById('bossFightModal'),
-    shadowModal: document.getElementById('shadowModal')
+  xpNum: document.getElementById('xp-num'),
+  streakNum: document.getElementById('streak-num'),
+  levelLabel: document.getElementById('levelLabel'),
+  progressBar: document.getElementById('levelProgressBar'),
+  flashcardGrid: document.getElementById('flashcardGrid'),
+  chatMessages: document.getElementById('chatMessages'),
+  chatInput: document.getElementById('chatInput'),
+  sendBtn: document.getElementById('chatSendBtn'),
+  libraryGrid: document.getElementById('studyLibraryGrid'),
+  bossModal: document.getElementById('bossFightModal'),
+  shadowModal: document.getElementById('shadowModal')
 };
 
-// ===================================================
-// INICIALIZAÇÃO
-// ===================================================
-document.addEventListener('DOMContentLoaded', async () => {
-    await loadUserProfile();
-    setupNavigation();
-    await loadFlashcards();
-    await loadLibraryModules();
-    updateUI();
-});
+// 🛠️ SUPABASE HELPERS
+async function sbFetch(path, opts = {}) {
+  try {
+    const client = getSupabase();
+    const { data, error } = await client.from(path.split('?')[0]).select('*').eq('active', true);
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.warn(`[SB] Fallback local para: ${path}`, e);
+    return null;
+  }
+}
 
-async function loadUserProfile() {
-    // Tenta buscar do Supabase, senão usa LocalStorage
-    const localXP = localStorage.getItem('dh-xp') || 0;
-    const localStreak = localStorage.getItem('dh-streak') || 0;
-    
-    state.xp = parseInt(localXP);
-    state.streak = parseInt(localStreak);
-    state.level = 'A1'; // Define inicial
-    updateUI();
+async function sbUpsert(table, record) {
+  try {
+    const client = getSupabase();
+    const { error } = await client.from(table).upsert(record, { onConflict: 'id' });
+    if (error) console.warn(`[SB] Upsert falhou: ${table}`, error);
+  } catch (e) {
+    console.warn(`[SB] Fallback local para upsert: ${table}`, e);
+  }
 }
 
 // ===================================================
-// NAVEGAÇÃO (PÁGINAS)
+// FLASHCARDS & SRS (Repetição Espaçada)
 // ===================================================
-function setupNavigation() {
-    // Sidebar links
-    document.querySelectorAll('.sidebar-link, .nav-pill').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const pageId = e.currentTarget.dataset.page;
-            if(pageId) showPage(pageId);
-        });
-    });
-}
+const FALLBACK_CARDS = [
+  { id: 'a1-01', level: 'A1', front_de: 'Guten Morgen!', back_pt: 'Bom dia!', tags: ['cumprimentos'] },
+  { id: 'a1-02', level: 'A1', front_de: 'Wie heißt du?', back_pt: 'Como você se chama?', tags: ['apresentação'] },
+  { id: 'a1-03', level: 'A1', front_de: 'Ich heiße...', back_pt: 'Eu me chamo...', tags: ['apresentação'] },
+  { id: 'a2-01', level: 'A2', front_de: 'Ich habe gestern gearbeitet.', back_pt: 'Eu trabalhei ontem.', tags: ['passado'] },
+  { id: 'b1-01', level: 'B1', front_de: 'Obwohl es regnet, gehe ich spazieren.', back_pt: 'Embora esteja chovendo, vou caminhar.', tags: ['concessivo'] }
+];
 
-function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(`page-${pageId}`)?.classList.add('active');
-    
-    // Atualiza estado visual
-    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-    document.querySelector(`.sidebar-link[data-page="${pageId}"]`)?.classList.add('active');
-}
-
-// ===================================================
-// GAMIFICAÇÃO (XP & STREAK)
-// ===================================================
-function addXP(amount, reason) {
-    state.xp += amount;
-    localStorage.setItem('dh-xp', state.xp);
-    updateUI();
-    
-    // Feedback visual (Toast)
-    showToast(`+${amount} XP: ${reason}`, 'success');
-}
-
-function updateUI() {
-    if(DOM.xpNum) DOM.xpNum.innerText = state.xp;
-    if(DOM.streakNum) DOM.streakNum.innerText = state.streak;
-    if(DOM.levelLabel) DOM.levelLabel.innerText = state.level;
-    
-    // Barra de progresso (simulada: 1000 XP = Level Up)
-    const progress = Math.min((state.xp % 500) / 500 * 100, 100);
-    if(DOM.progressBar) DOM.progressBar.style.width = `${progress}%`;
-}
-
-function showToast(msg, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
-
-// ===================================================
-// FLASHCARDS & SRS
-// ===================================================
-let flashcards = [];
+const SRS = {
+  get: () => JSON.parse(localStorage.getItem('dh-srs') || '{}'),
+  set: (data) => localStorage.setItem('dh-srs', JSON.stringify(data)),
+  cardDue: (id) => {
+    const srs = SRS.get();
+    return !srs[id] || srs[id].next <= Date.now();
+  },
+  evaluate: (id, rating) => {
+    const srs = SRS.get();
+    const c = srs[id] || { interval: 1, ease: 2.5 };
+    const day = 86400000;
+    if (rating === 'easy') { c.interval = Math.min(c.interval * 2.5, 30); c.ease = Math.min(c.ease + 0.2, 3); }
+    else if (rating === 'medium') { c.interval = Math.min(c.interval * 1.5, 14); }
+    else { c.interval = 1; c.ease = Math.max(c.ease - 0.3, 1.3); }
+    c.next = Date.now() + c.interval * day;
+    srs[id] = c;
+    SRS.set(srs);
+  }
+};
 
 async function loadFlashcards() {
-    // 1. Tenta buscar do Supabase
-    try {
-        const { data, error } = await client
-            .from('flashcards_v2')
-            .select('*')
-            .eq('active', true)
-            .order('level');
-            
-        if (!error && data) {
-            flashcards = data;
-        } else {
-            // Fallback para dados locais se não houver conexão
-            flashcards = getFallbackFlashcards();
-        }
-    } catch (e) {
-        flashcards = getFallbackFlashcards();
-    }
-    
-    renderFlashcards();
-}
-
-// Dados Fallback baseados no A1 1-20 que você enviou
-function getFallbackFlashcards() {
-    return [
-        { id: 'a1-01', level: 'A1', front_de: 'Guten Morgen!', back_pt: 'Bom dia!', tags: ['cumprimentos'] },
-        { id: 'a1-02', level: 'A1', front_de: 'Wie heißt du?', back_pt: 'Como você se chama?', tags: ['apresentação'] },
-        { id: 'a1-03', level: 'A1', front_de: 'Ich heiße...', back_pt: 'Eu me chamo...', tags: ['apresentação'] },
-        { id: 'a1-04', level: 'A1', front_de: 'Ich komme aus Brasilien.', back_pt: 'Eu sou do Brasil.', tags: ['origem'] },
-        { id: 'a1-05', level: 'A1', front_de: 'Freut mich!', back_pt: 'Prazer!', tags: ['social'] },
-        { id: 'a1-06', level: 'A1', front_de: 'Was machst du gern?', back_pt: 'O que você gosta de fazer?', tags: ['hobbies'] },
-        { id: 'a1-07', level: 'A1', front_de: 'Ich spiele gern Fußball.', back_pt: 'Eu gosto de jogar futebol.', tags: ['hobbies'] },
-        { id: 'a1-08', level: 'A1', front_de: 'Entschuldigung, wo ist der Bahnhof?', back_pt: 'Com licença, onde fica a estação?', tags: ['direções'] },
-        { id: 'a1-09', level: 'A1', front_de: 'Geradeaus und dann links.', back_pt: 'Em frente e depois à esquerda.', tags: ['direções'] },
-        { id: 'a1-10', level: 'A1', front_de: 'Ich hätte gern einen Kaffee.', back_pt: 'Eu gostaria de um café.', tags: ['restaurante'] },
-        { id: 'a1-11', level: 'A1', front_de: 'Die Rechnung, bitte.', back_pt: 'A conta, por favor.', tags: ['restaurante'] },
-        { id: 'a1-12', level: 'A1', front_de: 'Tschüss!', back_pt: 'Tchau!', tags: ['despedida'] }
-    ];
+  const sbData = await sbFetch('flashcards_v2');
+  state.flashcards = sbData || FALLBACK_CARDS;
+  renderFlashcards();
 }
 
 function renderFlashcards(filter = 'all') {
-    DOM.flashcardGrid.innerHTML = '';
-    
-    const filtered = filter === 'all' 
-        ? flashcards 
-        : flashcards.filter(c => c.level === filter);
+  if (!DOM.flashcardGrid) return;
+  let cards = state.flashcards;
+  if (filter !== 'all') cards = cards.filter(c => c.level === filter);
+  cards = cards.filter(c => SRS.cardDue(c.id));
 
-    filtered.forEach(card => {
-        const el = document.createElement('div');
-        el.className = 'flashcard';
-        el.dataset.id = card.id;
-        el.innerHTML = `
-            <div class="card-face front">${card.front_de}</div>
-            <div class="card-face back">
-                <div class="meaning">${card.back_pt}</div>
-                <div class="srs-controls">
-                    <button onclick="rateCard('${card.id}', 'hard')" class="btn-hard">Hard</button>
-                    <button onclick="rateCard('${card.id}', 'medium')" class="btn-med">Good</button>
-                    <button onclick="rateCard('${card.id}', 'easy')" class="btn-easy">Easy</button>
-                </div>
-            </div>
-        `;
-        
-        // Flip logic
-        el.addEventListener('click', (e) => {
-            if(!e.target.closest('.srs-controls')) {
-                el.classList.toggle('flipped');
-                // Audio TTS ao virar
-                if(el.classList.contains('flipped')) speak(card.front_de);
-            }
-        });
-        
-        DOM.flashcardGrid.appendChild(el);
+  if (!cards.length) {
+    DOM.flashcardGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);">🎉 Todos revisados! <br><br><button class="btn-secondary" onclick="resetSRS()">Ver todos novamente</button></div>`;
+    return;
+  }
+
+  DOM.flashcardGrid.innerHTML = cards.map(card => `
+    <div class="flashcard" data-id="${card.id}" data-text="${encodeURIComponent(card.front_de)}">
+      <div class="fc-tag">${card.level} · ${card.tags?.join(', ') || 'geral'}</div>
+      <div class="fc-front">${card.front_de}</div>
+      <div class="fc-audio-btns">
+        <button class="fc-audio-btn" onclick="event.stopPropagation();speak('${card.front_de}', false)">🔊 Normal</button>
+        <button class="fc-audio-btn" onclick="event.stopPropagation();speak('${card.front_de}', true)">🐢 Devagar</button>
+      </div>
+      <div class="fc-back">${card.back_pt}</div>
+      <div class="fc-leigo">💡 ${card.explanation_pt || ''}</div>
+      <div class="srs-btns">
+        <button class="srs-btn easy" onclick="event.stopPropagation();rateCard('${card.id}','easy')">Fácil ✓</button>
+        <button class="srs-btn medium" onclick="event.stopPropagation();rateCard('${card.id}','medium')">Médio</button>
+        <button class="srs-btn hard" onclick="event.stopPropagation();rateCard('${card.id}','hard')">Difícil</button>
+      </div>
+    </div>
+  `).join('');
+
+  DOM.flashcardGrid.querySelectorAll('.flashcard').forEach(fc => {
+    fc.addEventListener('click', () => {
+      const wasOpen = fc.classList.contains('is-open');
+      DOM.flashcardGrid.querySelectorAll('.flashcard').forEach(f => f.classList.remove('is-open'));
+      if (!wasOpen) {
+        fc.classList.add('is-open');
+        speak(decodeURIComponent(fc.dataset.text), false);
+      }
     });
+  });
 }
 
-function rateCard(cardId, difficulty) {
-    const cardEl = document.querySelector(`.flashcard[data-id="${cardId}"]`);
-    if(!cardEl) return;
-    
-    // SRS Logic (Simplified)
-    let current = state.srsProgress[cardId] || { interval: 1, ease: 2.5 };
-    let xpGain = 0;
-    
-    if(difficulty === 'hard') {
-        current.interval = 1;
-        current.ease = Math.max(1.3, current.ease - 0.2);
-        xpGain = 5;
-    } else if (difficulty === 'medium') {
-        current.interval = Math.round(current.interval * current.ease);
-        xpGain = 10;
-    } else { // easy
-        current.interval = Math.round(current.interval * current.ease * 1.5);
-        current.ease += 0.15;
-        xpGain = 15;
-    }
-    
-    state.srsProgress[cardId] = current;
-    
-    // Animation & XP
-    cardEl.style.transform = 'scale(0.9) rotateY(180deg)';
-    cardEl.style.opacity = '0.5';
-    addXP(xpGain, `Card Review (${difficulty})`);
-    
-    setTimeout(() => cardEl.remove(), 300);
+function rateCard(id, rating) {
+  SRS.evaluate(id, rating);
+  addXP(rating === 'easy' ? 3 : rating === 'medium' ? 2 : 1, `Card Review (${rating})`);
+  const fc = document.querySelector(`.flashcard[data-id="${id}"]`);
+  if (fc) {
+    fc.style.opacity = '0'; fc.style.transform = 'scale(0.95)'; fc.style.transition = 'all 0.3s';
+    setTimeout(() => fc.remove(), 300);
+  }
+}
+
+function resetSRS() {
+  SRS.set({});
+  renderFlashcards();
 }
 
 // ===================================================
-// TTS (TEXT TO SPEECH)
+// BIBLIOTECA DE ESTUDOS (Módulos → Lições → Exercícios)
 // ===================================================
-function speak(text) {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'de-DE';
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
-    }
+const FALLBACK_MODULES = [
+  { slug: 'a1-cap1', level: 'A1', chapter_number: 1, title_pt: '1. Hallo! – Begrüßungen', focus: 'Apresentações básicas' },
+  { slug: 'a2-cap21', level: 'A2', chapter_number: 21, title_pt: '21. Gestern war… – Perfekt', focus: 'Passado com haben' },
+  { slug: 'b1-cap40', level: 'B1', chapter_number: 40, title_pt: '40. Feste und Feiern', focus: 'Tradições e cultura' }
+];
+
+async function loadLibraryModules() {
+  const sbModules = await sbFetch('study_modules');
+  state.modules = sbModules || FALLBACK_MODULES;
+  renderLibrary();
 }
 
+function renderLibrary() {
+  if (!DOM.libraryGrid) return;
+  DOM.libraryGrid.innerHTML = state.modules.map(mod => `
+    <div class="module-card" onclick="openModule('${mod.slug}')">
+      <div class="module-header">
+        <span class="level-tag ${mod.level.toLowerCase()}">${mod.level}</span>
+        <h3>${mod.title_pt}</h3>
+      </div>
+      <p class="module-focus">🎯 ${mod.focus || 'Estudo completo'}</p>
+      <button class="btn-study">Estudar</button>
+    </div>
+  `).join('');
+}
+
+async function openModule(slug) {
+  // Fallback visual se não houver Supabase
+  const lessonData = await sbFetch(`study_lessons?module_slug=eq.${slug}`);
+  if (!lessonData?.length) {
+    alert(`📚 Módulo ${slug}\n\nConteúdo detalhado será carregado do Supabase.\nFallback: Estude pelo flashcard ou chatbot.`);
+    return;
+  }
+  showPage('biblioteca');
+  DOM.libraryGrid.innerHTML = lessonData.map(les => `
+    <section style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px;margin-bottom:12px;">
+      <h4 style="font-family:'Inter Tight',sans-serif;font-weight:700;font-size:17px;margin:0 0 8px 0;">${les.title_pt}</h4>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 10px 0;">${les.summary_pt || ''}</p>
+      ${les.quick_rule_pt ? `<div style="background:var(--bg);padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;"><strong>Regra:</strong> ${les.quick_rule_pt}</div>` : ''}
+    </section>
+  `).join('');
+}
 // ===================================================
-// CHATBOT
+// CHATBOT & PERSONAS (Groq → HF → Fallback)
 // ===================================================
-const personas = {
-    hans: {
-        name: 'Hans',
-        avatar: '👨‍',
-        desc: 'Professor rigoroso. Foca em gramática.',
-        prompt: 'Você é Hans, um professor de alemão rigoroso mas justo. Responda apenas em alemão, corrigindo erros gramaticais do aluno se houver.'
-    },
-    lukas: {
-        name: 'Lukas',
-        avatar: '🧢',
-        desc: 'Estudante casual. Usa gírias.',
-        prompt: 'Você é Lukas, um amigo estudante em Berlim. Fale de forma casual, use gírias jovens e responda em alemão simples.'
-    }
+const PERSONAS = {
+  hans: {
+    name: 'Hans', label: 'Hans – O Mentor', chatName: 'Hans',
+    desc: 'Professor rigoroso. Foca em gramática.',
+    greeting: 'Guten Tag, Rebeca. Beginnen wir mit dem Wesentlichen: der deutschen Grammatik. Schreib mir einen Satz — ich höre jeden falschen Artikel. 🇩🇪',
+    systemPrompt: 'Du bist Hans, ein strenger Deutschlehrer. Antworte auf Deutsch präzise. Korrigiere Fehler mit Format: ---KORREKTUR--- 🎼 [Metapher] ❌ Fehler: [...] ✅ Richtig: [...] 💡 Regel (em português): [...] XP: 10'
+  },
+  lukas: {
+    name: 'Lukas', label: 'Lukas – O Dev', chatName: 'Lukas',
+    desc: 'Estudante casual. Usa gírias.',
+    greeting: 'Hey Rebeca! Lukas hier aus Kreuzberg 🧢 Lass uns quatschen — kein cringe-formales Deutsch! Was ist dein Stand, Digga? 😎🇪',
+    systemPrompt: 'Du bist Lukas, 26, Dev aus Kreuzberg. Sehr informell. Slang 2026: krass, Digga, Alter, Bock, cringe. Korrigiere locker. Format: ---KORREKTUR--- 🐛 Bug in deiner Logik! ❌ Dein Code: [...] ✅ Der Fix: [...] 💡 Dica (em português): [...] XP: 10'
+  },
+  heidi: {
+    name: 'Heidi', label: 'Heidi – A Viajante', chatName: 'Heidi',
+    desc: 'Freelancer nômade. Dicas de viagem.',
+    greeting: 'Hallo Rebeca! Heidi hier ✈️ Ich zeige dir, wie man auf Reisen WIRKLICH Deutsch spricht — von der Straße, nicht vom Lehrbuch. Wohin reist du heute? 🗺️',
+    systemPrompt: 'Du bist Heidi, nomadische Freelance-Übersetzerin. Freundlich, praktisch, reisefokussiert. Format: ---KORREKTUR--- ✈️ Reise-Check für Rebeca: ❌ So gibt es Probleme: [...] ✅ So kommst du durch: [...] 💡 Dica de sobrevivência (em português): [...] XP: 10'
+  },
+  petra: {
+    name: 'Petra', label: 'Petra – A Analítica', chatName: 'Petra',
+    desc: 'Bibliotecária old school. Sarcasmo é carinho.',
+    greeting: 'Petra hier. *nippt am Kamillentee* Ihre Akte zeigt: Anfängerin. Gut. Schreiben Sie etwas auf Deutsch, Rebeca. Ich werde... präzise sein. 📚',
+    systemPrompt: 'Du bist Petra, Bibliothekarin. Präzise, leicht ironisch, warmherzig. Finde UND KATALOGISIERE jeden Fehler. Format: ---KORREKTUR--- 📚 Katalog für Rebeca: • Fehler 1: ❌ "[falsch]" → ✅ "[richtig]" | (em português): [explicação] 💡 Petra\'s Urteil (em português): [resumo sarcástico mas carinhoso] 📊 Precisão: X/10 XP: 10'
+  }
 };
 
-function setPersona(id) {
-    state.activePersona = id;
-    document.querySelectorAll('.persona-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.persona-btn[data-id="${id}"]`)?.classList.add('active');
-    
-    // Limpa chat
-    DOM.chatMessages.innerHTML = '';
-    addBotMessage(personas[id].desc);
+let currentChar = 'hans';
+let charHistories = { hans: [], lukas: [], heidi: [], petra: [] };
+
+function selectChar(charKey) {
+  currentChar = charKey;
+  document.querySelectorAll('.char-btn').forEach(b => b.classList.toggle('active', b.dataset.char === charKey));
+  const ch = PERSONAS[charKey];
+  DOM.chatMessages.innerHTML = '';
+  addBotMessage(ch.greeting);
+  charHistories[charKey] = [];
 }
 
-DOM.sendBtn.addEventListener('click', sendChat);
-DOM.chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChat(); });
-
 async function sendChat() {
-    const text = DOM.chatInput.value.trim();
-    if(!text) return;
-    
-    addUserMessage(text);
-    DOM.chatInput.value = '';
-    
-    // Simula delay de "digitando..."
-    const loadingId = addLoadingMessage();
-    
-    try {
-        // Aqui você conectaria com OpenAI/Groq no backend
-        // Por enquanto, simulamos uma resposta baseada na persona
-        setTimeout(() => {
-            removeLoadingMessage(loadingId);
-            const response = generateMockResponse(text, state.activePersona);
-            addBotMessage(response);
-            speak(response);
-        }, 1500);
-    } catch (e) {
-        addBotMessage("Desculpe, erro de conexão.");
-    }
+  const text = DOM.chatInput.value.trim();
+  if (!text) return;
+  addUserMessage(text);
+  DOM.chatInput.value = '';
+  DOM.sendBtn.disabled = true;
+
+  const loadingId = addLoadingMessage();
+  try {
+    // Mock AI response (substitua por fetch('/api/groq') se tiver backend)
+    setTimeout(() => {
+      removeLoadingMessage(loadingId);
+      const response = generateMockResponse(text, currentChar);
+      addBotMessage(response);
+      parseXPFromResponse(response);
+      DOM.sendBtn.disabled = false;
+    }, 1200);
+  } catch (e) {
+    removeLoadingMessage(loadingId);
+    addBotMessage('⚠️ Verbindungsfehler. Versuche es erneut.');
+    DOM.sendBtn.disabled = false;
+  }
 }
 
 function addUserMessage(text) {
-    const div = document.createElement('div');
-    div.className = 'msg user';
-    div.innerText = text;
-    DOM.chatMessages.appendChild(div);
-    DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
+  const div = document.createElement('div');
+  div.className = 'chat-msg user';
+  div.innerHTML = `<div class="chat-bubble">${escHtml(text)}</div>`;
+  DOM.chatMessages.appendChild(div);
+  DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
 }
 
 function addBotMessage(text) {
-    const div = document.createElement('div');
-    div.className = 'msg bot';
-    div.innerHTML = `<strong>${personas[state.activePersona].avatar} ${personas[state.activePersona].name}:</strong> ${text}`;
-    DOM.chatMessages.appendChild(div);
-    DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
+  const ch = PERSONAS[currentChar];
+  const div = document.createElement('div');
+  div.className = 'chat-msg bot';
+  let main = text, corr = '';
+  if (text.includes('---KORREKTUR---')) {
+    const parts = text.split('---KORREKTUR---');
+    main = parts[0].trim();
+    corr = parts[1]?.split('---')[0]?.trim() || '';
+  }
+  div.innerHTML = `
+    <div class="chat-name">${ch.chatName}</div>
+    <div class="chat-bubble">${escHtml(main)}</div>
+    ${corr ? `<div class="chat-correction"><div class="correction-label">📝 ${ch.name} corrige você</div><div class="correction-text">${escHtml(corr)}</div><button onclick="markCorrectionRead(this)" style="margin-top:8px;padding:4px 12px;border-radius:999px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;">✓ Li a correção (+XP)</button></div>` : ''}
+    <div style="margin-top:6px;"><button class="fc-audio-btn" onclick="speak(\`${main.replace(/`/g, '\\`')}\`, false)">🔊 Ouvir</button></div>
+  `;
+  DOM.chatMessages.appendChild(div);
+  DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
 }
 
-function addLoadingMessage() {
-    const id = 'loading-' + Date.now();
-    const div = document.createElement('div');
-    div.id = id;
-    div.className = 'msg bot loading';
-    div.innerText = '...';
-    DOM.chatMessages.appendChild(div);
-    DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
-    return id;
-}
-
-function removeLoadingMessage(id) {
-    document.getElementById(id)?.remove();
-}
-
-// Mock response generator (Para funcionar sem Backend AI por enquanto)
 function generateMockResponse(input, persona) {
-    const lower = input.toLowerCase();
-    
-    if (persona === 'hans') {
-        if(lower.includes('hallo') || lower.includes('hi')) return 'Guten Tag! Wie geht es Ihnen?';
-        if(lower.includes('wie geht')) return 'Mir geht es gut, danke. Und Ihnen?';
-        return 'Das ist interessant. Bitte achten Sie auf die Großschreibung der Nomen!';
-    }
-    
-    if (persona === 'lukas') {
-        if(lower.includes('hallo')) return 'Moin! Was geht ab?';
-        if(lower.includes('lernen')) return 'Ja, Deutsch lernen ist krass! Viel Erfolg, Digga.';
-        return 'Alles klar! Lass uns chillen und üben.';
-    }
-    
-    return 'Entschuldigung, ich verstehe das nicht ganz.';
+  const lower = input.toLowerCase();
+  if (persona === 'hans') {
+    if (lower.includes('hallo')) return 'Guten Tag! Wie geht es Ihnen?';
+    if (lower.includes('wie geht')) return 'Mir geht es gut, danke. Und Ihnen?';
+    return 'Das ist interessant. Bitte achten Sie auf die Großschreibung der Nomen!';
+  }
+  if (persona === 'lukas') {
+    if (lower.includes('hallo')) return 'Moin! Was geht ab?';
+    if (lower.includes('lernen')) return 'Ja, Deutsch lernen ist krass! Viel Erfolg, Digga.';
+    return 'Alles klar! Lass uns chillen und üben.';
+  }
+  if (persona === 'heidi') return 'Das klingt nach einem tollen Plan! Packen Sie Ihren Koffer!';
+  if (persona === 'petra') return 'Ihr Satz ist fast perfekt. Nur ein kleiner Artikel-Fehler... korrigiere ich sofort.';
+  return 'Entschuldigung, ich verstehe das nicht ganz.';
+}
+
+function parseXPFromResponse(raw) {
+  const match = raw.match(/XP:\s*(\d+)/);
+  if (match) addXP(parseInt(match[1]), 'Resposta do Chatbot');
+}
+
+function markCorrectionRead(btn) {
+  addXP(10, 'Correção lida');
+  btn.textContent = '✓ XP ganho!'; btn.disabled = true; btn.style.opacity = '0.5';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+}
+// ===================================================
+// GAMIFICAÇÃO & XP
+// ===================================================
+function addXP(amount, reason) {
+  state.xp += amount;
+  localStorage.setItem('dh-xp', state.xp);
+  updateUI();
+  showToast(`+${amount} XP: ${reason}`, 'success');
+}
+
+function updateUI() {
+  if (DOM.xpNum) DOM.xpNum.innerText = state.xp;
+  if (DOM.streakNum) DOM.streakNum.innerText = state.streak;
+  if (DOM.levelLabel) DOM.levelLabel.innerText = state.level;
+  const progress = Math.min((state.xp % 500) / 500 * 100, 100);
+  if (DOM.progressBar) DOM.progressBar.style.width = `${progress}%`;
+}
+
+function showToast(msg, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerText = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
 // ===================================================
-// BIBLIOTECA DE ESTUDOS (MÓDULOS)
+// BOSS FIGHT & SHADOWING
 // ===================================================
-async function loadLibraryModules() {
-    try {
-        // Tenta buscar módulos do Supabase
-        const { data, error } = await client
-            .from('study_modules')
-            .select('*')
-            .order('chapter_number');
-            
-        if(!error && data && data.length > 0) {
-            renderLibrary(data);
-        } else {
-            // Fallback local baseado no seu doc
-            renderLibrary(getFallbackModules());
-        }
-    } catch (e) {
-        renderLibrary(getFallbackModules());
-    }
-}
-
-function getFallbackModules() {
-    return [
-        { slug: 'cap1', chapter_number: 1, title_pt: '1. Hallo! – Begrüßungen', level: 'A1', focus: 'Apresentações básicas' },
-        { slug: 'cap2', chapter_number: 2, title_pt: '2. Wer bin ich? – Familie', level: 'A1', focus: 'Família e números' },
-        { slug: 'cap3', chapter_number: 3, title_pt: '3. Hobbys und Freizeit', level: 'A1', focus: 'Hobbies e verbo möchten' },
-        { slug: 'cap4', chapter_number: 4, title_pt: '4. Im Supermarkt', level: 'A1', focus: 'Compras e Acusativo' },
-        { slug: 'cap5', chapter_number: 5, title_pt: '5. Mein Tag', level: 'A1', focus: 'Rotina e horas' }
-    ];
-}
-
-function renderLibrary(modules) {
-    DOM.libraryGrid.innerHTML = '';
-    
-    modules.forEach(mod => {
-        const card = document.createElement('div');
-        card.className = 'module-card';
-        card.innerHTML = `
-            <div class="module-header">
-                <span class="level-tag ${mod.level}">${mod.level}</span>
-                <h3>${mod.title_pt}</h3>
-            </div>
-            <p class="module-focus">🎯 ${mod.focus}</p>
-            <button onclick="openModule('${mod.slug}')" class="btn-study">Estudar</button>
-        `;
-        DOM.libraryGrid.appendChild(card);
-    });
-}
-
-// Função chamada ao clicar em "Estudar"
-window.openModule = function(slug) {
-    // Lógica para abrir detalhes do módulo ou lições
-    alert(`Abrindo módulo: ${slug}\n(Aqui carregaria as lições de study_lessons)`);
+const BOSS_PHRASES = {
+  A1: [{ de: 'Ich heiße Rebeca und ich komme aus Brasilien.', pt: 'Meu nome é Rebeca e eu venho do Brasil.' }],
+  A2: [{ de: 'Ich habe gestern im Restaurant gegessen.', pt: 'Eu comi no restaurante ontem.' }],
+  B1: [{ de: 'Obwohl es regnet, gehe ich spazieren.', pt: 'Embora esteja chovendo, vou caminhar.' }]
 };
 
-// ===================================================
-// BOSS FIGHT (Mini Game)
-// ===================================================
 window.startBossFight = function() {
-    DOM.bossModal.style.display = 'flex';
-    const words = ['der Apfel', 'die Banane', 'das Brot', 'der Kaffee'];
-    const randomWord = words[Math.floor(Math.random() * words.length)];
-    
-    document.getElementById('boss-word').innerText = randomWord;
-    document.getElementById('boss-input').value = '';
-    document.getElementById('boss-feedback').innerText = '';
+  state.bossState = { active: true, round: 0, score: 0, phrases: BOSS_PHRASES[state.level] || BOSS_PHRASES.A1, total: 5 };
+  DOM.bossModal.style.display = 'flex';
+  document.getElementById('bossLevel').textContent = state.level;
+  startBossRound();
 };
+
+function startBossRound() {
+  const round = state.bossState.round;
+  if (round >= state.bossState.total) { endBossFight(); return; }
+  const phrase = state.bossState.phrases[round];
+  document.getElementById('bossTranslation').textContent = phrase.pt;
+  document.getElementById('bossInput').value = '';
+  speak(phrase.de, false);
+}
 
 window.checkBossAnswer = function() {
-    const input = document.getElementById('boss-input').value.toLowerCase();
-    const target = document.getElementById('boss-word').innerText.toLowerCase();
-    const feedback = document.getElementById('boss-feedback');
-    
-    if(input.includes(target)) {
-        feedback.innerHTML = '<span style="color:var(--green)">Richtig! +50 XP</span>';
-        addXP(50, 'Boss Fight Victory');
-        setTimeout(() => DOM.bossModal.style.display = 'none', 1500);
-    } else {
-        feedback.innerHTML = '<span style="color:var(--red)">Falsch! Tente novamente.</span>';
-    }
+  const input = document.getElementById('bossInput').value.toLowerCase();
+  const phrase = state.bossState.phrases[state.bossState.round];
+  const ok = input.includes(phrase.de.toLowerCase()) || input.replace(/[.,!?]/g, '') === phrase.de.toLowerCase().replace(/[.,!?]/g, '');
+  document.getElementById('bossFeedback').innerHTML = ok ? '<span style="color:var(--green)">✅ Richtig! +50 XP</span>' : '<span style="color:var(--red)">❌ Falsch! Tente novamente.</span>';
+  if (ok) addXP(50, 'Boss Fight Victory');
+  setTimeout(() => { state.bossState.round++; startBossRound(); }, 1500);
+};
+
+function endBossFight() {
+  DOM.bossModal.style.display = 'none';
+  showToast('🏆 Boss Fight Concluído!', 'success');
+}
+
+window.startShadowing = function() {
+  DOM.shadowModal.style.display = 'flex';
+  const phrase = 'Guten Morgen, wie geht es Ihnen?';
+  document.getElementById('shadow-phrase').innerText = phrase;
+  speak(phrase, true);
+  showToast('🎤 Modo Shadowing ativo!', 'info');
 };
 
 // ===================================================
-// SHADOWING (Speech-to-Text)
+// INIT & EVENT LISTENERS
 // ===================================================
-window.startShadowing = function() {
-    if(!('webkitSpeechRecognition' in window)) {
-        alert('Seu navegador não suporta reconhecimento de voz.');
-        return;
-    }
-    
-    DOM.shadowModal.style.display = 'flex';
-    const phrase = 'Guten Morgen, wie geht es Ihnen?';
-    document.getElementById('shadow-phrase').innerText = phrase;
-    
-    const recognition = new webkitSpeechRecognition();
-    recognition.lang = 'de-DE';
-    recognition.onresult = (event) => {
-        const speechResult = event.results[0][0].transcript;
-        document.getElementById('shadow-result').innerText = speechResult;
-        
-        if(speechResult.toLowerCase().includes('morgen') || speechResult.toLowerCase().includes('geht')) {
-            document.getElementById('shadow-feedback').innerText = 'Gut gemacht! Pronúncia excelente.';
-            addXP(30, 'Shadowing Practice');
-        } else {
-            document.getElementById('shadow-feedback').innerText = 'Tente novamente.';
-        }
-    };
-    recognition.start();
+function initAuth() {
+  const userId = localStorage.getItem('dh-user-id') || 'guest-' + crypto.randomUUID();
+  localStorage.setItem('dh-user-id', userId);
+  state.user = { id: userId };
+}
+
+function setupNavigation() {
+  document.querySelectorAll('.sidebar-link, .nav-pill').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const pageId = e.currentTarget.dataset.page;
+      if (pageId) showPage(pageId);
+    });
+  });
+}
+
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${pageId}`)?.classList.add('active');
+  if (pageId === 'flashcards') renderFlashcards();
+  if (pageId === 'biblioteca') loadLibraryModules();
+}
+
+window.showPage = showPage;
+window.selectChar = selectChar;
+window.sendChat = sendChat;
+window.speak = function(text, slow) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE'; u.rate = slow ? 0.5 : 0.95;
+    window.speechSynthesis.speak(u);
+  }
 };
+
+// 🚀 INIT DOM READY
+document.addEventListener('DOMContentLoaded', async () => {
+  initAuth();
+  setupNavigation();
+  const savedXP = parseInt(localStorage.getItem('dh-xp') || '0');
+  const savedStreak = parseInt(localStorage.getItem('dh-streak') || '0');
+  state.xp = savedXP;
+  state.streak = savedStreak;
+  updateUI();
+  await loadFlashcards();
+  await loadLibraryModules();
+  selectChar('hans');
+  console.log('🇩 Deutsch Hub v2.0 iniciado!');
+});
 </script>
 </body>
 </html>
