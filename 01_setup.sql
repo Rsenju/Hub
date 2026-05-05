@@ -1,18 +1,16 @@
 -- =====================================================
 -- DEUTSCH HUB — 01_setup.sql
--- Extensões e configurações iniciais.
--- Execute este arquivo PRIMEIRO, antes dos demais.
+-- Configurações iniciais e extensões.
 -- =====================================================
 
-
 -- ── Extensões ─────────────────────────────────────
--- gen_random_uuid() vem do pgcrypto (já ativo no Supabase por padrão).
--- A linha abaixo garante que esteja disponível em projetos novos.
+-- Gera UUIDs aleatórios
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- Permite buscas sem acentos (ex: buscar "uber" encontra "über")
+CREATE EXTENSION IF NOT EXISTS unaccent;
 
--- ── Função para atualizar updated_at automaticamente ──
--- Reutilizada por todas as tabelas que têm a coluna updated_at.
+-- ── Função para updated_at automático ─────────────
 CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql

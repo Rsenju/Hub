@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Deutsch Hub – Seu hub pessoal de alemão. Flashcards, chatbot com correção automática, áudio TTS, desafios e repetição espaçada.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://deutsch-hub.vercel.app/">
+  <meta property="og:title" content="Deutsch Hub – Seu espaço de alemão">
+  <meta property="og:description" content="Flashcards, chatbot com correção automática, áudio TTS, desafios e repetição espaçada.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://deutsch-hub.vercel.app/">
+  <meta property="og:image" content="https://deutsch-hub.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Deutsch Hub – Seu espaço de alemão">
+  <meta name="twitter:description" content="Flashcards, chatbot com correção automática, áudio TTS, desafios e repetição espaçada.">
+  <title>Deutsch Hub – Seu espaço de alemão</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇩🇪</text></svg>">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Deutsch Hub",
+    "description": "Plataforma interativa para aprendizado de alemão com flashcards, chatbot IA, áudio TTS e desafios.",
+    "url": "https://deutsch-hub.vercel.app/",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+    "author": { "@type": "Person", "name": "Rebeca" },
+    "inLanguage": ["de", "pt-BR"]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<body>
+<!-- ===================================================
+     DEUTSCH HUB — body.html
+     Estrutura atualizada para A1, A2 e B1.
+     =================================================== -->
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="logo">🇩 <b>Deutsch Hub</b></span>
+      <span class="version-badge">v2.0 (A1-B1)</span>
+    </div>
+
+    <div class="sidebar-nav">
+      <!-- Filtros de Nível (Flashcards) -->
+      <div class="sb-section">
+        <div class="sb-label">Flashcards por Nível</div>
+        <button class="sb-sub-item active" id="sl-all" onclick="setFilter('all')">📚 Todos os Níveis</button>
+        <button class="sb-sub-item" id="sl-a1" onclick="setFilter('A1')">🟢 A1 – Iniciante</button>
+        <button class="sb-sub-item" id="sl-a2" onclick="setFilter('A2')">🔵 A2 – Básico</button>
+        <button class="sb-sub-item" id="sl-b1" onclick="setFilter('B1')">🟠 B1 – Intermediário</button>
+        <button class="sb-sub-item" id="sl-girias" onclick="setFilter('girias')">😎 Gírias 2026</button>
+      </div>
+
+      <!-- Filtros por Tema -->
+      <div class="sb-section" style="margin-top:20px;">
+        <div class="sb-label">Temas do Dia a Dia</div>
+        <button class="sb-sub-item" onclick="setThemeFilter('dia-a-dia')">☀️ Dia a Dia</button>
+        <button class="sb-sub-item" onclick="setThemeFilter('trabalho')">💼 Trabalho</button>
+        <button class="sb-sub-item" onclick="setThemeFilter('viagem')">✈️ Viagem</button>
+        <button class="sb-sub-item" onclick="setThemeFilter('pedidos')">🛒 Pedidos</button>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sb-progress">
+        <div class="sb-xp-bar"><div id="sb-xp-fill" class="sb-xp-fill"></div></div>
+        <div id="sb-xp-label" class="sb-xp-text">0 / 500 XP</div>
+      </div>
+      <div class="sb-streak">🔥 <span id="sb-streak">0</span> dias</div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- PAGE: HOME -->
+    <div id="page-home" class="page active">
+      <div class="hero">
+        <div class="hero-badge"><span class="hero-badge-dot"></span>Atualizado 2026</div>
+        <h1>Seu hub pessoal<br>de alemão</h1>
+        <p>Flashcards com áudio, chatbot professor e biblioteca completa do A1 ao B1.</p>
+        <div class="hero-btns">
+          <button class="btn-primary" onclick="showPage('flashcards')">🔥 Estudar Flashcards</button>
+          <button class="btn-secondary" onclick="showPage('biblioteca')">📖 Biblioteca de Estudos</button>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-eyebrow">Explore por Tema</div>
+        <div class="category-grid">
+          <div class="category-card" onclick="setThemeFilter('dia-a-dia'); showPage('flashcards')">
+            <div class="category-icon">☀️</div>
+            <div class="category-title">Dia a Dia</div>
+            <div class="category-desc">Saudações, rotina, casa e família.</div>
+          </div>
+          <div class="category-card" onclick="setThemeFilter('trabalho'); showPage('flashcards')">
+            <div class="category-icon">💼</div>
+            <div class="category-title">Trabalho</div>
+            <div class="category-desc">E-mails, reuniões e ambiente corporativo.</div>
+          </div>
+          <div class="category-card" onclick="setThemeFilter('viagem'); showPage('flashcards')">
+            <div class="category-icon">✈️</div>
+            <div class="category-title">Viagem</div>
+            <div class="category-desc">Aeroporto, hotel, transporte e emergências.</div>
+          </div>
+          <div class="category-card" onclick="setThemeFilter('pedidos'); showPage('flashcards')">
+            <div class="category-icon">🛒</div>
+            <div class="category-title">Pedidos & Compras</div>
+            <div class="category-desc">Restaurantes, lojas e farmácias.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-eyebrow">Recursos do Hub</div>
+        <div class="features-list">
+          <div class="feature-item">
+            <div class="feature-icon">🔊</div>
+            <div>
+              <div class="feature-title">Áudio Realista</div>
+              <div class="feature-desc">Flashcards com voz humana (Premium) e nativa do sistema. Treine a pronúncia com velocidade normal e lenta.</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🤖</div>
+            <div>
+              <div class="feature-title">Chatbot Professor</div>
+              <div class="feature-desc">Converse com Hans, Lukas, Heidi ou Petra. Receba correções gramaticais detalhadas e explicações.</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📈</div>
+            <div>
+              <div class="feature-title">Progresso A1 → B1</div>
+              <div class="feature-desc">Acompanhe seu XP, mantenha seu Streak diário e desbloqueie os níveis superiores.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: FLASHCARDS -->
+    <div id="page-flashcards" class="page">
+      <div class="section-eyebrow">Vocabulário</div>
+      <div class="section-title">Flashcards <span id="flashcardCount" style="font-size:16px;color:var(--muted);font-weight:400;"></span></div>
+
+      <!-- Filtros de Flashcards -->
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-chip active" onclick="setFilter('all')" data-filter="all">Todos</button>
+        <button class="filter-chip" onclick="setFilter('A1')" data-filter="A1">A1</button>
+        <button class="filter-chip" onclick="setFilter('A2')" data-filter="A2">A2</button>
+        <button class="filter-chip" onclick="setFilter('B1')" data-filter="B1">B1</button>
+        <button class="filter-chip" onclick="setThemeFilter('girias')" data-filter="girias">Gírias</button>
+        <button class="filter-chip" onclick="resetSRS()" style="margin-left:auto;">🔄 Resetar Revisão</button>
+      </div>
+
+      <!-- Grid de Flashcards (Preenchido pelo JS) -->
+      <div id="flashcardGrid" class="flashcard-grid">
+        <!-- JS renderiza aqui -->
+      </div>
+    </div>
+
+    <!-- PAGE: BIBLIOTECA -->
+    <div id="page-biblioteca" class="page">
+      <div class="section-eyebrow">Aulas Curtas</div>
+      <div class="section-title">Biblioteca de Estudos</div>
+      <p class="p-md" style="margin-bottom:24px;">Capítulos rápidos com exemplos, gramática e exercícios para sua trilha completa (A1-B1).</p>
+
+      <!-- Filtros da Biblioteca -->
+      <div class="filter-bar" style="margin-bottom:24px;">
+        <button class="filter-chip active" onclick="filterStudyLibrary('all')" data-library-filter="all">Todos</button>
+        <button class="filter-chip" onclick="filterStudyLibrary('A1')" data-library-filter="A1">🟢 A1 (Cap. 1-20)</button>
+        <button class="filter-chip" onclick="filterStudyLibrary('A2')" data-library-filter="A2">🔵 A2 (Cap. 21-39)</button>
+        <button class="filter-chip" onclick="filterStudyLibrary('B1')" data-library-filter="B1">🟠 B1 (Cap. 40-49)</button>
+      </div>
+
+      <!-- Grid da Biblioteca (Preenchido pelo JS) -->
+      <div id="studyLibraryGrid" class="study-grid">
+        <!-- JS renderiza aqui -->
+      </div>
+    </div>
+
+    <!-- PAGE: CHATBOT -->
+    <div id="page-chat" class="page">
+      <div class="section-eyebrow">Prática de Conversação</div>
+      <div class="section-title">Chatbot com Personagens</div>
+
+      <div class="chatbot-wrap">
+        <!-- Seleção de Personagem -->
+        <div class="char-selector">
+          <button class="char-btn active" data-char="hans" onclick="selectChar('hans')">
+            <span class="char-avatar">🧔</span>
+            <span class="char-name">Hans</span>
+            <span class="char-role">O Mentor</span>
+          </button>
+          <button class="char-btn" data-char="lukas" onclick="selectChar('lukas')">
+            <span class="char-avatar">🧢</span>
+            <span class="char-name">Lukas</span>
+            <span class="char-role">O Jovem</span>
+          </button>
+          <button class="char-btn" data-char="heidi" onclick="selectChar('heidi')">
+            <span class="char-avatar">✈️</span>
+            <span class="char-name">Heidi</span>
+            <span class="char-role">A Viajante</span>
+          </button>
+          <button class="char-btn" data-char="petra" onclick="selectChar('petra')">
+            <span class="char-avatar">📚</span>
+            <span class="char-name">Petra</span>
+            <span class="char-role">A Analítica</span>
+          </button>
+        </div>
+
+        <!-- Info do Personagem Ativo -->
+        <div class="char-active-bar">
+          <div class="char-active-avatar" id="charActiveEmoji">🧔</div>
+          <div class="char-active-info">
+            <div class="char-active-name" id="charActiveName">Hans – O Mentor</div>
+            <div class="char-active-desc" id="charActiveDesc">Sério e focado em gramática pura. Corrige cada detalhe.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+             <button class="call-btn" id="callBtn" onclick="toggleCall()" title="Chamada de Voz">📞</button>
+             <button class="clear-hist-btn" onclick="clearCurrentHistory()">🗑 Limpar</button>
+          </div>
+        </div>
+
+        <!-- Controles de Voz -->
+        <div class="el-api-row">
+          <label class="voice-toggle-label">Voz:</label>
+          <label class="voice-toggle">
+            <input type="checkbox" id="voicePremiumToggle" onchange="onVoiceToggle()">
+            <span class="voice-slider"></span>
+          </label>
+          <span class="voice-badge" id="voiceBadge">Normal</span>
+          <div class="audio-status" id="audioStatus" onclick="stopAudio()">
+            <span id="audioStatusIcon">🔈</span>
+            <span id="audioStatusText">Voz pronta</span>
+          </div>
+          <button class="btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="openXPLog()">🏆 Log XP</button>
+        </div>
+
+        <!-- Área de Mensagens -->
+        <div class="chat-messages" id="chatMessages">
+          <!-- JS renderiza aqui -->
+        </div>
+
+        <!-- Input de Chat -->
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" placeholder="Fale em alemão..." onkeydown="if(event.key==='Enter') sendChat()">
+          <button class="chat-send" id="chatSendBtn" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: NOTAS -->
+    <div id="page-notas" class="page">
+      <div class="section-eyebrow">Anotações pessoais</div>
+      <div class="section-title">Seu Caderno</div>
+
+      <div class="notes-tabs">
+        <button class="notes-tab active" onclick="showNote('erros')">Caderno de Erros</button>
+        <button class="notes-tab" onclick="showNote('frases')">Frases Prontas</button>
+        <button class="notes-tab" onclick="showNote('vocab')">Vocabulário Pessoal</button>
+        <button class="notes-tab" onclick="showNote('livre')">Anotações Livres</button>
+      </div>
+
+      <div class="notes-pane active" id="note-erros">
+        <textarea class="notes-textarea" id="ta-erros" placeholder="Registre os erros que você mais comete para não repetir. Ex: Ich habe gesagt (não 'Ich bin gesagt')"></textarea>
+      </div>
+      <div class="notes-pane" id="note-frases">
+        <textarea class="notes-textarea" id="ta-frases" placeholder="Frases para automatizar e usar naturalmente. Ex: Könnten Sie bitte langsamer sprechen?"></textarea>
+      </div>
+      <div class="notes-pane" id="note-vocab">
+        <textarea class="notes-textarea" id="ta-vocab" placeholder="Palavras que encontrou no dia a dia e quer memorizar."></textarea>
+      </div>
+      <div class="notes-pane" id="note-livre">
+        <textarea class="notes-textarea" id="ta-livre" placeholder="Espaço livre para qualquer anotação."></textarea>
+      </div>
+    </div>
+
+    <!-- PAGE: REVIEW (Erros) -->
+    <div id="page-review" class="page">
+      <div class="section-eyebrow">Supabase · LanguageTool</div>
+      <div class="section-title">📋 Revisão de Erros Gramaticais</div>
+      <p class="p-md">Todos os erros capturados pelo LanguageTool durante suas conversas são salvos aqui.</p>
+
+      <div style="margin-bottom:16px;">
+        <button class="btn-secondary" onclick="loadErrorReview()">🔄 Atualizar do Supabase</button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="xp-log-table">
+          <thead>
+            <tr>
+              <th>Texto Original</th>
+              <th>Erro Identificado</th>
+              <th>Sugestão</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="errorReviewBody">
+            <tr>
+              <td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">Clique em "Atualizar" para carregar seus erros.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAIS -->
+
+<!-- Modal: Boss Fight -->
+<div class="boss-modal" id="bossFightModal">
+  <div class="boss-box">
+    <div class="boss-header">
+      <div class="boss-title">⚔️ Boss Fight!</div>
+      <div class="boss-level-badge" id="bossLevel">A1</div>
+    </div>
+    <div id="bossRoundInfo" style="font-size:14px;color:var(--muted);margin-bottom:12px;">Rodada 1 de 5</div>
+    
+    <div class="boss-phrase-box">
+      <div class="boss-translation" id="bossTranslation">Traduza para o alemão:</div>
+    </div>
+    
+    <input class="boss-input" id="bossInput" placeholder="Digite em alemão...">
+    <div id="bossFeedback" style="margin-top:12px;min-height:24px;"></div>
+    
+    <button class="boss-submit" id="bossSubmit" onclick="submitBossAnswer()">✓ Confirmar resposta</button>
+    <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeBossFight(false)">Sair do Boss Fight</button>
+  </div>
+</div>
+
+<!-- Modal: Shadowing -->
+<div class="shadow-modal" id="shadowModal">
+  <div class="shadow-box">
+    <div class="boss-title">🎤 Modo Shadowing</div>
+    <div class="shadow-phrase" id="shadowPhrase">...</div>
+    <div class="shadow-status" id="shadowStatus">Preparando áudio...</div>
+    <div id="shadowFeedback"></div>
+  </div>
+</div>
+
+<!-- Modal: XP Log -->
+<div class="modal-overlay" id="xpModal">
+  <div class="modal-box">
+    <div class="modal-title">🏆 Log de Conquistas</div>
+    <div style="font-size:14px;margin-bottom:16px;">Total de XP: <b id="modalXPTotal">0</b></div>
+    <table class="xp-log-table">
+      <thead><tr><th>Conquista</th><th>XP</th><th>Quando</th></tr></thead>
+      <tbody id="xpLogBody"></tbody>
+    </table>
+    <button class="btn-secondary" style="margin-top:16px;width:100%;" onclick="closeXPLog()">Fechar</button>
+  </div>
+</div>
+
+<!-- Modal: Call -->
+<div class="call-modal" id="callModal">
+  <div class="call-box">
+    <img class="call-avatar" id="callAvatar" src="" alt="Avatar">
+    <div class="call-name" id="callName">Nome</div>
+    <div class="call-status" id="callStatus">Chamando...</div>
+    <div class="call-wave">
+      <div class="call-bar"></div><div class="call-bar"></div><div class="call-bar"></div>
+      <div class="call-bar"></div><div class="call-bar"></div><div class="call-bar"></div>
+      <div class="call-bar"></div>
+    </div>
+    <div id="callTranscript" style="font-size:13px;color:var(--muted);min-height:40px;margin-bottom:20px;">...</div>
+    <button class="call-hang" onclick="hangUp()">✕</button>
+  </div>
+</div>
+
+<!-- Tooltip Pexels (Dicionário Visual) -->
+<div id="pexelsTooltip"></div>
+</body>
