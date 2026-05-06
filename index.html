@@ -604,7 +604,7 @@ input,textarea{font-family:inherit;outline:none}
 </div>
 
 <script>
-  // ==================== CONFIG SUPABASE ====================
+// ==================== SUPABASE CONFIG ====================
 const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
 const SUPABASE_KEY = 'sb_publishable__1bxoDUtOWsghhgfOpSz2A_qlwCtTo0';
 
@@ -616,103 +616,31 @@ function getSupabase() {
   return supabaseClient;
 }
 
-// ==================== FALLBACK DATA ====================
-const FALLBACK_MODULES = {
-  A1: [
-    {id:1,title:'Begrüßung',translation:'Saudações',status:'done',chapters:[
-      {name:'Hallo und Tschüss',type:'vocab',done:true},{name:'Sich vorstellen',type:'gramática',done:true},{name:'Formelle und informelle Begrüßung',type:'cultura',done:true}
-    ]},
-    {id:2,title:'Zahlen und Farben',translation:'Números e Cores',status:'done',chapters:[
-      {name:'Zahlen 1-100',type:'vocab',done:true},{name:'Farben benennen',type:'vocab',done:true},{name:'Preise verstehen',type:'prática',done:true}
-    ]},
-    {id:3,title:'Einkaufen und Essen',translation:'Compras e Comida',status:'current',chapters:[
-      {name:'Im Supermarkt',type:'vocab',done:true},{name:'Bestellen im Restaurant',type:'prática',done:false},{name:'Lebensmittel',type:'vocab',done:false},{name:'Der Dativ',type:'gramática',done:false}
-    ]},
-    {id:4,title:'Familie und Freunde',translation:'Família e Amigos',status:'locked',chapters:[
-      {name:'Familienmitglieder',type:'vocab',done:false},{name:'Über Familie sprechen',type:'prática',done:false},{name:'Possessivartikel',type:'gramática',done:false}
-    ]},
-    {id:5,title:'Alltag und Routine',translation:'Dia a Dia',status:'locked',chapters:[
-      {name:'Tagesablauf',type:'vocab',done:false},{name:'Uhrzeit',type:'gramática',done:false},{name:'Trennbare Verben',type:'gramática',done:false}
-    ]}
-  ],
-  A2: [
-    {id:6,title:'Reisen und Transport',translation:'Viagem e Transporte',status:'locked',chapters:[
-      {name:'Am Bahnhof',type:'vocab',done:false},{name:'Wegbeschreibung',type:'prática',done:false},{name:'Perfekt',type:'gramática',done:false}
-    ]},
-    {id:7,title:'Arbeit und Beruf',translation:'Trabalho e Profissão',status:'locked',chapters:[
-      {name:'Berufe',type:'vocab',done:false},{name:'Im Büro',type:'vocab',done:false},{name:'Modalverben',type:'gramática',done:false}
-    ]},
-    {id:8,title:'Gesundheit',translation:'Saúde',status:'locked',chapters:[
-      {name:'Beim Arzt',type:'prática',done:false},{name:'Körperteile',type:'vocab',done:false},{name:'Imperativ',type:'gramática',done:false}
-    ]}
-  ],
-  B1: [
-    {id:9,title:'Medien und Kommunikation',translation:'Mídia e Comunicação',status:'locked',chapters:[
-      {name:'Nachrichten lesen',type:'prática',done:false},{name:'Soziale Medien',type:'vocab',done:false},{name:'Konjunktiv II',type:'gramática',done:false}
-    ]},
-    {id:10,title:'Umwelt und Natur',translation:'Meio Ambiente e Natureza',status:'locked',chapters:[
-      {name:'Umweltschutz',type:'vocab',done:false},{name:'Diskussion führen',type:'prática',done:false},{name:'Passiv',type:'gramática',done:false}
-    ]},
-    {id:11,title:'Kultur und Gesellschaft',translation:'Cultura e Sociedade',status:'locked',chapters:[
-      {name:'Deutsche Feste',type:'cultura',done:false},{name:'Kunst und Musik',type:'vocab',done:false},{name:'Relativsätze',type:'gramática',done:false}
-    ]}
-  ]
-};
-
-let modulesData = JSON.parse(JSON.stringify(FALLBACK_MODULES));
+// ==================== STATE & EMPTY DATA ====================
+let modulesData = { A1: [], A2: [], B1: [] };
 let modulesLoaded = false;
+let currentLevel = 'A1';
+let currentPage = 'dashboard';
+let currentCardIndex = 0;
+let currentShadowIndex = 0;
+let currentChar = 'hans';
+let notes = [];
+let reviewItems = [];
+let xp = 2450;
+let streak = 12;
+let editingNoteId = null;
 
-// ==================== OUTROS DADOS ====================
-const flashcardsData = [
-  {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
-  {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
-  {word:'Danke',translation:'Obrigado',example:'Danke schön!'},
-  {word:'Bitte',translation:'Por favor',example:'Ein Wasser, bitte.'},
-  {word:'Entschuldigung',translation:'Desculpe',example:'Entschuldigung, wo ist der Bahnhof?'},
-  {word:'Ja',translation:'Sim',example:'Ja, ich verstehe.'},
-  {word:'Nein',translation:'Não',example:'Nein, danke.'},
-  {word:'Auf Wiedersehen',translation:'Adeus',example:'Auf Wiedersehen und gute Reise!'},
-  {word:'Ich heiße...',translation:'Eu me chamo...',example:'Ich heiße Maria.'},
-  {word:'Wie geht es Ihnen?',translation:'Como vai? (formal)',example:'Wie geht es Ihnen heute?'},
-  {word:'Der Apfel',translation:'A maçã',example:'Der Apfel ist rot.'},
-  {word:'Das Wasser',translation:'A água',example:'Ich möchte das Wasser.'},
-  {word:'Die Milch',translation:'O leite',example:'Die Milch ist kalt.'},
-  {word:'Guten Morgen',translation:'Bom dia (manhã)',example:'Guten Morgen, zusammen!'},
-  {word:'Gute Nacht',translation:'Boa noite',example:'Gute Nacht, schlaf gut.'},
-  {word:'Tschüss',translation:'Tchau (informal)',example:'Tschüss, bis morgen!'},
-  {word:'Ich verstehe',translation:'Eu entendo',example:'Ich verstehe die Aufgabe.'},
-  {word:'Ich spreche Deutsch',translation:'Eu falo alemão',example:'Ich spreche ein bisschen Deutsch.'},
-  {word:'Wo ist...?',translation:'Onde fica...?',example:'Wo ist der Supermarkt?'},
-  {word:'Wie viel kostet das?',translation:'Quanto custa isso?',example:'Wie viel kostet das Brot?'}
-];
-
-const shadowPhrases = [
-  {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai? (formal)'},
-  {german:'Ich möchte einen Kaffee, bitte.',translation:'Eu gostaria de um café, por favor.'},
-  {german:'Wo ist der nächste Bahnhof?',translation:'Onde fica a próxima estação de trem?'},
-  {german:'Das Wetter ist heute sehr schön.',translation:'O tempo está muito bonito hoje.'},
-  {german:'Können Sie das bitte wiederholen?',translation:'Pode repetir isso, por favor?'},
-  {german:'Ich lerne seit drei Monaten Deutsch.',translation:'Estou aprendendo alemão há três meses.'},
-  {german:'Meine Familie ist sehr groß.',translation:'Minha família é muito grande.'},
-  {german:'Ich arbeite in einem Büro.',translation:'Eu trabalho em um escritório.'},
-  {german:'Was machst du am Wochenende?',translation:'O que você faz no fim de semana?'},
-  {german:'Entschuldigung, ich habe eine Frage.',translation:'Desculpe, eu tenho uma pergunta.'}
-];
-
-const reviewData = [
-  {type:'grammar',title:'Der vs. Das vs. Die',desc:'Artigos definidos em alemão têm três gêneros.',icon:'📝',solved:false},
-  {type:'vocab',title:'Zahlen (Números)',desc:'Números de 1 a 100 em alemão.',icon:'🔢',solved:false},
-  {type:'grammar',title:'Präteritum vs. Perfekt',desc:'Os dois tempos passados do alemão.',icon:'⏰',solved:false},
-  {type:'vocab',title:'Farben (Cores)',desc:'Vocabulário de cores.',icon:'🎨',solved:false},
-  {type:'grammar',title:'Dativ - Wann und Wie',desc:'Quando usar o caso dativo.',icon:'📖',solved:false},
-  {type:'vocab',title:'Essen und Trinken',desc:'Vocabulário sobre comida.',icon:'🍽️',solved:false}
-];
-
-const notesData = [
-  {id:1,title:'Artigos - Dica rápida',content:'Der = masculino, Das = neutro, Die = feminino.',date:'2026-05-04'},
-  {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam no presente.',date:'2026-05-03'},
-  {id:3,title:'Dúvida - Akkusativ',content:'Preciso revisar quando usar Akkusativ vs. Dativ.',date:'2026-05-02'}
-];
+// DOM Cache
+const DOM = {
+  moduleList: null,
+  chatMessages: null,
+  chatInput: null,
+  sendBtn: null,
+  xpNum: null,
+  streakNum: null,
+  levelLabel: null,
+  progressBar: null
+};
 
 // ==================== PERSONAS & CHATBOT ====================
 const PERSONAS = {
@@ -729,27 +657,15 @@ const botResponses = {
   petra: ['Ihr Satz ist fast perfekt.','Ausgezeichnet. Bitte achten Sie auf die Wortstellung.','Sehr korrekt.']
 };
 
-// ==================== STATE ====================
-let currentPage = 'dashboard';
-let currentLevel = 'A1';
-let currentCardIndex = 0;
-let currentShadowIndex = 0;
-let currentChar = 'hans';
-let notes = JSON.parse(JSON.stringify(notesData));
-let reviewItems = JSON.parse(JSON.stringify(reviewData));
-let xp = 2450;
-let streak = 12;
-let editingNoteId = null;
-
 // ==================== SUPABASE: CARREGAR MÓDULOS ====================
 async function loadModulesFromSupabase() {
-  if (modulesLoaded) return modulesData;
   const client = getSupabase();
   if (!client) {
-    console.warn('[Supabase] Cliente não inicializado');
-    return modulesData;
+    console.warn('[Supabase] Cliente não inicializado. Verifique a tag <script> do SDK.');
+    return;
   }
   try {
+    // 1. Busca módulos
     const {  modules, error: modError } = await client
       .from('study_modules')
       .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order')
@@ -757,62 +673,64 @@ async function loadModulesFromSupabase() {
       .in('level', ['A1','A2','B1'])
       .order('level', {ascending:true})
       .order('sort_order', {ascending:true});
-    if (modError) throw modError;
-    if (!modules || modules.length === 0) return modulesData;
 
+    if (modError) throw modError;
+
+    // 2. Busca lições (capítulos)
     const {  lessons } = await client
       .from('study_lessons')
-      .select('module_slug, slug, title_pt, title_de, summary_pt, sort_order')
+      .select('module_slug, slug, title_pt, title_de, summary_pt, quick_rule_pt, sort_order')
       .eq('active', true)
       .order('sort_order', {ascending:true});
 
+    // 3. Transforma para o formato da UI
     const formatted = {A1:[], A2:[], B1:[]};
     modules.forEach(function(mod) {
       const moduleLessons = (lessons || []).filter(function(l) { return l.module_slug === mod.slug; });
       const chapters = moduleLessons.map(function(l, idx) {
         let type = 'vocab';
-        if (l.summary_pt && l.summary_pt.toLowerCase().indexOf('gram') >= 0) type = 'gramática';
+        if (l.quick_rule_pt && l.quick_rule_pt.toLowerCase().indexOf('gram') >= 0) type = 'gramática';
         else if (l.summary_pt && l.summary_pt.toLowerCase().indexOf('prátic') >= 0) type = 'prática';
+        else if ((l.title_pt && l.title_pt.toLowerCase().indexOf('kultur') >= 0) || (l.title_pt && l.title_pt.toLowerCase().indexOf('cultura') >= 0)) type = 'cultura';
         return {name: l.title_pt || l.title_de || 'Lição '+(idx+1), type:type, done: idx<2, slug:l.slug};
       });
+      
       const finalChapters = chapters.length > 0 ? chapters : [
         {name:'Introdução',type:'vocab',done:true},
         {name:'Gramática Básica',type:'gramática',done:false},
         {name:'Prática',type:'prática',done:false}
       ];
+
       let status = 'locked';
       if (mod.chapter_number <= 2) status = 'done';
       else if (mod.chapter_number === 3) status = 'current';
+
       const module = {
         id: mod.chapter_number || mod.slug,
         slug: mod.slug,
         title: mod.title_de || mod.title_pt,
         translation: mod.title_pt,
-        description: mod.focus,
         status: status,
         chapters: finalChapters,
         sort_order: mod.sort_order
       };
       if (formatted[mod.level]) formatted[mod.level].push(module);
     });
+
+    // Ordena por sort_order
     ['A1','A2','B1'].forEach(function(level) {
       formatted[level].sort(function(a,b) { return (a.sort_order||0) - (b.sort_order||0); });
     });
-    if (Object.values(formatted).some(function(arr) { return arr.length > 0; })) {
-      modulesData = formatted;
-      modulesLoaded = true;
-      console.log('✅ Módulos carregados do Supabase');
-    }
-    return modulesData;
+
+    modulesData = formatted;
+    modulesLoaded = true;
+    console.log('✅ Módulos carregados do Supabase');
+    renderModules();
   } catch (err) {
     console.error('❌ Erro ao carregar módulos:', err);
-    return modulesData;
+    var list = document.getElementById('moduleList');
+    if (list) list.innerHTML = '<p class="text-center text-red-500 py-4">Erro ao conectar com Supabase. Verifique as políticas RLS e o console.</p>';
   }
-}
-
-async function getModulesByLevel(level) {
-  if (!modulesLoaded) await loadModulesFromSupabase();
-  return modulesData[level] || [];
 }
 
 // ==================== NAVIGATION ====================
@@ -822,18 +740,18 @@ function navigateTo(page) {
   for (var i=0; i<pages.length; i++) pages[i].classList.remove('active');
   var target = document.getElementById('page-' + page);
   if (target) target.classList.add('active');
+  
   var items = document.querySelectorAll('.sidebar-item, .sidebar-link, .nav-pill, .bottom-nav-item');
   for (var j=0; j<items.length; j++) {
-    if (items[j].dataset && items[j].dataset.page === page) {
-      items[j].classList.add('active');
-    } else {
-      items[j].classList.remove('active');
-    }
+    if (items[j].dataset && items[j].dataset.page === page) items[j].classList.add('active');
+    else items[j].classList.remove('active');
   }
-  var titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão',biblioteca:'Biblioteca'};
+  
+  var titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
   var titleEl = document.getElementById('topbarTitle');
   if (titleEl) titleEl.textContent = titles[page] || page;
-  if (page === 'modules') { loadModulesFromSupabase(); renderModules(); }
+  
+  if (page === 'modules') renderModules();
   if (page === 'flashcards') renderFlashcard();
   if (page === 'shadowing') renderShadowPhrase();
   if (page === 'notes') renderNotes();
@@ -841,7 +759,6 @@ function navigateTo(page) {
   closeSidebar();
 }
 
-// ==================== SIDEBAR ====================
 function toggleSidebar() {
   var sb = document.getElementById('sidebar');
   var ov = document.getElementById('overlay');
@@ -857,7 +774,6 @@ function closeSidebar() {
 var overlay = document.getElementById('overlay');
 if (overlay) overlay.addEventListener('click', closeSidebar);
 
-// ==================== GREETING ====================
 function updateGreeting() {
   var h = new Date().getHours();
   var greeting = 'Willkommen zurück! 👋';
@@ -870,13 +786,20 @@ function updateGreeting() {
 
 // ==================== MODULES ====================
 function renderModules() {
-  var list = document.getElementById('moduleList');
+  var list = DOM.moduleList || document.getElementById('moduleList');
   if (!list) return;
-  var modules = modulesData[currentLevel] || [];
-  if (modules.length === 0) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos...</p>';
+  
+  if (!modulesLoaded) {
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos do Supabase...</p>';
     return;
   }
+  
+  var modules = modulesData[currentLevel] || [];
+  if (modules.length === 0) {
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'. Execute o SQL no Supabase.</p>';
+    return;
+  }
+  
   var html = '';
   for (var mi=0; mi<modules.length; mi++) {
     var m = modules[mi];
@@ -917,13 +840,48 @@ for (var lt=0; lt<levelTabs.length; lt++) {
       for (var i=0; i<levelTabs.length; i++) levelTabs[i].classList.remove('active');
       tab.classList.add('active');
       currentLevel = tab.dataset.level;
-      if (!modulesLoaded) loadModulesFromSupabase();
       renderModules();
     };
   })(levelTabs[lt]));
 }
 
 // ==================== FLASHCARDS ====================
+const flashcardsData = [
+  {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
+  {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
+  {word:'Danke',translation:'Obrigado',example:'Danke schön!'},
+  {word:'Bitte',translation:'Por favor',example:'Ein Wasser, bitte.'},
+  {word:'Entschuldigung',translation:'Desculpe',example:'Entschuldigung, wo ist der Bahnhof?'},
+  {word:'Ja',translation:'Sim',example:'Ja, ich verstehe.'},
+  {word:'Nein',translation:'Não',example:'Nein, danke.'},
+  {word:'Auf Wiedersehen',translation:'Adeus',example:'Auf Wiedersehen und gute Reise!'},
+  {word:'Ich heiße...',translation:'Eu me chamo...',example:'Ich heiße Maria.'},
+  {word:'Wie geht es Ihnen?',translation:'Como vai? (formal)',example:'Wie geht es Ihnen heute?'},
+  {word:'Der Apfel',translation:'A maçã',example:'Der Apfel ist rot.'},
+  {word:'Das Wasser',translation:'A água',example:'Ich möchte das Wasser.'},
+  {word:'Die Milch',translation:'O leite',example:'Die Milch ist kalt.'},
+  {word:'Guten Morgen',translation:'Bom dia (manhã)',example:'Guten Morgen, zusammen!'},
+  {word:'Gute Nacht',translation:'Boa noite',example:'Gute Nacht, schlaf gut.'},
+  {word:'Tschüss',translation:'Tchau (informal)',example:'Tschüss, bis morgen!'},
+  {word:'Ich verstehe',translation:'Eu entendo',example:'Ich verstehe die Aufgabe.'},
+  {word:'Ich spreche Deutsch',translation:'Eu falo alemão',example:'Ich spreche ein bisschen Deutsch.'},
+  {word:'Wo ist...?',translation:'Onde fica...?',example:'Wo ist der Supermarkt?'},
+  {word:'Wie viel kostet das?',translation:'Quanto custa isso?',example:'Wie viel kostet das Brot?'}
+];
+
+const shadowPhrases = [
+  {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai? (formal)'},
+  {german:'Ich möchte einen Kaffee, bitte.',translation:'Eu gostaria de um café, por favor.'},
+  {german:'Wo ist der nächste Bahnhof?',translation:'Onde fica a próxima estação de trem?'},
+  {german:'Das Wetter ist heute sehr schön.',translation:'O tempo está muito bonito hoje.'},
+  {german:'Können Sie das bitte wiederholen?',translation:'Pode repetir isso, por favor?'},
+  {german:'Ich lerne seit drei Monaten Deutsch.',translation:'Estou aprendendo alemão há três meses.'},
+  {german:'Meine Familie ist sehr groß.',translation:'Minha família é muito grande.'},
+  {german:'Ich arbeite in einem Büro.',translation:'Eu trabalho em um escritório.'},
+  {german:'Was machst du am Wochenende?',translation:'O que você faz no fim de semana?'},
+  {german:'Entschuldigung, ich habe eine Frage.',translation:'Desculpe, eu tenho uma pergunta.'}
+];
+
 function renderFlashcard() {
   var card = flashcardsData[currentCardIndex];
   if (!card) return;
@@ -936,10 +894,9 @@ function renderFlashcard() {
   if (els.fc) els.fc.classList.remove('flipped');
 }
 function flipCard() { var fc=document.getElementById('flashcard'); if(fc) fc.classList.toggle('flipped'); }
-function nextCard() { currentCardIndex=(currentCardIndex+1)%flashcardsData.length; renderFlashcard(); addXP(5); }
-function cardAction(action) { if(action==='like') addXP(10); else addXP(2); nextCard(); }
+function nextCard() { currentCardIndex=(currentCardIndex+1)%flashcardsData.length; renderFlashcard(); addXP(5,'Flashcard'); }
+function cardAction(action) { if(action==='like') addXP(10,'Flashcard'); else addXP(2,'Flashcard'); nextCard(); }
 
-// ==================== SHADOWING ====================
 function renderShadowPhrase() {
   var phrase = shadowPhrases[currentShadowIndex];
   if (!phrase) return;
@@ -954,9 +911,9 @@ function playShadowAudio() {
   var u = new SpeechSynthesisUtterance(phrase.german);
   u.lang='de-DE'; u.rate=0.85;
   speechSynthesis.speak(u);
-  addXP(3);
+  addXP(3,'Shadowing');
 }
-function nextShadowPhrase() { currentShadowIndex=(currentShadowIndex+1)%shadowPhrases.length; renderShadowPhrase(); addXP(5); }
+function nextShadowPhrase() { currentShadowIndex=(currentShadowIndex+1)%shadowPhrases.length; renderShadowPhrase(); addXP(5,'Shadowing'); }
 
 // ==================== CHATBOT ====================
 function selectChar(charKey) {
@@ -1000,30 +957,26 @@ function sendChat() {
   addUserMessage(text);
   var sendBtn = document.getElementById('sendBtn');
   if (sendBtn) sendBtn.disabled = true;
-  var loadingId = 'loading-'+Date.now();
-  var msgs = document.getElementById('chatMessages');
-  if (msgs) {
-    var ld = document.createElement('div');
-    ld.className='chat-msg bot'; ld.id=loadingId;
-    ld.innerHTML='<div class="chat-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
-    msgs.appendChild(ld);
-    msgs.scrollTop = msgs.scrollHeight;
-  }
+  
   setTimeout(function() {
-    var el = document.getElementById(loadingId);
-    if (el) el.remove();
     var responses = botResponses[currentChar] || botResponses.hans;
     var response = responses[Math.floor(Math.random()*responses.length)];
     addBotMessage(response);
     var m = response.match(/XP:\s*(\d+)/);
-    if (m) addXP(parseInt(m[1]), 'Resposta do Chatbot');
+    if (m) addXP(parseInt(m[1]), 'Chatbot');
     if (sendBtn) sendBtn.disabled = false;
   }, 1200);
 }
-function markCorrectionRead(btn) { addXP(10,'Correção lida'); btn.textContent='✓ XP ganho!'; btn.disabled=true; btn.style.opacity='0.5'; }
+function markCorrectionRead(btn) { addXP(10,'Correção'); btn.textContent='✓ XP ganho!'; btn.disabled=true; btn.style.opacity='0.5'; }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
 
 // ==================== NOTES ====================
+const notesData = [
+  {id:1,title:'Artigos - Dica rápida',content:'Der = masculino, Das = neutro, Die = feminino.',date:'2026-05-04'},
+  {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam no presente.',date:'2026-05-03'},
+  {id:3,title:'Dúvida - Akkusativ',content:'Preciso revisar quando usar Akkusativ vs. Dativ.',date:'2026-05-02'}
+];
+
 function renderNotes() {
   var grid = document.getElementById('notesGrid');
   if (!grid) return;
@@ -1069,12 +1022,21 @@ function saveNote() {
   }
   closeNoteModal();
   renderNotes();
-  addXP(10);
+  addXP(10,'Nota salva');
 }
 function editNote(id) { openNoteModal(id); }
 function deleteNote(id) { notes = notes.filter(function(n){return n.id!==id;}); renderNotes(); }
 
 // ==================== REVIEW ====================
+const reviewData = [
+  {type:'grammar',title:'Der vs. Das vs. Die',desc:'Artigos definidos em alemão têm três gêneros.',icon:'📝',solved:false},
+  {type:'vocab',title:'Zahlen (Números)',desc:'Números de 1 a 100 em alemão.',icon:'🔢',solved:false},
+  {type:'grammar',title:'Präteritum vs. Perfekt',desc:'Os dois tempos passados do alemão.',icon:'⏰',solved:false},
+  {type:'vocab',title:'Farben (Cores)',desc:'Vocabulário de cores.',icon:'🎨',solved:false},
+  {type:'grammar',title:'Dativ - Wann und Wie',desc:'Quando usar o caso dativo.',icon:'📖',solved:false},
+  {type:'vocab',title:'Essen und Trinken',desc:'Vocabulário sobre comida.',icon:'🍽️',solved:false}
+];
+
 function renderReview() {
   var container = document.getElementById('reviewCards');
   if (!container) return;
@@ -1087,7 +1049,7 @@ function renderReview() {
   }
   container.innerHTML = html;
 }
-function markReviewDone(index) { reviewItems[index].solved = !reviewItems[index].solved; renderReview(); addXP(15); }
+function markReviewDone(index) { reviewItems[index].solved = !reviewItems[index].solved; renderReview(); addXP(15,'Revisão'); }
 
 // ==================== XP SYSTEM ====================
 function addXP(amount, reason) {
@@ -1114,13 +1076,10 @@ function showToast(msg, type) {
   setTimeout(function(){ toast.remove(); }, 3000);
 }
 
-// ==================== BOSS FIGHT & SHADOWING MODAL ====================
+// ==================== BOSS & SHADOWING MODALS ====================
 window.startBossFight = function() {
   var modal = document.getElementById('bossModal');
-  if (!modal) return;
-  modal.style.display = 'flex';
-  document.getElementById('bossLevel').textContent = currentLevel;
-  showToast('🎯 Boss Fight iniciado!', 'info');
+  if (modal) { modal.style.display = 'flex'; showToast('🎯 Boss Fight iniciado!', 'info'); }
 };
 window.checkBossAnswer = function() {
   var input = document.getElementById('bossInput');
@@ -1140,17 +1099,14 @@ window.startShadowing = function() {
   showToast('🎤 Modo Shadowing ativo!', 'info');
 };
 
-// ==================== SPEECH ====================
 window.speak = function(text, slow) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   var u = new SpeechSynthesisUtterance(text);
-  u.lang = 'de-DE';
-  u.rate = slow ? 0.5 : 0.95;
+  u.lang = 'de-DE'; u.rate = slow ? 0.5 : 0.95;
   window.speechSynthesis.speak(u);
 };
 
-// ==================== FILTERS ====================
 window.setFilter = function(level) {
   var chips = document.querySelectorAll('.filter-chip');
   for (var i=0; i<chips.length; i++) chips[i].classList.toggle('active', chips[i].dataset && chips[i].dataset.filter===level);
@@ -1185,29 +1141,46 @@ function setupNavigation() {
   }
 }
 function initDOM() {
-  // Cache elements if needed
+  DOM.moduleList = document.getElementById('moduleList');
+  DOM.chatMessages = document.getElementById('chatMessages');
+  DOM.chatInput = document.getElementById('chatInput');
+  DOM.sendBtn = document.getElementById('sendBtn');
+  DOM.xpNum = document.getElementById('xpNum');
+  DOM.streakNum = document.getElementById('streakNum');
+  DOM.levelLabel = document.getElementById('levelLabel');
+  DOM.progressBar = document.getElementById('progressBar');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   initAuth();
   initDOM();
   setupNavigation();
+  
   var savedXP = parseInt(localStorage.getItem('dh-xp')||'0');
   var savedStreak = parseInt(localStorage.getItem('dh-streak')||'0');
   if (savedXP) xp = savedXP;
   if (savedStreak) streak = savedStreak;
+  
+  notes = JSON.parse(JSON.stringify(notesData));
+  reviewItems = JSON.parse(JSON.stringify(reviewData));
+  
   updateGreeting();
   updateUI();
-  loadModulesFromSupabase().then(function(){ renderModules(); });
+  
+  // Carrega módulos do Supabase (ASSÍNCRONO)
+  loadModulesFromSupabase();
+  
+  renderModules();
   renderFlashcard();
   renderShadowPhrase();
   selectChar('hans');
   renderNotes();
   renderReview();
-  console.log('🇩🇪 Deutsch Hub v2.0 iniciado!');
+  
+  console.log('🇩🇪 Deutsch Hub iniciado! (Dados via Supabase)');
 });
 
-// Expor funções globais
+// Expor funções globais para onclick no HTML
 window.navigateTo = navigateTo;
 window.toggleSidebar = toggleSidebar;
 window.flipCard = flipCard;
@@ -1230,7 +1203,7 @@ window.showPage = showPage;
 window.startBossFight = startBossFight;
 window.checkBossAnswer = checkBossAnswer;
 window.startShadowing = startShadowing;
-</script>
+</script>>
 </body>
 </html>
 
