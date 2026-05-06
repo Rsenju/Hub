@@ -1,8 +1,1 @@
-.env
-.env.*
-!.env.example
-node_modules
-.vercel
-
-.vercel
-.env*.local
+(extra/style_refactored.css is just a CSS file, which is source code and should not be ignored)
