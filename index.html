@@ -683,79 +683,77 @@ const reviewData = [
 async function loadModulesFromSupabase() {
   const client = getSupabase();
   if (!client) {
-    console.error('❌ Supabase SDK não carregado. Verifique a tag <script> no index.html');
+    console.error('❌ Supabase SDK não carregado. Verifique o <script> no index.html');
     return;
   }
 
   try {
     console.log('🔍 Buscando módulos...');
     
+    // ✅ QUERY CORRIGIDA:
+    // 1. Select '*' pega tudo (caso tenha colunas novas)
+    // 2. .in('level'...) mantém o filtro de nível
+    // 3. REMOVEMOS o .eq('active', true) que estava bloqueando
+    
     const {  modules, error: modError } = await client
       .from('study_modules')
-      .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order')
-      .eq('active', true)
-      .in('level', ['A1','A2','B1'])
-      .order('sort_order', {ascending:true});
+      .select('*') 
+      .in('level', ['A1', 'A2', 'B1'])
+      .order('sort_order', { ascending: true });
 
-    if (modError) throw modError;
-    console.log('✅ Módulos encontrados:', modules ? modules.length : 0);
-    
-    if (!modules || modules.length === 0) {
-      console.warn('⚠️ Nenhum módulo retornado. Verifique se os dados foram inseridos.');
+    if (modError) {
+      console.error('❌ Erro no Supabase:', modError);
       return;
     }
 
+    if (!modules || modules.length === 0) {
+      console.warn('⚠️ Nenhum módulo encontrado. Verifique se os níveis são A1, A2 ou B1.');
+      return;
+    }
+
+    console.log(`✅ ${modules.length} módulos encontrados!`);
+
+    // Busca as lições correspondentes
     const {  lessons } = await client
       .from('study_lessons')
-      .select('module_slug, slug, title_pt, title_de, sort_order')
-      .eq('active', true)
-      .order('sort_order', {ascending:true});
+      .select('*')
+      .order('sort_order', { ascending: true });
 
-    const formatted = {A1:[], A2:[], B1:[]};
+    // Transforma dados para o formato da UI
+    const formatted = { A1: [], A2: [], B1: [] };
     
-    modules.forEach(function(mod) {
+    modules.forEach(mod => {
+      // Filtra lições deste módulo
       const modLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
       
-      const chapters = modLessons.map((l, idx) => {
-        let type = 'vocab';
-        const title = (l.title_pt || '').toLowerCase();
-        if (title.includes('gram') || title.includes('verbo')) type = 'gramática';
-        else if (title.includes('kultur') || title.includes('cultura')) type = 'cultura';
-        else if (title.includes('prátic') || title.includes('dialog')) type = 'prática';
-        
-        return {
-          name: l.title_pt || l.title_de || 'Lição '+(idx+1),
-          type: type,
-          done: userProgress[l.slug]?.completed || false,
-          slug: l.slug
-        };
-      });
+      const chapters = modLessons.map((l, idx) => ({
+        name: l.title_pt || l.title_de || `Lição ${idx + 1}`,
+        type: l.quick_rule_pt?.toLowerCase().includes('gram') ? 'gramática' : 'vocab',
+        done: false,
+        slug: l.slug
+      }));
 
-      const finalChapters = chapters.length > 0 ? chapters : [
-        {name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro'}
-      ];
-
-      // Lógica: módulo 1 disponível, resto bloqueado até completar anterior
-      const status = mod.chapter_number === 1 ? 'available' : 'locked';
+      const moduleData = {
+        id: mod.chapter_number || mod.slug,
+        slug: mod.slug,
+        title: mod.title_de || mod.title_pt,
+        translation: mod.title_pt,
+        status: mod.chapter_number === 1 ? 'available' : 'locked',
+        chapters: chapters.length > 0 ? chapters : [{ name: 'Introdução', type: 'vocab', done: false }]
+      };
 
       if (formatted[mod.level]) {
-        formatted[mod.level].push({
-          id: mod.chapter_number,
-          slug: mod.slug,
-          title: mod.title_de || mod.title_pt,
-          translation: mod.title_pt,
-          status: status,
-          chapters: finalChapters
-        });
+        formatted[mod.level].push(moduleData);
       }
     });
 
+    // Atualiza o estado global
     modulesData = formatted;
     modulesLoaded = true;
     renderModules();
-    
+
   } catch (err) {
-    console.error('❌ Erro ao carregar módulos:', err);
+    console.error('❌ Erro fatal ao carregar módulos:', err);
   }
 }
 
