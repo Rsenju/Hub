@@ -605,7 +605,7 @@ input,textarea{font-family:inherit;outline:none}
 </div>
 
 <script>
-// ==================== CONFIG SUPABASE ====================
+// ==================== SUPABASE CONFIG ====================
 const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
 const SUPABASE_KEY = 'sb_publishable__1bxoDUtOWsghhgfOpSz2A_qlwCtTo0';
 
@@ -630,9 +630,9 @@ let reviewItems = [];
 let xp = 2450;
 let streak = 12;
 let editingNoteId = null;
-let userProgress = {}; // { lesson_slug: { completed: boolean, xp: number } }
+let userProgress = {}; // { lesson_slug: { completed: boolean } }
 
-// ==================== DADOS ESTÁTICOS (Flashcards, Shadowing, etc) ====================
+// ==================== DADOS ESTÁTICOS ====================
 const flashcardsData = [
   {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
   {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
@@ -694,60 +694,78 @@ const reviewData = [
 
 const notesData = [
   {id:1,title:'Artigos - Dica rápida',content:'Der = masculino, Das = neutro, Die = feminino.',date:'2026-05-04'},
-  {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam.',date:'2026-05-03'},
-  {id:3,title:'Dúvida - Akkusativ',content:'Preciso revisar Akkusativ vs. Dativ.',date:'2026-05-02'}
+  {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam no presente.',date:'2026-05-03'},
+  {id:3,title:'Dúvida - Akkusativ',content:'Preciso revisar quando usar Akkusativ vs. Dativ.',date:'2026-05-02'}
 ];
 
 // ==================== CARREGAR MÓDULOS DO SUPABASE ====================
 async function loadModulesFromSupabase() {
   const client = getSupabase();
   if (!client) {
-    console.warn('[Supabase] Cliente não inicializado');
+    console.error('[Supabase] SDK não carregado. Verifique a tag <script> no index.html');
     return;
   }
 
   try {
-    // 1. Busca módulos
+    // DEBUG: Teste simples primeiro
+    console.log('[Supabase] Tentando buscar study_modules...');
+    
+    // 1. Busca módulos - REMOVENDO filtros que podem bloquear
     const {  modules, error: modError } = await client
       .from('study_modules')
-      .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order')
-      .eq('active', true)
+      .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order, active')
       .in('level', ['A1','A2','B1'])
       .order('sort_order', {ascending:true});
 
-    if (modError) throw modError;
+    if (modError) {
+      console.error('[Supabase] Erro na query de módulos:', modError);
+      return;
+    }
+    
+    console.log('[Supabase] Módulos retornados:', modules ? modules.length : 0);
+    
     if (!modules || modules.length === 0) {
-      console.warn('[Supabase] Nenhum módulo encontrado');
+      console.warn('[Supabase] Nenhum módulo encontrado. Verifique:');
+      console.warn('  1. A tabela study_modules existe?');
+      console.warn('  2. Os dados foram inseridos (03_a1_data.sql)?');
+      console.warn('  3. O campo level está em MAIÚSCULO (A1, não a1)?');
+      console.warn('  4. Há políticas RLS bloqueando?');
       return;
     }
 
     // 2. Busca lições (capítulos)
-    const {  lessons } = await client
+    const {  lessons, error: lessError } = await client
       .from('study_lessons')
       .select('module_slug, slug, title_pt, title_de, summary_pt, quick_rule_pt, sort_order')
-      .eq('active', true)
       .order('sort_order', {ascending:true});
 
-    // 3. Transforma para formato da UI (SEM user_progress)
+    if (lessError) {
+      console.warn('[Supabase] Erro ao buscar lições:', lessError);
+    }
+    console.log('[Supabase] Lições retornadas:', lessons ? lessons.length : 0);
+
+    // 3. Transforma para formato da UI
     const formatted = {A1:[], A2:[], B1:[]};
     
     modules.forEach(function(mod) {
+      // Filtra lições deste módulo
       const modLessons = (lessons || []).filter(function(l) { return l.module_slug === mod.slug; });
       
       // Cria capítulos a partir das lições
       const chapters = modLessons.map(function(l, idx) {
         // Deriva tipo baseado no título/conteúdo
         let type = 'vocab';
-        if (l.title_pt && (l.title_pt.toLowerCase().indexOf('gram') >= 0 || l.title_pt.toLowerCase().indexOf('verbo') >= 0)) {
+        var titleLower = (l.title_pt || '').toLowerCase();
+        if (titleLower.indexOf('gram') >= 0 || titleLower.indexOf('verbo') >= 0) {
           type = 'gramática';
-        } else if (l.title_pt && l.title_pt.toLowerCase().indexOf('cultura') >= 0) {
+        } else if (titleLower.indexOf('kultur') >= 0 || titleLower.indexOf('cultura') >= 0) {
           type = 'cultura';
-        } else if (l.title_pt && l.title_pt.toLowerCase().indexOf('prátic') >= 0) {
+        } else if (titleLower.indexOf('prátic') >= 0 || titleLower.indexOf('dialog') >= 0) {
           type = 'prática';
         }
         
-        // Lógica local de progresso: só capítulo 1 começa disponível
-        const isCompleted = false; // Inicia tudo como não concluído
+        // Verifica progresso do usuário (local)
+        var isCompleted = userProgress[l.slug] ? userProgress[l.slug].completed : false;
         
         return {
           name: l.title_pt || l.title_de || 'Lição '+(idx+1),
@@ -761,27 +779,29 @@ async function loadModulesFromSupabase() {
       });
 
       // Se não houver lições, cria placeholders
-      const finalChapters = chapters.length > 0 ? chapters : [
+      var finalChapters = chapters.length > 0 ? chapters : [
         {name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro',summary:'',quick_rule:'',sort_order:1},
         {name:'Gramática Básica',type:'gramática',done:false,slug:mod.slug+'-gram',summary:'',quick_rule:'',sort_order:2},
         {name:'Prática',type:'prática',done:false,slug:mod.slug+'-prac',summary:'',quick_rule:'',sort_order:3}
       ];
 
-      // Determina status do módulo: só capítulo 1 disponível inicialmente
-      let status = 'locked';
+      // Ordena capítulos por sort_order
+      finalChapters.sort(function(a,b) { return (a.sort_order||0) - (b.sort_order||0); });
+
+      // Determina status do módulo e disponibilidade dos capítulos
+      // Lógica: módulo 1 disponível, capítulo 1 liberado, resto bloqueado até completar
+      var moduleStatus = 'locked';
       if (mod.chapter_number === 1) {
-        status = 'available'; // Módulo 1 liberado
-      } else if (mod.chapter_number === 2) {
-        status = 'locked'; // Módulo 2 bloqueado até completar o 1
+        moduleStatus = 'available';
       }
 
-      const module = {
+      var module = {
         id: mod.chapter_number || mod.slug,
         slug: mod.slug,
         title: mod.title_de || mod.title_pt,
         translation: mod.title_pt,
         focus: mod.focus,
-        status: status,
+        status: moduleStatus,
         chapters: finalChapters,
         sort_order: mod.sort_order
       };
@@ -798,62 +818,89 @@ async function loadModulesFromSupabase() {
 
     modulesData = formatted;
     modulesLoaded = true;
-    console.log('✅ Módulos carregados do Supabase');
-    renderModules();
+    console.log('✅ Módulos carregados:', Object.keys(formatted).map(function(l) { return l+':'+formatted[l].length; }));
     
   } catch (err) {
     console.error('❌ Erro ao carregar módulos:', err);
-    var list = document.getElementById('moduleList');
-    if (list) {
-      list.innerHTML = '<p class="text-center text-red-500 py-4">Erro ao conectar com Supabase. Verifique o console.</p>';
-    }
-  }
-}
-
-// ==================== MARCAR LIÇÃO COMO COMPLETA ====================
-async function markLessonComplete(lessonSlug, xpReward) {
-  // Atualiza estado local
-  if (!userProgress[lessonSlug]) {
-    userProgress[lessonSlug] = { completed: false, xp: 0 };
-  }
-  
-  if (!userProgress[lessonSlug].completed) {
-    userProgress[lessonSlug].completed = true;
-    userProgress[lessonSlug].xp = xpReward || 10;
-    
-    // Atualiza UI
+  } finally {
     renderModules();
-    addXP(xpReward || 10);
-    
-    // Salva no Supabase (se tabela existir)
-    var client = getSupabase();
-    if (client) {
-      try {
-        await client.from('user_progress').upsert({
-          user_id: 'guest-user', // Substituir pelo ID real
-          lesson_slug: lessonSlug,
-          completed: true,
-          xp_earned: xpReward || 10,
-          active: true
-        }, { onConflict: 'user_id,lesson_slug' });
-      } catch (e) {
-        console.warn('Não foi possível salvar progresso:', e);
-      }
-    }
   }
 }
 
 // ==================== ABRIR LIÇÃO ====================
-function openLesson(lessonSlug, lessonName, lessonType, chapterIndex) {
+window.openLesson = function(lessonSlug, lessonName, lessonType, chapterIndex, moduleStatus) {
   console.log('📖 Abrindo lição:', lessonSlug, lessonName, lessonType, 'Capítulo:', chapterIndex);
   
-  if (chapterIndex > 0) {
-   
+  // Bloqueia se módulo não estiver disponível ou capítulo não for o primeiro e anterior não concluído
+  if (moduleStatus === 'locked') {
+    alert('🔒 Este módulo está bloqueado. Complete o módulo anterior primeiro.');
+    return;
   }
   
-  alert('📚 ' + lessonName + '\n\nTipo: ' + lessonType + '\nSlug: ' + lessonSlug + '\n\n[Em breve: conteúdo da lição]');
+  if (chapterIndex > 0) {
+    // Verifica se o capítulo anterior está concluído
+    var prevCompleted = false;
+    for (var level in modulesData) {
+      for (var mi = 0; mi < modulesData[level].length; mi++) {
+        var mod = modulesData[level][mi];
+        if (mod.chapters && mod.chapters[chapterIndex-1] && mod.chapters[chapterIndex-1].done) {
+          prevCompleted = true;
+          break;
+        }
+      }
+    }
+    if (!prevCompleted) {
+      alert('🔒 Complete o capítulo anterior primeiro.');
+      return;
+    }
+  }
   
+  // Mostra conteúdo (substituir por navegação real)
+  var content = '📚 ' + lessonName + '\n\nTipo: ' + lessonType + '\nSlug: ' + lessonSlug;
+  if (lessonType === 'vocab') {
+    content += '\n\n[Vocabulário: lista de palavras com áudio]';
+  } else if (lessonType === 'gramática') {
+    content += '\n\n[Gramática: explicação + exercícios]';
+  } else if (lessonType === 'prática') {
+    content += '\n\n[Prática: diálogo interativo]';
+  } else if (lessonType === 'cultura') {
+    content += '\n\n[Cultura: texto + curiosidades]';
+  }
+  content += '\n\n[Em breve: conteúdo completo]';
+  
+  alert(content);
+  
+  // Marca como concluído após "estudar"
   markLessonComplete(lessonSlug, 10);
+};
+
+// ==================== MARCAR LIÇÃO COMO COMPLETA ====================
+function markLessonComplete(lessonSlug, xpReward) {
+  // Atualiza estado local
+  if (!userProgress[lessonSlug]) {
+    userProgress[lessonSlug] = { completed: false };
+  }
+  
+  if (!userProgress[lessonSlug].completed) {
+    userProgress[lessonSlug].completed = true;
+    
+    // Atualiza modulesData para refletir progresso
+    for (var level in modulesData) {
+      for (var mi = 0; mi < modulesData[level].length; mi++) {
+        var mod = modulesData[level][mi];
+        for (var ci = 0; ci < mod.chapters.length; ci++) {
+          if (mod.chapters[ci].slug === lessonSlug) {
+            mod.chapters[ci].done = true;
+            break;
+          }
+        }
+      }
+    }
+    
+    // Atualiza UI e dá XP
+    renderModules();
+    addXP(xpReward || 10, 'Lição concluída');
+  }
 }
 
 // ==================== NAVIGATION ====================
@@ -922,15 +969,15 @@ function renderModules() {
   
   var modules = modulesData[currentLevel] || [];
   if (modules.length === 0) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'. Execute o SQL no Supabase.</p>';
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.<br><small>Execute 03_a1_data.sql no Supabase e verifique as políticas RLS.</small></p>';
     return;
   }
   
   var html = '';
   for (var mi=0; mi<modules.length; mi++) {
     var m = modules[mi];
-    var statusText = m.status === 'done' ? '✓ Concluído' : (m.status === 'current' ? '● Em andamento' : (m.status === 'available' ? '🔓 Disponível' : '🔒 Bloqueado'));
-    var statusClass = m.status === 'done' ? 'status-done' : (m.status === 'current' ? 'status-current' : (m.status === 'available' ? 'status-available' : 'status-locked'));
+    var statusText = m.status === 'available' ? '🔓 Disponível' : (m.status === 'locked' ? '🔒 Bloqueado' : '✓ Concluído');
+    var statusClass = m.status === 'available' ? 'status-available' : (m.status === 'locked' ? 'status-locked' : 'status-done');
     
     html += '<div class="module-card" data-slug="'+(m.slug||'')+'">';
     html += '<div class="module-header">';
@@ -945,18 +992,18 @@ function renderModules() {
     
     for (var ci=0; ci<m.chapters.length; ci++) {
       var c = m.chapters[ci];
-      var isLocked = m.status === 'locked' && ci > 0; // Só primeiro capítulo liberado se módulo disponível
-      var clickable = !isLocked;
+      // Lógica de desbloqueio: capítulo 1 sempre clicável se módulo disponível; outros só se anterior concluído
+      var isAvailable = m.status === 'available' && (ci === 0 || (ci > 0 && m.chapters[ci-1].done));
+      var clickable = isAvailable;
       
-      html += '<div class="chapter-item '+ (clickable ? 'clickable' : 'locked') +'" ';
-     html += '<div class="chapter-item '+ (clickable ? 'clickable' : 'locked') +'" ';
+      html += '<div class="chapter-item '+(clickable ? 'clickable' : 'locked')+'" ';
       if (clickable) {
-      html += 'onclick="openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\','+ci+')" ';
+        html += 'onclick="openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\','+ci+',\''+m.status+'\')" ';
       }
-      html += 'data-slug="'+(c.slug||'')+'">';
-      html += '<div class="chapter-check '+ (c.done ? 'done' : '') +'">'+ (c.done ? '✓' : '') +'</div>';
+      html += 'data-slug="'+(c.slug||'')+'" data-type="'+c.type+'">';
+      html += '<div class="chapter-check '+(c.done ? 'done' : '')+'">'+(c.done ? '✓' : '')+'</div>';
       html += '<span class="chapter-name">'+c.name+'</span>';
-      html += '<span class="chapter-type-badge '+c.type+'">'+c.type+'</span>';
+      html += '<span class="chapter-type-badge '+c.type+'" onclick="event.stopPropagation(); openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\','+ci+',\''+m.status+'\')">'+c.type+'</span>';
       html += '</div>';
     }
     html += '</div></div>';
@@ -1195,7 +1242,7 @@ document.addEventListener('DOMContentLoaded', function() {
   renderNotes();
   renderReview();
   
-  console.log('🇩 Deutsch Hub v2.0 iniciado!');
+  console.log('🇩🇪 Deutsch Hub v2.0 iniciado!');
 });
 
 // Expor funções globais
@@ -1215,7 +1262,6 @@ window.editNote = editNote;
 window.deleteNote = deleteNote;
 window.markReviewDone = markReviewDone;
 window.openLesson = openLesson;
-window.markLessonComplete = markLessonComplete;
 </script>
 </body>
 </html>
