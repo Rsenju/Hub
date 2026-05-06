@@ -702,38 +702,36 @@ const notesData = [
 async function loadModulesFromSupabase() {
   const client = getSupabase();
   if (!client) {
-    console.error('[Supabase] SDK não carregado. Verifique a tag <script> no index.html');
+    console.error('[Supabase] Cliente não inicializado');
     return;
   }
 
   try {
-    // DEBUG: Teste simples primeiro
-    console.log('[Supabase] Tentando buscar study_modules...');
+    console.log('[Supabase] Buscando módulos...');
     
-    // 1. Busca módulos - REMOVENDO filtros que podem bloquear
+    // Query simplificada SEM filtros problemáticos
     const {  modules, error: modError } = await client
       .from('study_modules')
       .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order, active')
-      .in('level', ['A1','A2','B1'])
       .order('sort_order', {ascending:true});
 
     if (modError) {
-      console.error('[Supabase] Erro na query de módulos:', modError);
+      console.error('[Supabase] Erro na query:', modError);
       return;
     }
     
-    console.log('[Supabase] Módulos retornados:', modules ? modules.length : 0);
+    console.log('[Supabase] Módulos encontrados:', modules ? modules.length : 0);
+    if (modules && modules.length > 0) {
+      console.log('[Supabase] Exemplo:', modules[0]);
+    }
     
     if (!modules || modules.length === 0) {
-      console.warn('[Supabase] Nenhum módulo encontrado. Verifique:');
-      console.warn('  1. A tabela study_modules existe?');
-      console.warn('  2. Os dados foram inseridos (03_a1_data.sql)?');
-      console.warn('  3. O campo level está em MAIÚSCULO (A1, não a1)?');
-      console.warn('  4. Há políticas RLS bloqueando?');
+      console.warn('[Supabase] Nenhum módulo retornado. Verifique se há dados na tabela.');
       return;
     }
 
-    // 2. Busca lições (capítulos)
+    // Busca lições
+    console.log('[Supabase] Buscando lições...');
     const {  lessons, error: lessError } = await client
       .from('study_lessons')
       .select('module_slug, slug, title_pt, title_de, summary_pt, quick_rule_pt, sort_order')
@@ -742,18 +740,20 @@ async function loadModulesFromSupabase() {
     if (lessError) {
       console.warn('[Supabase] Erro ao buscar lições:', lessError);
     }
-    console.log('[Supabase] Lições retornadas:', lessons ? lessons.length : 0);
+    console.log('[Supabase] Lições encontradas:', lessons ? lessons.length : 0);
 
-    // 3. Transforma para formato da UI
+    // Transforma para formato da UI
     const formatted = {A1:[], A2:[], B1:[]};
     
     modules.forEach(function(mod) {
-      // Filtra lições deste módulo
+      // Filtra apenas por level maiúsculo (A1, A2, B1)
+      if (!mod.level || ['A1','A2','B1'].indexOf(mod.level) === -1) {
+        return; // Pula módulos com level inválido
+      }
+      
       const modLessons = (lessons || []).filter(function(l) { return l.module_slug === mod.slug; });
       
-      // Cria capítulos a partir das lições
       const chapters = modLessons.map(function(l, idx) {
-        // Deriva tipo baseado no título/conteúdo
         let type = 'vocab';
         var titleLower = (l.title_pt || '').toLowerCase();
         if (titleLower.indexOf('gram') >= 0 || titleLower.indexOf('verbo') >= 0) {
@@ -764,13 +764,10 @@ async function loadModulesFromSupabase() {
           type = 'prática';
         }
         
-        // Verifica progresso do usuário (local)
-        var isCompleted = userProgress[l.slug] ? userProgress[l.slug].completed : false;
-        
         return {
           name: l.title_pt || l.title_de || 'Lição '+(idx+1),
           type: type,
-          done: isCompleted,
+          done: false, // Inicia como não concluído
           slug: l.slug,
           summary: l.summary_pt,
           quick_rule: l.quick_rule_pt,
@@ -778,18 +775,15 @@ async function loadModulesFromSupabase() {
         };
       });
 
-      // Se não houver lições, cria placeholders
-      var finalChapters = chapters.length > 0 ? chapters : [
+      const finalChapters = chapters.length > 0 ? chapters : [
         {name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro',summary:'',quick_rule:'',sort_order:1},
         {name:'Gramática Básica',type:'gramática',done:false,slug:mod.slug+'-gram',summary:'',quick_rule:'',sort_order:2},
         {name:'Prática',type:'prática',done:false,slug:mod.slug+'-prac',summary:'',quick_rule:'',sort_order:3}
       ];
 
-      // Ordena capítulos por sort_order
       finalChapters.sort(function(a,b) { return (a.sort_order||0) - (b.sort_order||0); });
 
-      // Determina status do módulo e disponibilidade dos capítulos
-      // Lógica: módulo 1 disponível, capítulo 1 liberado, resto bloqueado até completar
+      // Lógica de desbloqueio: módulo 1 disponível, resto bloqueado
       var moduleStatus = 'locked';
       if (mod.chapter_number === 1) {
         moduleStatus = 'available';
@@ -811,7 +805,7 @@ async function loadModulesFromSupabase() {
       }
     });
 
-    // Ordena módulos por sort_order
+    // Ordena módulos
     ['A1','A2','B1'].forEach(function(level) {
       formatted[level].sort(function(a,b) { return (a.sort_order||0) - (b.sort_order||0); });
     });
@@ -969,7 +963,7 @@ function renderModules() {
   
   var modules = modulesData[currentLevel] || [];
   if (modules.length === 0) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.<br><small>Execute 03_a1_data.sql no Supabase e verifique as políticas RLS.</small></p>';
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.<br><small>Verifique se os dados foram inseridos no Supabase.</small></p>';
     return;
   }
   
@@ -992,7 +986,7 @@ function renderModules() {
     
     for (var ci=0; ci<m.chapters.length; ci++) {
       var c = m.chapters[ci];
-      // Lógica de desbloqueio: capítulo 1 sempre clicável se módulo disponível; outros só se anterior concluído
+      // Lógica de desbloqueio sequencial
       var isAvailable = m.status === 'available' && (ci === 0 || (ci > 0 && m.chapters[ci-1].done));
       var clickable = isAvailable;
       
@@ -1003,6 +997,7 @@ function renderModules() {
       html += 'data-slug="'+(c.slug||'')+'" data-type="'+c.type+'">';
       html += '<div class="chapter-check '+(c.done ? 'done' : '')+'">'+(c.done ? '✓' : '')+'</div>';
       html += '<span class="chapter-name">'+c.name+'</span>';
+      // Tag clicável com event.stopPropagation para não conflitar com o clique do capítulo
       html += '<span class="chapter-type-badge '+c.type+'" onclick="event.stopPropagation(); openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\','+ci+',\''+m.status+'\')">'+c.type+'</span>';
       html += '</div>';
     }
