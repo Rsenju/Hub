@@ -1,100 +1,97 @@
+// ===================================================
+// DEUTSCH HUB - JAVASCRIPT REFACTORED
+// Arquitetura SPA com navegação por páginas
+// ===================================================
+
 // 1. CONFIGURAÇÃO DO SUPABASE
 const supabaseUrl = 'https://htefiqaxilufnewmycut.supabase.co';
-const supabaseKey = 'sb_publishable__1bxoDUtOWsghhgfOpSz2A_qlwCtTo0'; // Sua chave pública
+const supabaseKey = 'sb_publishable__1bxoDUtOWsghhgfOpSz2A_qlwCtTo0';
 const client = supabase.createClient(supabaseUrl, supabaseKey);
 
 // ===================================================
-// ESTADO GLOBAL
+// 2. ESTADO GLOBAL (STATE)
 // ===================================================
-let state = {
+const state = {
     user: null,
     xp: 0,
     streak: 0,
-    level: 'A1', // A1, A2, B1
-    srsProgress: {}, // { cardId: { interval: 1, ease: 2.5, nextReview: timestamp } }
+    level: 'A1',
+    srsProgress: {},
     activePersona: 'hans',
-    chatHistory: []
-};
-
-// Cache de DOM
-const DOM = {
-    xpNum: document.getElementById('xp-num'),
-    streakNum: document.getElementById('streak-num'),
-    levelLabel: document.getElementById('levelLabel'),
-    progressBar: document.getElementById('levelProgressBar'),
-    flashcardGrid: document.getElementById('flashcardGrid'),
-    chatMessages: document.getElementById('chatMessages'),
-    chatInput: document.getElementById('chatInput'),
-    sendBtn: document.getElementById('chatSendBtn'),
-    libraryGrid: document.getElementById('studyLibraryGrid'),
-    bossModal: document.getElementById('bossFightModal'),
-    shadowModal: document.getElementById('shadowModal')
+    chatHistory: [],
+    currentPage: 'home',
+    flashcardFilter: 'all'
 };
 
 // ===================================================
-// INICIALIZAÇÃO
+// 3. CACHE DE DOM
 // ===================================================
-document.addEventListener('DOMContentLoaded', async () => {
-    await loadUserProfile();
-    setupNavigation();
-    await loadFlashcards();
-    await loadLibraryModules();
-    updateUI();
-});
+const DOM = {};
 
-async function loadUserProfile() {
-    // Tenta buscar do Supabase, senão usa LocalStorage
-    const localXP = localStorage.getItem('dh-xp') || 0;
-    const localStreak = localStorage.getItem('dh-streak') || 0;
-    
-    state.xp = parseInt(localXP);
-    state.streak = parseInt(localStreak);
-    state.level = 'A1'; // Define inicial
-    updateUI();
+function initDOMCache() {
+    DOM.xpNum = document.getElementById('xp-num');
+    DOM.streakNum = document.getElementById('streak-num');
+    DOM.levelLabel = document.getElementById('levelLabel');
+    DOM.progressBar = document.getElementById('levelProgressBar');
+    DOM.flashcardGrid = document.getElementById('flashcardGrid');
+    DOM.chatMessages = document.getElementById('chatMessages');
+    DOM.chatInput = document.getElementById('chatInput');
+    DOM.sendBtn = document.getElementById('chatSendBtn');
+    DOM.libraryGrid = document.getElementById('studyLibraryGrid');
+    DOM.bossModal = document.getElementById('bossFightModal');
+    DOM.shadowModal = document.getElementById('shadowModal');
+    DOM.sbXpFill = document.getElementById('sb-xp-fill');
+    DOM.sbXpLabel = document.getElementById('sb-xp-label');
+    DOM.sbStreak = document.getElementById('sb-streak');
 }
 
 // ===================================================
-// NAVEGAÇÃO (PÁGINAS)
+// 4. ROUTER (NAVEGAÇÃO ENTRE PÁGINAS)
 // ===================================================
-function setupNavigation() {
-    // Sidebar links
-    document.querySelectorAll('.sidebar-link, .nav-pill').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const pageId = e.currentTarget.dataset.page;
-            if(pageId) showPage(pageId);
-        });
+function navigate(pageId) {
+    if (!pageId) return;
+    
+    // Remove active de todas as páginas
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
     });
+    
+    // Adiciona active na página alvo
+    const targetPage = document.getElementById(`page-${pageId}`);
+    if (targetPage) {
+        targetPage.classList.add('active');
+        state.currentPage = pageId;
+    }
+    
+    // Atualiza menu ativo se houver elementos com data-page
+    document.querySelectorAll('[data-page]').forEach(el => {
+        el.classList.toggle('active', el.dataset.page === pageId);
+    });
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
 }
 
-function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(`page-${pageId}`)?.classList.add('active');
-    
-    // Atualiza estado visual
-    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-    document.querySelector(`.sidebar-link[data-page="${pageId}"]`)?.classList.add('active');
-}
+// Wrapper para compatibilidade com onclick inline
+window.showPage = navigate;
 
 // ===================================================
-// GAMIFICAÇÃO (XP & STREAK)
+// 5. UI UPDATES
 // ===================================================
-function addXP(amount, reason) {
-    state.xp += amount;
-    localStorage.setItem('dh-xp', state.xp);
-    updateUI();
-    
-    // Feedback visual (Toast)
-    showToast(`+${amount} XP: ${reason}`, 'success');
-}
-
 function updateUI() {
-    if(DOM.xpNum) DOM.xpNum.innerText = state.xp;
-    if(DOM.streakNum) DOM.streakNum.innerText = state.streak;
-    if(DOM.levelLabel) DOM.levelLabel.innerText = state.level;
+    // Atualiza números de XP e Streak
+    if (DOM.xpNum) DOM.xpNum.innerText = state.xp;
+    if (DOM.streakNum) DOM.streakNum.innerText = state.streak;
+    if (DOM.levelLabel) DOM.levelLabel.innerText = state.level;
     
-    // Barra de progresso (simulada: 1000 XP = Level Up)
+    // Barra de progresso principal (1000 XP = Level Up)
     const progress = Math.min((state.xp % 500) / 500 * 100, 100);
-    if(DOM.progressBar) DOM.progressBar.style.width = `${progress}%`;
+    if (DOM.progressBar) DOM.progressBar.style.width = `${progress}%`;
+    
+    // Barra de progresso da sidebar
+    if (DOM.sbXpFill) DOM.sbXpFill.style.width = `${progress}%`;
+    if (DOM.sbXpLabel) DOM.sbXpLabel.innerText = `${state.xp % 500} / 500 XP`;
+    if (DOM.sbStreak) DOM.sbStreak.innerText = state.streak;
 }
 
 function showToast(msg, type = 'info') {
@@ -106,12 +103,79 @@ function showToast(msg, type = 'info') {
 }
 
 // ===================================================
-// FLASHCARDS & SRS
+// 6. EVENT LISTENERS
+// ===================================================
+function setupEventListeners() {
+    // Navegação por elementos com data-page
+    document.querySelectorAll('[data-page]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = btn.dataset.page;
+            if (pageId) navigate(pageId);
+        });
+    });
+    
+    // Botões de filtro de nível (Flashcards)
+    document.querySelectorAll('#sl-all, #sl-a1, #sl-a2, #sl-b1, #sl-girias').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Remove active de todos
+            document.querySelectorAll('.sb-sub-item').forEach(b => b.classList.remove('active'));
+            // Adiciona active no clicado
+            btn.classList.add('active');
+        });
+    });
+    
+    // Chatbot
+    if (DOM.sendBtn) {
+        DOM.sendBtn.addEventListener('click', sendChat);
+    }
+    if (DOM.chatInput) {
+        DOM.chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChat();
+        });
+    }
+}
+
+// ===================================================
+// 7. INICIALIZAÇÃO
+// ===================================================
+document.addEventListener('DOMContentLoaded', async () => {
+    initDOMCache();
+    await loadUserProfile();
+    setupEventListeners();
+    await loadFlashcards();
+    await loadLibraryModules();
+    updateUI();
+});
+
+// ===================================================
+// 8. PERFIL DO USUÁRIO
+// ===================================================
+async function loadUserProfile() {
+    const localXP = localStorage.getItem('dh-xp') || 0;
+    const localStreak = localStorage.getItem('dh-streak') || 0;
+    
+    state.xp = parseInt(localXP);
+    state.streak = parseInt(localStreak);
+    state.level = 'A1';
+}
+
+// ===================================================
+// 9. GAMIFICAÇÃO (XP & STREAK)
+// ===================================================
+function addXP(amount, reason) {
+    state.xp += amount;
+    localStorage.setItem('dh-xp', state.xp);
+    updateUI();
+    showToast(`+${amount} XP: ${reason}`, 'success');
+}
+
+// ===================================================
+// 10. FLASHCARDS & SRS
 // ===================================================
 let flashcards = [];
 
 async function loadFlashcards() {
-    // 1. Tenta buscar do Supabase
     try {
         const { data, error } = await client
             .from('flashcards_v2')
@@ -122,7 +186,6 @@ async function loadFlashcards() {
         if (!error && data) {
             flashcards = data;
         } else {
-            // Fallback para dados locais se não houver conexão
             flashcards = getFallbackFlashcards();
         }
     } catch (e) {
@@ -132,7 +195,6 @@ async function loadFlashcards() {
     renderFlashcards();
 }
 
-// Dados Fallback baseados no A1 1-20 que você enviou
 function getFallbackFlashcards() {
     return [
         { id: 'a1-01', level: 'A1', front_de: 'Guten Morgen!', back_pt: 'Bom dia!', tags: ['cumprimentos'] },
@@ -151,7 +213,10 @@ function getFallbackFlashcards() {
 }
 
 function renderFlashcards(filter = 'all') {
+    if (!DOM.flashcardGrid) return;
+    
     DOM.flashcardGrid.innerHTML = '';
+    state.flashcardFilter = filter;
     
     const filtered = filter === 'all' 
         ? flashcards 
@@ -173,11 +238,9 @@ function renderFlashcards(filter = 'all') {
             </div>
         `;
         
-        // Flip logic
         el.addEventListener('click', (e) => {
             if(!e.target.closest('.srs-controls')) {
                 el.classList.toggle('flipped');
-                // Audio TTS ao virar
                 if(el.classList.contains('flipped')) speak(card.front_de);
             }
         });
@@ -190,7 +253,6 @@ function rateCard(cardId, difficulty) {
     const cardEl = document.querySelector(`.flashcard[data-id="${cardId}"]`);
     if(!cardEl) return;
     
-    // SRS Logic (Simplified)
     let current = state.srsProgress[cardId] || { interval: 1, ease: 2.5 };
     let xpGain = 0;
     
@@ -201,7 +263,7 @@ function rateCard(cardId, difficulty) {
     } else if (difficulty === 'medium') {
         current.interval = Math.round(current.interval * current.ease);
         xpGain = 10;
-    } else { // easy
+    } else {
         current.interval = Math.round(current.interval * current.ease * 1.5);
         current.ease += 0.15;
         xpGain = 15;
@@ -209,7 +271,6 @@ function rateCard(cardId, difficulty) {
     
     state.srsProgress[cardId] = current;
     
-    // Animation & XP
     cardEl.style.transform = 'scale(0.9) rotateY(180deg)';
     cardEl.style.opacity = '0.5';
     addXP(xpGain, `Card Review (${difficulty})`);
@@ -217,8 +278,52 @@ function rateCard(cardId, difficulty) {
     setTimeout(() => cardEl.remove(), 300);
 }
 
+// Função global para filtro de flashcards
+window.setFilter = function(filter) {
+    renderFlashcards(filter);
+};
+
+// Função global para filtro por tema
+window.setThemeFilter = function(theme) {
+    // Filtra por tags
+    const filtered = flashcards.filter(c => c.tags && c.tags.includes(theme));
+    renderFlashcardsWithCustomList(filtered);
+};
+
+function renderFlashcardsWithCustomList(cardList) {
+    if (!DOM.flashcardGrid) return;
+    
+    DOM.flashcardGrid.innerHTML = '';
+    
+    cardList.forEach(card => {
+        const el = document.createElement('div');
+        el.className = 'flashcard';
+        el.dataset.id = card.id;
+        el.innerHTML = `
+            <div class="card-face front">${card.front_de}</div>
+            <div class="card-face back">
+                <div class="meaning">${card.back_pt}</div>
+                <div class="srs-controls">
+                    <button onclick="rateCard('${card.id}', 'hard')" class="btn-hard">Hard</button>
+                    <button onclick="rateCard('${card.id}', 'medium')" class="btn-med">Good</button>
+                    <button onclick="rateCard('${card.id}', 'easy')" class="btn-easy">Easy</button>
+                </div>
+            </div>
+        `;
+        
+        el.addEventListener('click', (e) => {
+            if(!e.target.closest('.srs-controls')) {
+                el.classList.toggle('flipped');
+                if(el.classList.contains('flipped')) speak(card.front_de);
+            }
+        });
+        
+        DOM.flashcardGrid.appendChild(el);
+    });
+}
+
 // ===================================================
-// TTS (TEXT TO SPEECH)
+// 11. TTS (TEXT TO SPEECH)
 // ===================================================
 function speak(text) {
     if ('speechSynthesis' in window) {
@@ -231,7 +336,7 @@ function speak(text) {
 }
 
 // ===================================================
-// CHATBOT
+// 12. CHATBOT
 // ===================================================
 const personas = {
     hans: {
@@ -253,27 +358,24 @@ function setPersona(id) {
     document.querySelectorAll('.persona-btn').forEach(b => b.classList.remove('active'));
     document.querySelector(`.persona-btn[data-id="${id}"]`)?.classList.add('active');
     
-    // Limpa chat
-    DOM.chatMessages.innerHTML = '';
-    addBotMessage(personas[id].desc);
+    if (DOM.chatMessages) {
+        DOM.chatMessages.innerHTML = '';
+        addBotMessage(personas[id].desc);
+    }
 }
 
-DOM.sendBtn.addEventListener('click', sendChat);
-DOM.chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChat(); });
-
 async function sendChat() {
+    if (!DOM.chatInput || !DOM.chatMessages) return;
+    
     const text = DOM.chatInput.value.trim();
     if(!text) return;
     
     addUserMessage(text);
     DOM.chatInput.value = '';
     
-    // Simula delay de "digitando..."
     const loadingId = addLoadingMessage();
     
     try {
-        // Aqui você conectaria com OpenAI/Groq no backend
-        // Por enquanto, simulamos uma resposta baseada na persona
         setTimeout(() => {
             removeLoadingMessage(loadingId);
             const response = generateMockResponse(text, state.activePersona);
@@ -286,6 +388,7 @@ async function sendChat() {
 }
 
 function addUserMessage(text) {
+    if (!DOM.chatMessages) return;
     const div = document.createElement('div');
     div.className = 'msg user';
     div.innerText = text;
@@ -294,6 +397,7 @@ function addUserMessage(text) {
 }
 
 function addBotMessage(text) {
+    if (!DOM.chatMessages) return;
     const div = document.createElement('div');
     div.className = 'msg bot';
     div.innerHTML = `<strong>${personas[state.activePersona].avatar} ${personas[state.activePersona].name}:</strong> ${text}`;
@@ -302,6 +406,7 @@ function addBotMessage(text) {
 }
 
 function addLoadingMessage() {
+    if (!DOM.chatMessages) return null;
     const id = 'loading-' + Date.now();
     const div = document.createElement('div');
     div.id = id;
@@ -316,7 +421,6 @@ function removeLoadingMessage(id) {
     document.getElementById(id)?.remove();
 }
 
-// Mock response generator (Para funcionar sem Backend AI por enquanto)
 function generateMockResponse(input, persona) {
     const lower = input.toLowerCase();
     
@@ -336,11 +440,10 @@ function generateMockResponse(input, persona) {
 }
 
 // ===================================================
-// BIBLIOTECA DE ESTUDOS (MÓDULOS)
+// 13. BIBLIOTECA DE ESTUDOS (MÓDULOS)
 // ===================================================
 async function loadLibraryModules() {
     try {
-        // Tenta buscar módulos do Supabase
         const { data, error } = await client
             .from('study_modules')
             .select('*')
@@ -349,7 +452,6 @@ async function loadLibraryModules() {
         if(!error && data && data.length > 0) {
             renderLibrary(data);
         } else {
-            // Fallback local baseado no seu doc
             renderLibrary(getFallbackModules());
         }
     } catch (e) {
@@ -368,6 +470,8 @@ function getFallbackModules() {
 }
 
 function renderLibrary(modules) {
+    if (!DOM.libraryGrid) return;
+    
     DOM.libraryGrid.innerHTML = '';
     
     modules.forEach(mod => {
@@ -385,16 +489,15 @@ function renderLibrary(modules) {
     });
 }
 
-// Função chamada ao clicar em "Estudar"
 window.openModule = function(slug) {
-    // Lógica para abrir detalhes do módulo ou lições
     alert(`Abrindo módulo: ${slug}\n(Aqui carregaria as lições de study_lessons)`);
 };
 
 // ===================================================
-// BOSS FIGHT (Mini Game)
+// 14. BOSS FIGHT (Mini Game)
 // ===================================================
 window.startBossFight = function() {
+    if (!DOM.bossModal) return;
     DOM.bossModal.style.display = 'flex';
     const words = ['der Apfel', 'die Banane', 'das Brot', 'der Kaffee'];
     const randomWord = words[Math.floor(Math.random() * words.length)];
@@ -412,14 +515,20 @@ window.checkBossAnswer = function() {
     if(input.includes(target)) {
         feedback.innerHTML = '<span style="color:var(--green)">Richtig! +50 XP</span>';
         addXP(50, 'Boss Fight Victory');
-        setTimeout(() => DOM.bossModal.style.display = 'none', 1500);
+        setTimeout(() => {
+            if (DOM.bossModal) DOM.bossModal.style.display = 'none';
+        }, 1500);
     } else {
         feedback.innerHTML = '<span style="color:var(--red)">Falsch! Tente novamente.</span>';
     }
 };
 
+window.closeBossFight = function() {
+    if (DOM.bossModal) DOM.bossModal.style.display = 'none';
+};
+
 // ===================================================
-// SHADOWING (Speech-to-Text)
+// 15. SHADOWING (Speech-to-Text)
 // ===================================================
 window.startShadowing = function() {
     if(!('webkitSpeechRecognition' in window)) {
@@ -427,6 +536,7 @@ window.startShadowing = function() {
         return;
     }
     
+    if (!DOM.shadowModal) return;
     DOM.shadowModal.style.display = 'flex';
     const phrase = 'Guten Morgen, wie geht es Ihnen?';
     document.getElementById('shadow-phrase').innerText = phrase;
@@ -446,4 +556,23 @@ window.startShadowing = function() {
     };
     
     recognition.start();
+};
+
+// ===================================================
+// 16. FUNÇÕES AUXILIARES GLOBAIS
+// ===================================================
+window.openXPLog = function() {
+    const xpLogModal = document.getElementById('xpLogModal');
+    if (xpLogModal) xpLogModal.style.display = 'flex';
+};
+
+window.closeXPLog = function() {
+    const xpLogModal = document.getElementById('xpLogModal');
+    if (xpLogModal) xpLogModal.style.display = 'none';
+};
+
+window.loadErrorReview = function() {
+    showToast('Atualizando dados...', 'info');
+    loadFlashcards();
+    loadLibraryModules();
 };
