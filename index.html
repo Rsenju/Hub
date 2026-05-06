@@ -621,8 +621,23 @@ function getSupabase() {
 let modulesData = { A1: [], A2: [], B1: [] };
 let modulesLoaded = false;
 let currentLevel = 'A1';
+let currentCardIndex = 0;
+let currentShadowIndex = 0;
+let xp = 2450;
+let streak = 12;
 
-// ==================== DEBUG: CARREGAR MÓDULOS SEM FILTROS ====================
+// Dados estáticos (flashcards, shadowing, etc)
+const flashcardsData = [
+  {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
+  {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
+  {word:'Danke',translation:'Obrigado',example:'Danke schön!'}
+];
+
+const shadowPhrases = [
+  {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai?'}
+];
+
+// ==================== CARREGAR MÓDULOS DO SUPABASE ====================
 async function loadModulesFromSupabase() {
   const client = getSupabase();
   if (!client) {
@@ -631,110 +646,78 @@ async function loadModulesFromSupabase() {
   }
 
   try {
-    console.log('🔍 [DEBUG] Query 1: SELECT * FROM study_modules LIMIT 5');
+    console.log('🔍 Buscando módulos...');
     
-    // QUERY 1: Sem filtros - só para ver se há dados
-    const {  raw, error: err1 } = await client
+    // Busca módulos
+    const {  modules, error: modError } = await client
       .from('study_modules')
-      .select('*')
-      .limit(5);
-    
-    console.log('📦 Raw response:', raw);
-    console.log('❌ Error:', err1);
-    
-    if (err1) {
-      console.error('❌ Erro na query:', err1);
-      return;
-    }
-    
-    if (!raw || raw.length === 0) {
-      console.warn('⚠️ Tabela vazia ou RLS bloqueando. Execute no SQL Editor:');
-      console.warn('CREATE POLICY "Leitura pública" ON study_modules FOR SELECT USING (true);');
-      return;
-    }
-    
-    // QUERY 2: Com filtros originais
-    console.log('\n🔍 [DEBUG] Query 2: Com filtros level + active');
-    const {  filtered, error: err2 } = await client
-      .from('study_modules')
-      .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order, active')
+      .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order')
       .in('level', ['A1','A2','B1'])
+      .eq('active', true)
       .order('sort_order', {ascending:true});
+
+    if (modError) throw modError;
+    console.log('✅ Módulos encontrados:', modules ? modules.length : 0);
     
-    console.log('📦 Filtered response:', filtered);
-    console.log('❌ Error:', err2);
-    
-    if (err2) throw err2;
-    
-    // Se filtered estiver vazio mas raw não, o problema é o filtro
-    if (raw.length > 0 && (!filtered || filtered.length === 0)) {
-      console.warn('⚠️ Filtros estão excluindo os dados! Verifique:');
-      console.warn('  • Os valores de "level" estão em MAIÚSCULO? (A1, não a1)');
-      console.warn('  • O campo "active" é boolean true ou string "true"?');
-      console.warn('  • Há políticas RLS aplicando filtros adicionais?');
+    if (!modules || modules.length === 0) {
+      console.warn('⚠️ Nenhum módulo encontrado');
+      return;
     }
+
+    // Busca lições
+    const {  lessons } = await client
+      .from('study_lessons')
+      .select('module_slug, slug, title_pt, title_de, sort_order')
+      .eq('active', true)
+      .order('sort_order', {ascending:true});
+
+    // Transforma dados
+    const formatted = {A1:[], A2:[], B1:[]};
     
-    // Transforma dados válidos
-    if (filtered && filtered.length > 0) {
-      const {  lessons } = await client
-        .from('study_lessons')
-        .select('module_slug, slug, title_pt, title_de, summary_pt, sort_order')
-        .order('sort_order', {ascending:true});
+    modules.forEach(function(mod) {
+      const modLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
       
-      const formatted = {A1:[], A2:[], B1:[]};
+      const chapters = modLessons.map((l, idx) => ({
+        name: l.title_pt || l.title_de || 'Lição '+(idx+1),
+        type: 'vocab',
+        done: false,
+        slug: l.slug
+      }));
+
+      const module = {
+        id: mod.chapter_number,
+        slug: mod.slug,
+        title: mod.title_de || mod.title_pt,
+        translation: mod.title_pt,
+        status: mod.chapter_number === 1 ? 'available' : 'locked',
+        chapters: chapters.length > 0 ? chapters : [{name:'Introdução',type:'vocab',done:false}]
+      };
       
-      filtered.forEach(function(mod) {
-        const modLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
-        const chapters = modLessons.map((l, idx) => ({
-          name: l.title_pt || l.title_de || 'Lição '+(idx+1),
-          type: 'vocab',
-          done: false,
-          slug: l.slug,
-          sort_order: l.sort_order
-        }));
-        
-        const module = {
-          id: mod.chapter_number || mod.slug,
-          slug: mod.slug,
-          title: mod.title_de || mod.title_pt,
-          translation: mod.title_pt,
-          status: mod.chapter_number === 1 ? 'available' : 'locked',
-          chapters: chapters.length > 0 ? chapters : [{name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro'}],
-          sort_order: mod.sort_order
-        };
-        
-        if (formatted[mod.level]) formatted[mod.level].push(module);
-      });
-      
-      ['A1','A2','B1'].forEach(level => {
-        formatted[level].sort((a,b) => (a.sort_order||0) - (b.sort_order||0));
-      });
-      
-      modulesData = formatted;
-      modulesLoaded = true;
-      console.log('✅ Módulos carregados:', Object.keys(formatted).map(l => l+':'+formatted[l].length));
-    }
+      if (formatted[mod.level]) formatted[mod.level].push(module);
+    });
+
+    modulesData = formatted;
+    modulesLoaded = true;
+    renderModules();
     
   } catch (err) {
-    console.error('❌ Erro fatal:', err);
-  } finally {
-    renderModules();
+    console.error('❌ Erro:', err);
   }
 }
 
-// ==================== RENDER SIMPLES ====================
+// ==================== RENDER MODULES ====================
 function renderModules() {
   const list = document.getElementById('moduleList');
   if (!list) return;
   
   if (!modulesLoaded) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando...</p>';
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos...</p>';
     return;
   }
   
   const modules = modulesData[currentLevel] || [];
   if (modules.length === 0) {
-    list.innerHTML = '<p class="text-center text-red-500 py-6">Nenhum módulo encontrado. <br><small>Verifique RLS e filtros no console.</small></p>';
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado</p>';
     return;
   }
   
@@ -760,20 +743,20 @@ function renderModules() {
   `).join('');
 }
 
-// Tabs
-document.querySelectorAll('.level-tab')?.forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    currentLevel = tab.dataset.level;
-    renderModules();
-  });
-});
-
 // ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🚀 Iniciando...');
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 Deutsch Hub iniciando...');
   loadModulesFromSupabase();
+  
+  // Navegação básica
+  document.querySelectorAll('.level-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      currentLevel = this.dataset.level;
+      renderModules();
+    });
+  });
 });
 </script>
 </body>
