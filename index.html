@@ -605,11 +605,11 @@ input,textarea{font-family:inherit;outline:none}
 </div>
 
 <script>
-  // ==================== SUPABASE CONFIG ====================
+  // ==================== CONFIG SUPABASE ====================
 const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
 const SUPABASE_KEY = 'sb_publishable__1bxoDUtOWsghhgfOpSz2A_qlwCtTo0';
-
 let supabaseClient = null;
+
 function getSupabase() {
   if (!supabaseClient && window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -620,20 +620,11 @@ function getSupabase() {
 // ==================== STATE ====================
 let modulesData = { A1: [], A2: [], B1: [] };
 let modulesLoaded = false;
-let userProgress = {}; // { lesson_slug: { completed: boolean } }
-
-let currentPage = 'dashboard';
 let currentLevel = 'A1';
-let currentCardIndex = 0;
-let currentShadowIndex = 0;
-let currentChar = 'anna';
-let notes = [];
-let reviewItems = [];
 let xp = 2450;
 let streak = 12;
-let editingNoteId = null;
 
-// ==================== DADOS ESTÁTICOS ====================
+// Dados estáticos (Flashcards, Shadowing, etc)
 const flashcardsData = [
   {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
   {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
@@ -679,56 +670,58 @@ const reviewData = [
   {type:'vocab',title:'Zahlen (Números)',desc:'Números de 1 a 100 em alemão.',icon:'🔢',solved:false}
 ];
 
-// ==================== SUPABASE: CARREGAR MÓDULOS ====================
+let notes = JSON.parse(JSON.stringify(notesData));
+let reviewItems = JSON.parse(JSON.stringify(reviewData));
+let currentCardIndex = 0;
+let currentShadowIndex = 0;
+let currentChar = 'anna';
+let editingNoteId = null;
+
+// ==================== CARREGAR MÓDULOS DO SUPABASE ====================
 async function loadModulesFromSupabase() {
   const client = getSupabase();
   if (!client) {
-    console.error('❌ Supabase SDK não carregado. Verifique o <script> no index.html');
+    console.error('❌ Supabase SDK não carregado.');
     return;
   }
 
   try {
     console.log('🔍 Buscando módulos...');
     
-    // ✅ QUERY CORRIGIDA:
-    // 1. Select '*' pega tudo (caso tenha colunas novas)
-    // 2. .in('level'...) mantém o filtro de nível
-    // 3. REMOVEMOS o .eq('active', true) que estava bloqueando
-    
+    // Busca módulos (sem filtro de active para evitar bloqueios extras)
     const {  modules, error: modError } = await client
       .from('study_modules')
-      .select('*') 
+      .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order')
       .in('level', ['A1', 'A2', 'B1'])
       .order('sort_order', { ascending: true });
 
     if (modError) {
-      console.error('❌ Erro no Supabase:', modError);
+      console.error('❌ Erro Supabase:', modError);
       return;
     }
 
+    console.log('✅ Módulos encontrados:', modules ? modules.length : 0);
+    
     if (!modules || modules.length === 0) {
-      console.warn('⚠️ Nenhum módulo encontrado. Verifique se os níveis são A1, A2 ou B1.');
+      console.warn('⚠️ Nenhum módulo retornado. Verifique o RLS ou se os dados foram inseridos.');
       return;
     }
 
-    console.log(`✅ ${modules.length} módulos encontrados!`);
-
-    // Busca as lições correspondentes
+    // Busca lições
     const {  lessons } = await client
       .from('study_lessons')
-      .select('*')
+      .select('module_slug, slug, title_pt, title_de, sort_order')
       .order('sort_order', { ascending: true });
 
     // Transforma dados para o formato da UI
     const formatted = { A1: [], A2: [], B1: [] };
     
     modules.forEach(mod => {
-      // Filtra lições deste módulo
       const modLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
       
       const chapters = modLessons.map((l, idx) => ({
         name: l.title_pt || l.title_de || `Lição ${idx + 1}`,
-        type: l.quick_rule_pt?.toLowerCase().includes('gram') ? 'gramática' : 'vocab',
+        type: 'vocab', // Padrão, pode ser ajustado via lógica se necessário
         done: false,
         slug: l.slug
       }));
@@ -738,7 +731,7 @@ async function loadModulesFromSupabase() {
         slug: mod.slug,
         title: mod.title_de || mod.title_pt,
         translation: mod.title_pt,
-        status: mod.chapter_number === 1 ? 'available' : 'locked',
+        status: mod.chapter_number === 1 ? 'available' : 'locked', // Lógica simples de desbloqueio
         chapters: chapters.length > 0 ? chapters : [{ name: 'Introdução', type: 'vocab', done: false }]
       };
 
@@ -747,112 +740,43 @@ async function loadModulesFromSupabase() {
       }
     });
 
-    // Atualiza o estado global
     modulesData = formatted;
     modulesLoaded = true;
     renderModules();
 
   } catch (err) {
-    console.error('❌ Erro fatal ao carregar módulos:', err);
+    console.error('❌ Erro fatal:', err);
   }
 }
 
-// ==================== ABRIR LIÇÃO / MARCAR PROGRESSO ====================
-window.openLesson = function(lessonSlug, lessonName, lessonType) {
-  console.log('📖 Abrindo:', lessonSlug, lessonName, lessonType);
-  
-  if (!userProgress[lessonSlug]) userProgress[lessonSlug] = {completed:false};
-  if (!userProgress[lessonSlug].completed) {
-    userProgress[lessonSlug].completed = true;
-    
-    // Atualiza UI
-    for (let level in modulesData) {
-      modulesData[level].forEach(mod => {
-        mod.chapters.forEach(ch => {
-          if (ch.slug === lessonSlug) ch.done = true;
-        });
-      });
-    }
-    renderModules();
-    addXP(10, 'Lição concluída');
-  }
-  
-  alert('📚 ' + lessonName + '\n\nTipo: ' + lessonType + '\n\n[Conteúdo completo em breve]');
-};
-
-// ==================== NAVIGATION ====================
-function navigateTo(page) {
-  currentPage = page;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById('page-' + page);
-  if (target) target.classList.add('active');
-  
-  document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.page === page);
-  });
-  
-  const titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
-  const titleEl = document.getElementById('topbarTitle');
-  if (titleEl) titleEl.textContent = titles[page] || page;
-  
-  if (page === 'modules') renderModules();
-  if (page === 'flashcards') renderFlashcard();
-  if (page === 'shadowing') renderShadowPhrase();
-  if (page === 'notes') renderNotes();
-  if (page === 'review') renderReview();
-  closeSidebar();
-}
-
-function toggleSidebar() {
-  document.getElementById('sidebar')?.classList.toggle('open');
-  document.getElementById('overlay')?.classList.toggle('active');
-}
-function closeSidebar() {
-  document.getElementById('sidebar')?.classList.remove('open');
-  document.getElementById('overlay')?.classList.remove('active');
-}
-document.getElementById('overlay')?.addEventListener('click', closeSidebar);
-
-function updateGreeting() {
-  const h = new Date().getHours();
-  let greeting = 'Willkommen zurück! 👋';
-  if (h < 12) greeting = 'Guten Morgen! ☀️';
-  else if (h < 18) greeting = 'Guten Tag! 🌤️';
-  else greeting = 'Guten Abend! 🌙';
-  document.getElementById('greetingText').textContent = greeting;
-}
-
-// ==================== MODULES RENDER ====================
+// ==================== RENDER MODULES ====================
 function renderModules() {
   const list = document.getElementById('moduleList');
   if (!list) return;
-  
+
   if (!modulesLoaded) {
     list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos do Supabase...</p>';
     return;
   }
-  
+
   const modules = modulesData[currentLevel] || [];
   if (modules.length === 0) {
     list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.</p>';
     return;
   }
-  
+
   list.innerHTML = modules.map(m => {
     const statusText = m.status === 'available' ? '🔓 Disponível' : '🔒 Bloqueado';
     const statusClass = m.status === 'available' ? 'status-available' : 'status-locked';
     
-    let chaptersHtml = m.chapters.map(c => {
-      const isLocked = m.status === 'locked';
-      const clickable = !isLocked;
-      return `
-        <div class="chapter-item ${clickable ? 'clickable' : 'locked'}" ${clickable ? 'onclick="openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\')"' : ''}>
-          <div class="chapter-check ${c.done ? 'done' : ''}">${c.done ? '✓' : ''}</div>
-          <span class="chapter-name">${c.name}</span>
-          <span class="chapter-type-badge ${c.type}" onclick="event.stopPropagation(); ${clickable ? 'openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\')' : ''}">${c.type}</span>
-        </div>`;
-    }).join('');
-    
+    let chaptersHtml = m.chapters.map(c => `
+      <div class="chapter-item clickable" onclick="openLesson('${c.slug}', '${c.name.replace(/'/g,"\\'")}', '${c.type}')">
+        <div class="chapter-check ${c.done ? 'done' : ''}">${c.done ? '✓' : ''}</div>
+        <span class="chapter-name">${c.name}</span>
+        <span class="chapter-type-badge ${c.type}">${c.type}</span>
+      </div>
+    `).join('');
+
     return `
       <div class="module-card" data-slug="${m.slug}">
         <div class="module-header">
@@ -870,8 +794,46 @@ function renderModules() {
   }).join('');
 }
 
+// ==================== ABRIR LIÇÃO ====================
+window.openLesson = function(slug, name, type) {
+  alert(`📖 Abrindo: ${name}\nTipo: ${type}\nSlug: ${slug}`);
+  // Aqui você pode adicionar lógica para marcar como concluído e dar XP
+  addXP(10);
+};
+
+// ==================== NAVIGATION ====================
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  
+  document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === page);
+  });
+  
+  const titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
+  const titleEl = document.getElementById('topbarTitle');
+  if (titleEl) titleEl.textContent = titles[page] || page;
+  
+  if (page === 'modules') renderModules();
+  if (page === 'flashcards') renderFlashcard();
+  if (page === 'shadowing') renderShadowPhrase();
+  if (page === 'notes') renderNotes();
+  if (page === 'review') renderReview();
+  
+  // Fechar sidebar mobile se aberta
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('overlay')?.classList.remove('active');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar')?.classList.toggle('open');
+  document.getElementById('overlay')?.classList.toggle('active');
+}
+document.getElementById('overlay')?.addEventListener('click', toggleSidebar);
+
 // Tabs de nível
-document.querySelectorAll('.level-tab')?.forEach(tab => {
+document.querySelectorAll('.level-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
@@ -922,7 +884,7 @@ function initChatbot() {
       currentChar = btn.dataset.char;
       const ch = characters[currentChar];
       const msgs = document.getElementById('chatMessages');
-      if (msgs) msgs.innerHTML = `<div class="chat-msg bot"><div class="msg-avatar">${ch.name[0]}</div><div class="msg-bubble">Hallo! Ich bin ${ch.name}. Wie kann ich dir helfen? 😊</div></div>`;
+      if (msgs) msgs.innerHTML = `<div class="chat-msg bot"><div class="msg-avatar" style="background:${ch.color}">${ch.name[0]}</div><div class="msg-bubble">Hallo! Ich bin ${ch.name}. Wie kann ich dir helfen? 😊</div></div>`;
     });
   });
 }
@@ -1060,11 +1022,9 @@ function showToast(msg, type) {
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', async () => {
   navigateTo('dashboard');
-  updateGreeting();
-  notes = JSON.parse(JSON.stringify(notesData));
-  reviewItems = JSON.parse(JSON.stringify(reviewData));
-  
+  // Carrega módulos do Supabase primeiro
   await loadModulesFromSupabase();
+  
   renderFlashcard();
   renderShadowPhrase();
   renderNotes();
@@ -1075,7 +1035,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Expor funções globais para onclick no HTML
 window.navigateTo = navigateTo;
 window.toggleSidebar = toggleSidebar;
-window.openLesson = openLesson;
 </script>
 </body>
 </html>
