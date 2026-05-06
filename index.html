@@ -721,30 +721,14 @@ async function loadModulesFromSupabase() {
       return;
     }
 
-    // 2. Busca lições (capítulos) de todos os módulos
+    // 2. Busca lições (capítulos)
     const {  lessons } = await client
       .from('study_lessons')
       .select('module_slug, slug, title_pt, title_de, summary_pt, quick_rule_pt, sort_order')
       .eq('active', true)
       .order('sort_order', {ascending:true});
 
-    // 3. Busca progresso do usuário (se existir tabela user_progress)
-    // Se não existir, usa estado inicial vazio
-    const {  progress } = await client
-      .from('user_progress')
-      .select('lesson_slug, completed, xp_earned')
-      .eq('user_id', 'guest-user') // Substituir pelo ID real do usuário
-      .eq('active', true);
-
-    // Converte progresso em objeto para acesso rápido
-    userProgress = {};
-    if (progress) {
-      progress.forEach(p => {
-        userProgress[p.lesson_slug] = { completed: p.completed, xp: p.xp_earned || 0 };
-      });
-    }
-
-    // 4. Agrupa lições por módulo
+    // 3. Transforma para formato da UI (SEM user_progress)
     const formatted = {A1:[], A2:[], B1:[]};
     
     modules.forEach(function(mod) {
@@ -762,8 +746,8 @@ async function loadModulesFromSupabase() {
           type = 'prática';
         }
         
-        // Verifica se está completado no user_progress
-        const isCompleted = userProgress[l.slug] ? userProgress[l.slug].completed : false;
+        // Lógica local de progresso: só capítulo 1 começa disponível
+        const isCompleted = false; // Inicia tudo como não concluído
         
         return {
           name: l.title_pt || l.title_de || 'Lição '+(idx+1),
@@ -771,25 +755,24 @@ async function loadModulesFromSupabase() {
           done: isCompleted,
           slug: l.slug,
           summary: l.summary_pt,
-          quick_rule: l.quick_rule_pt
+          quick_rule: l.quick_rule_pt,
+          sort_order: l.sort_order
         };
       });
 
       // Se não houver lições, cria placeholders
       const finalChapters = chapters.length > 0 ? chapters : [
-        {name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro',summary:'',quick_rule:''},
-        {name:'Gramática Básica',type:'gramática',done:false,slug:mod.slug+'-gram',summary:'',quick_rule:''},
-        {name:'Prática',type:'prática',done:false,slug:mod.slug+'-prac',summary:'',quick_rule:''}
+        {name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro',summary:'',quick_rule:'',sort_order:1},
+        {name:'Gramática Básica',type:'gramática',done:false,slug:mod.slug+'-gram',summary:'',quick_rule:'',sort_order:2},
+        {name:'Prática',type:'prática',done:false,slug:mod.slug+'-prac',summary:'',quick_rule:'',sort_order:3}
       ];
 
-      // Determina status do módulo baseado no progresso
-      // Módulo 1 (chapter_number <= 2) = disponível, resto = bloqueado inicialmente
+      // Determina status do módulo: só capítulo 1 disponível inicialmente
       let status = 'locked';
-      if (mod.chapter_number <= 2) {
-        // Verifica se todas as lições do módulo estão completas
-        const allCompleted = finalChapters.every(function(c) { return c.done; });
-        const someCompleted = finalChapters.some(function(c) { return c.done; });
-        status = allCompleted ? 'done' : (someCompleted ? 'current' : 'available');
+      if (mod.chapter_number === 1) {
+        status = 'available'; // Módulo 1 liberado
+      } else if (mod.chapter_number === 2) {
+        status = 'locked'; // Módulo 2 bloqueado até completar o 1
       }
 
       const module = {
@@ -861,19 +844,16 @@ async function markLessonComplete(lessonSlug, xpReward) {
 }
 
 // ==================== ABRIR LIÇÃO ====================
-function openLesson(lessonSlug, lessonName, lessonType) {
-  console.log('📖 Abrindo lição:', lessonSlug, lessonName, lessonType);
+function openLesson(lessonSlug, lessonName, lessonType, chapterIndex) {
+  console.log('📖 Abrindo lição:', lessonSlug, lessonName, lessonType, 'Capítulo:', chapterIndex);
   
-  // Aqui você pode:
-  // 1. Navegar para página de conteúdo
-  // 2. Abrir modal com conteúdo
-  // 3. Carregar exercícios
+  if (chapterIndex > 0) {
+   
+  }
   
-  // Exemplo: mostrar alerta (substituir por navegação real)
   alert('📚 ' + lessonName + '\n\nTipo: ' + lessonType + '\nSlug: ' + lessonSlug + '\n\n[Em breve: conteúdo da lição]');
   
-  // Após completar a lição, chamar:
-  // markLessonComplete(lessonSlug, 10);
+  markLessonComplete(lessonSlug, 10);
 }
 
 // ==================== NAVIGATION ====================
@@ -969,8 +949,9 @@ function renderModules() {
       var clickable = !isLocked;
       
       html += '<div class="chapter-item '+ (clickable ? 'clickable' : 'locked') +'" ';
+     html += '<div class="chapter-item '+ (clickable ? 'clickable' : 'locked') +'" ';
       if (clickable) {
-        html += 'onclick="openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\')" ';
+      html += 'onclick="openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\','+ci+')" ';
       }
       html += 'data-slug="'+(c.slug||'')+'">';
       html += '<div class="chapter-check '+ (c.done ? 'done' : '') +'">'+ (c.done ? '✓' : '') +'</div>';
