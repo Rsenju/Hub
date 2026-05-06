@@ -620,80 +620,134 @@ function getSupabase() {
 // ==================== STATE ====================
 let modulesData = { A1: [], A2: [], B1: [] };
 let modulesLoaded = false;
+let userProgress = {}; // { lesson_slug: { completed: boolean } }
+
+let currentPage = 'dashboard';
 let currentLevel = 'A1';
 let currentCardIndex = 0;
 let currentShadowIndex = 0;
+let currentChar = 'anna';
+let notes = [];
+let reviewItems = [];
 let xp = 2450;
 let streak = 12;
+let editingNoteId = null;
 
-// Dados estáticos (flashcards, shadowing, etc)
+// ==================== DADOS ESTÁTICOS ====================
 const flashcardsData = [
   {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
   {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
-  {word:'Danke',translation:'Obrigado',example:'Danke schön!'}
+  {word:'Danke',translation:'Obrigado',example:'Danke schön!'},
+  {word:'Bitte',translation:'Por favor',example:'Ein Wasser, bitte.'},
+  {word:'Entschuldigung',translation:'Desculpe',example:'Entschuldigung, wo ist der Bahnhof?'},
+  {word:'Ja',translation:'Sim',example:'Ja, ich verstehe.'},
+  {word:'Nein',translation:'Não',example:'Nein, danke.'},
+  {word:'Auf Wiedersehen',translation:'Adeus',example:'Auf Wiedersehen und gute Reise!'},
+  {word:'Ich heiße...',translation:'Eu me chamo...',example:'Ich heiße Maria.'},
+  {word:'Wie geht es Ihnen?',translation:'Como vai? (formal)',example:'Wie geht es Ihnen heute?'}
 ];
 
 const shadowPhrases = [
-  {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai?'}
+  {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai? (formal)'},
+  {german:'Ich möchte einen Kaffee, bitte.',translation:'Eu gostaria de um café, por favor.'},
+  {german:'Wo ist der nächste Bahnhof?',translation:'Onde fica a próxima estação de trem?'},
+  {german:'Das Wetter ist heute sehr schön.',translation:'O tempo está muito bonito hoje.'},
+  {german:'Können Sie das bitte wiederholen?',translation:'Pode repetir isso, por favor?'}
 ];
 
-// ==================== CARREGAR MÓDULOS DO SUPABASE ====================
+const characters = {
+  anna:{name:'Anna',role:'Professora',color:'#f97316',systemMsg:'Você é Anna, uma professora de alemão paciente.'},
+  lukas:{name:'Lukas',role:'Colega',color:'#3b82f6',systemMsg:'Você é Lukas, um colega amigável.'},
+  herr_mueller:{name:'Herr Müller',role:'Formal',color:'#22c55e',systemMsg:'Você é Herr Müller, formal e educado.'},
+  lisa:{name:'Lisa',role:'Amiga',color:'#a855f7',systemMsg:'Você é Lisa, amiga descontraída.'}
+};
+
+const botResponses = {
+  anna:['Sehr gut! Deine Aussprache verbessert sich! 🎉','Das ist richtig! Du machst große Fortschritte.'],
+  lukas:['Hey, alles klar! Was machst du heute Abend?','Cool! Ich war letztes Wochenende in Berlin.'],
+  herr_mueller:['Guten Tag. Ihre Fortschritte sind bemerkenswert.','Sehr korrekt. Ich empfehle Ihnen weiter zu üben.'],
+  lisa:['Hey!! Wie geht\'s? 😍','Omg das ist so cool! Du lernst echt schnell! ✨']
+};
+
+const notesData = [
+  {id:1,title:'Artigos - Dica rápida',content:'Der = masculino, Das = neutro, Die = feminino.',date:'2026-05-04'},
+  {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam no presente.',date:'2026-05-03'}
+];
+
+const reviewData = [
+  {type:'grammar',title:'Der vs. Das vs. Die',desc:'Artigos definidos em alemão têm três gêneros.',icon:'📝',solved:false},
+  {type:'vocab',title:'Zahlen (Números)',desc:'Números de 1 a 100 em alemão.',icon:'🔢',solved:false}
+];
+
+// ==================== SUPABASE: CARREGAR MÓDULOS ====================
 async function loadModulesFromSupabase() {
   const client = getSupabase();
   if (!client) {
-    console.error('❌ Supabase SDK não carregado');
+    console.error('❌ Supabase SDK não carregado. Verifique a tag <script> no index.html');
     return;
   }
 
   try {
     console.log('🔍 Buscando módulos...');
     
-    // Busca módulos
     const {  modules, error: modError } = await client
       .from('study_modules')
       .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order')
-      .in('level', ['A1','A2','B1'])
       .eq('active', true)
+      .in('level', ['A1','A2','B1'])
       .order('sort_order', {ascending:true});
 
     if (modError) throw modError;
     console.log('✅ Módulos encontrados:', modules ? modules.length : 0);
     
     if (!modules || modules.length === 0) {
-      console.warn('⚠️ Nenhum módulo encontrado');
+      console.warn('⚠️ Nenhum módulo retornado. Verifique se os dados foram inseridos.');
       return;
     }
 
-    // Busca lições
     const {  lessons } = await client
       .from('study_lessons')
       .select('module_slug, slug, title_pt, title_de, sort_order')
       .eq('active', true)
       .order('sort_order', {ascending:true});
 
-    // Transforma dados
     const formatted = {A1:[], A2:[], B1:[]};
     
     modules.forEach(function(mod) {
       const modLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
       
-      const chapters = modLessons.map((l, idx) => ({
-        name: l.title_pt || l.title_de || 'Lição '+(idx+1),
-        type: 'vocab',
-        done: false,
-        slug: l.slug
-      }));
+      const chapters = modLessons.map((l, idx) => {
+        let type = 'vocab';
+        const title = (l.title_pt || '').toLowerCase();
+        if (title.includes('gram') || title.includes('verbo')) type = 'gramática';
+        else if (title.includes('kultur') || title.includes('cultura')) type = 'cultura';
+        else if (title.includes('prátic') || title.includes('dialog')) type = 'prática';
+        
+        return {
+          name: l.title_pt || l.title_de || 'Lição '+(idx+1),
+          type: type,
+          done: userProgress[l.slug]?.completed || false,
+          slug: l.slug
+        };
+      });
 
-      const module = {
-        id: mod.chapter_number,
-        slug: mod.slug,
-        title: mod.title_de || mod.title_pt,
-        translation: mod.title_pt,
-        status: mod.chapter_number === 1 ? 'available' : 'locked',
-        chapters: chapters.length > 0 ? chapters : [{name:'Introdução',type:'vocab',done:false}]
-      };
-      
-      if (formatted[mod.level]) formatted[mod.level].push(module);
+      const finalChapters = chapters.length > 0 ? chapters : [
+        {name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro'}
+      ];
+
+      // Lógica: módulo 1 disponível, resto bloqueado até completar anterior
+      const status = mod.chapter_number === 1 ? 'available' : 'locked';
+
+      if (formatted[mod.level]) {
+        formatted[mod.level].push({
+          id: mod.chapter_number,
+          slug: mod.slug,
+          title: mod.title_de || mod.title_pt,
+          translation: mod.title_pt,
+          status: status,
+          chapters: finalChapters
+        });
+      }
     });
 
     modulesData = formatted;
@@ -701,63 +755,329 @@ async function loadModulesFromSupabase() {
     renderModules();
     
   } catch (err) {
-    console.error('❌ Erro:', err);
+    console.error('❌ Erro ao carregar módulos:', err);
   }
 }
 
-// ==================== RENDER MODULES ====================
+// ==================== ABRIR LIÇÃO / MARCAR PROGRESSO ====================
+window.openLesson = function(lessonSlug, lessonName, lessonType) {
+  console.log('📖 Abrindo:', lessonSlug, lessonName, lessonType);
+  
+  if (!userProgress[lessonSlug]) userProgress[lessonSlug] = {completed:false};
+  if (!userProgress[lessonSlug].completed) {
+    userProgress[lessonSlug].completed = true;
+    
+    // Atualiza UI
+    for (let level in modulesData) {
+      modulesData[level].forEach(mod => {
+        mod.chapters.forEach(ch => {
+          if (ch.slug === lessonSlug) ch.done = true;
+        });
+      });
+    }
+    renderModules();
+    addXP(10, 'Lição concluída');
+  }
+  
+  alert('📚 ' + lessonName + '\n\nTipo: ' + lessonType + '\n\n[Conteúdo completo em breve]');
+};
+
+// ==================== NAVIGATION ====================
+function navigateTo(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  
+  document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === page);
+  });
+  
+  const titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
+  const titleEl = document.getElementById('topbarTitle');
+  if (titleEl) titleEl.textContent = titles[page] || page;
+  
+  if (page === 'modules') renderModules();
+  if (page === 'flashcards') renderFlashcard();
+  if (page === 'shadowing') renderShadowPhrase();
+  if (page === 'notes') renderNotes();
+  if (page === 'review') renderReview();
+  closeSidebar();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar')?.classList.toggle('open');
+  document.getElementById('overlay')?.classList.toggle('active');
+}
+function closeSidebar() {
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('overlay')?.classList.remove('active');
+}
+document.getElementById('overlay')?.addEventListener('click', closeSidebar);
+
+function updateGreeting() {
+  const h = new Date().getHours();
+  let greeting = 'Willkommen zurück! 👋';
+  if (h < 12) greeting = 'Guten Morgen! ☀️';
+  else if (h < 18) greeting = 'Guten Tag! 🌤️';
+  else greeting = 'Guten Abend! 🌙';
+  document.getElementById('greetingText').textContent = greeting;
+}
+
+// ==================== MODULES RENDER ====================
 function renderModules() {
   const list = document.getElementById('moduleList');
   if (!list) return;
   
   if (!modulesLoaded) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos...</p>';
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos do Supabase...</p>';
     return;
   }
   
   const modules = modulesData[currentLevel] || [];
   if (modules.length === 0) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado</p>';
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.</p>';
     return;
   }
   
-  list.innerHTML = modules.map(m => `
-    <div class="module-card">
-      <div class="module-header">
-        <div class="module-num">${m.id}</div>
-        <div>
-          <div class="module-title">${m.title}</div>
-          <div class="module-sub">${m.translation||''}</div>
-        </div>
-        <span class="module-status">${m.status==='available'?'🔓 Disponível':'🔒 Bloqueado'}</span>
-      </div>
-      <div class="module-chapters">
-        ${m.chapters.map(c => `
-          <div class="chapter-item">
-            <span class="chapter-name">${c.name}</span>
-            <span class="chapter-type">${c.type}</span>
+  list.innerHTML = modules.map(m => {
+    const statusText = m.status === 'available' ? '🔓 Disponível' : '🔒 Bloqueado';
+    const statusClass = m.status === 'available' ? 'status-available' : 'status-locked';
+    
+    let chaptersHtml = m.chapters.map(c => {
+      const isLocked = m.status === 'locked';
+      const clickable = !isLocked;
+      return `
+        <div class="chapter-item ${clickable ? 'clickable' : 'locked'}" ${clickable ? 'onclick="openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\')"' : ''}>
+          <div class="chapter-check ${c.done ? 'done' : ''}">${c.done ? '✓' : ''}</div>
+          <span class="chapter-name">${c.name}</span>
+          <span class="chapter-type-badge ${c.type}" onclick="event.stopPropagation(); ${clickable ? 'openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\')' : ''}">${c.type}</span>
+        </div>`;
+    }).join('');
+    
+    return `
+      <div class="module-card" data-slug="${m.slug}">
+        <div class="module-header">
+          <div class="module-header-left">
+            <div class="module-num">${m.id}</div>
+            <div>
+              <div class="module-title">${m.title}</div>
+              <div class="module-sub">${m.translation || ''}</div>
+            </div>
           </div>
-        `).join('')}
+          <span class="module-status ${statusClass}">${statusText}</span>
+        </div>
+        <div class="module-chapters">${chaptersHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+// Tabs de nível
+document.querySelectorAll('.level-tab')?.forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentLevel = tab.dataset.level;
+    renderModules();
+  });
+});
+
+// ==================== FLASHCARDS ====================
+function renderFlashcard() {
+  const card = flashcardsData[currentCardIndex];
+  if (!card) return;
+  document.getElementById('fcWord').textContent = card.word;
+  document.getElementById('fcTranslation').textContent = card.translation;
+  document.getElementById('fcExample').textContent = `"${card.example}"`;
+  document.getElementById('fcProgress').textContent = `${currentCardIndex + 1} / ${flashcardsData.length}`;
+  document.getElementById('fcLevel').textContent = `Nível ${currentLevel}`;
+  document.getElementById('flashcard')?.classList.remove('flipped');
+}
+window.flipCard = () => document.getElementById('flashcard')?.classList.toggle('flipped');
+window.nextCard = () => { currentCardIndex = (currentCardIndex + 1) % flashcardsData.length; renderFlashcard(); addXP(5); };
+window.cardAction = (action) => { if(action==='like') addXP(10); else addXP(2); nextCard(); };
+
+// ==================== SHADOWING ====================
+function renderShadowPhrase() {
+  const phrase = shadowPhrases[currentShadowIndex];
+  if (!phrase) return;
+  document.getElementById('shadowGerman').textContent = phrase.german;
+  document.getElementById('shadowTranslation').textContent = phrase.translation;
+  document.getElementById('shadowProgress').textContent = `Frase ${currentShadowIndex + 1} de ${shadowPhrases.length}`;
+}
+window.playShadowAudio = () => {
+  const phrase = shadowPhrases[currentShadowIndex]?.german;
+  if (!phrase || !('speechSynthesis' in window)) return alert('Seu navegador não suporta síntese de voz.');
+  const u = new SpeechSynthesisUtterance(phrase);
+  u.lang = 'de-DE'; u.rate = 0.85;
+  speechSynthesis.speak(u);
+  addXP(3);
+};
+window.nextShadowPhrase = () => { currentShadowIndex = (currentShadowIndex + 1) % shadowPhrases.length; renderShadowPhrase(); addXP(5); };
+
+// ==================== CHATBOT ====================
+function initChatbot() {
+  document.querySelectorAll('.char-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentChar = btn.dataset.char;
+      const ch = characters[currentChar];
+      const msgs = document.getElementById('chatMessages');
+      if (msgs) msgs.innerHTML = `<div class="chat-msg bot"><div class="msg-avatar">${ch.name[0]}</div><div class="msg-bubble">Hallo! Ich bin ${ch.name}. Wie kann ich dir helfen? 😊</div></div>`;
+    });
+  });
+}
+initChatbot();
+
+window.sendMessage = () => {
+  const input = document.getElementById('chatInput');
+  const text = input?.value.trim();
+  if (!text) return;
+  input.value = '';
+  const msgs = document.getElementById('chatMessages');
+  if (!msgs) return;
+  
+  msgs.innerHTML += `<div class="chat-msg user"><div class="msg-avatar">US</div><div class="msg-bubble">${escapeHtml(text)}</div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  addXP(8);
+  
+  const typingId = 'typing-' + Date.now();
+  msgs.innerHTML += `<div class="chat-msg bot" id="${typingId}"><div class="msg-avatar">${characters[currentChar].name[0]}</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  
+  setTimeout(() => {
+    const responses = botResponses[currentChar];
+    const response = responses[Math.floor(Math.random() * responses.length)];
+    const el = document.getElementById(typingId);
+    if (el) el.querySelector('.msg-bubble').textContent = response;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1200);
+};
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ==================== NOTES ====================
+function renderNotes() {
+  const grid = document.getElementById('notesGrid');
+  if (!grid) return;
+  if (notes.length === 0) {
+    grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px">Nenhuma anotação ainda.</p>';
+    return;
+  }
+  grid.innerHTML = notes.map(n => `
+    <div class="note-card">
+      <h4>${escapeHtml(n.title)}</h4>
+      <p>${escapeHtml(n.content)}</p>
+      <div class="note-date">${n.date}</div>
+      <div class="note-actions">
+        <button onclick="editNote(${n.id})">Editar</button>
+        <button class="del" onclick="deleteNote(${n.id})">Excluir</button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
+}
+window.openNoteModal = (id) => {
+  editingNoteId = id || null;
+  const modal = document.getElementById('noteModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  const titleInput = document.getElementById('noteTitle');
+  const contentInput = document.getElementById('noteContent');
+  const titleEl = document.getElementById('noteModalTitle');
+  if (id) {
+    const note = notes.find(n => n.id === id);
+    if (titleEl) titleEl.textContent = 'Editar Anotação';
+    if (titleInput && note) titleInput.value = note.title;
+    if (contentInput && note) contentInput.value = note.content;
+  } else {
+    if (titleEl) titleEl.textContent = 'Nova Anotação';
+    if (titleInput) titleInput.value = '';
+    if (contentInput) contentInput.value = '';
+  }
+};
+window.closeNoteModal = () => { document.getElementById('noteModal')?.classList.add('hidden'); editingNoteId = null; };
+window.saveNote = () => {
+  const title = document.getElementById('noteTitle')?.value.trim();
+  const content = document.getElementById('noteContent')?.value.trim();
+  if (!title || !content) return;
+  if (editingNoteId) {
+    const note = notes.find(n => n.id === editingNoteId);
+    if (note) { note.title = title; note.content = content; }
+  } else {
+    notes.unshift({id:Date.now(),title,content,date:new Date().toISOString().split('T')[0]});
+  }
+  closeNoteModal();
+  renderNotes();
+  addXP(10);
+};
+window.editNote = (id) => openNoteModal(id);
+window.deleteNote = (id) => { notes = notes.filter(n => n.id !== id); renderNotes(); };
+
+// ==================== REVIEW ====================
+function renderReview() {
+  const container = document.getElementById('reviewCards');
+  if (!container) return;
+  const iconColors = {'grammar':'rgba(249,115,22,.15)','vocab':'rgba(168,85,247,.15)','prática':'rgba(59,130,246,.15)'};
+  const iconTextColors = {'grammar':'var(--accent)','vocab':'var(--purple)','prática':'var(--blue)'};
+  container.innerHTML = reviewItems.map((r,i) => `
+    <div class="review-card">
+      <div class="review-icon" style="background:${iconColors[r.type]||'rgba(249,115,22,.15)'};color:${iconTextColors[r.type]||'var(--accent)'}">
+        <span style="font-size:1.2rem">${r.icon}</span>
+      </div>
+      <div class="review-content">
+        <h4>${r.title}</h4>
+        <p>${r.desc}</p>
+        <div class="review-actions">
+          <button class="btn btn-primary btn-sm" onclick="markReviewDone(${i})">${r.solved?'Revisar novamente':'Marcar como revisado'}</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+window.markReviewDone = (index) => { reviewItems[index].solved = !reviewItems[index].solved; renderReview(); addXP(15); };
+
+// ==================== XP SYSTEM ====================
+function addXP(amount, reason) {
+  xp = Math.min(xp + amount, 3000);
+  const pct = (xp / 3000) * 100;
+  const fill = document.getElementById('xpFill');
+  const text = document.getElementById('xpText');
+  const metric = document.getElementById('metricProgress');
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = `${xp.toLocaleString('pt-BR')} / 3.000`;
+  if (metric) metric.textContent = Math.round(pct) + '%';
+  if (reason) showToast(`+${amount} XP: ${reason}`, 'success');
+}
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type||'info'}`;
+  toast.innerText = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
 // ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 Deutsch Hub iniciando...');
-  loadModulesFromSupabase();
+document.addEventListener('DOMContentLoaded', async () => {
+  navigateTo('dashboard');
+  updateGreeting();
+  notes = JSON.parse(JSON.stringify(notesData));
+  reviewItems = JSON.parse(JSON.stringify(reviewData));
   
-  // Navegação básica
-  document.querySelectorAll('.level-tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-      document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-      currentLevel = this.dataset.level;
-      renderModules();
-    });
-  });
+  await loadModulesFromSupabase();
+  renderFlashcard();
+  renderShadowPhrase();
+  renderNotes();
+  renderReview();
+  console.log('🇩 Deutsch Hub v2.0 iniciado!');
 });
+
+// Expor funções globais para onclick no HTML
+window.navigateTo = navigateTo;
+window.toggleSidebar = toggleSidebar;
+window.openLesson = openLesson;
 </script>
 </body>
 </html>
