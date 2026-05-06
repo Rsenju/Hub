@@ -605,7 +605,7 @@ input,textarea{font-family:inherit;outline:none}
 </div>
 
 <script>
-// ==================== SUPABASE CONFIG ====================
+  // ==================== SUPABASE CONFIG ====================
 const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
 const SUPABASE_KEY = 'sb_publishable__1bxoDUtOWsghhgfOpSz2A_qlwCtTo0';
 
@@ -617,603 +617,164 @@ function getSupabase() {
   return supabaseClient;
 }
 
-// ==================== STATE (SEM HARDCODE) ====================
+// ==================== STATE ====================
 let modulesData = { A1: [], A2: [], B1: [] };
 let modulesLoaded = false;
-let userProgress = {}; // { lesson_slug: { completed: boolean } }
-
-let currentPage = 'dashboard';
 let currentLevel = 'A1';
-let currentCardIndex = 0;
-let currentShadowIndex = 0;
-let currentChar = 'anna';
-let notes = [];
-let reviewItems = [];
-let xp = 2450;
-let streak = 12;
-let editingNoteId = null;
 
-// ==================== DADOS ESTÁTICOS (Flashcards, etc) ====================
-const flashcardsData = [
-  {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
-  {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
-  {word:'Danke',translation:'Obrigado',example:'Danke schön!'},
-  {word:'Bitte',translation:'Por favor',example:'Ein Wasser, bitte.'},
-  {word:'Entschuldigung',translation:'Desculpe',example:'Entschuldigung, wo ist der Bahnhof?'},
-  {word:'Ja',translation:'Sim',example:'Ja, ich verstehe.'},
-  {word:'Nein',translation:'Não',example:'Nein, danke.'},
-  {word:'Auf Wiedersehen',translation:'Adeus',example:'Auf Wiedersehen und gute Reise!'},
-  {word:'Ich heiße...',translation:'Eu me chamo...',example:'Ich heiße Maria.'},
-  {word:'Wie geht es Ihnen?',translation:'Como vai? (formal)',example:'Wie geht es Ihnen heute?'}
-];
-
-const shadowPhrases = [
-  {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai? (formal)'},
-  {german:'Ich möchte einen Kaffee, bitte.',translation:'Eu gostaria de um café, por favor.'},
-  {german:'Wo ist der nächste Bahnhof?',translation:'Onde fica a próxima estação de trem?'},
-  {german:'Das Wetter ist heute sehr schön.',translation:'O tempo está muito bonito hoje.'},
-  {german:'Können Sie das bitte wiederholen?',translation:'Pode repetir isso, por favor?'}
-];
-
-const characters = {
-  anna:{name:'Anna',role:'Professora',color:'#f97316',systemMsg:'Você é Anna, uma professora de alemão paciente.'},
-  lukas:{name:'Lukas',role:'Colega',color:'#3b82f6',systemMsg:'Você é Lukas, um colega amigável.'},
-  herr_mueller:{name:'Herr Müller',role:'Formal',color:'#22c55e',systemMsg:'Você é Herr Müller, formal e educado.'},
-  lisa:{name:'Lisa',role:'Amiga',color:'#a855f7',systemMsg:'Você é Lisa, amiga descontraída.'}
-};
-
-const botResponses = {
-  anna:['Sehr gut! Deine Aussprache verbessert sich! 🎉','Das ist richtig! Du machst große Fortschritte.'],
-  lukas:['Hey, alles klar! Was machst du heute Abend?','Cool! Ich war letztes Wochenende in Berlin.'],
-  herr_mueller:['Guten Tag. Ihre Fortschritte sind bemerkenswert.','Sehr korrekt. Ich empfehle Ihnen weiter zu üben.'],
-  lisa:['Hey!! Wie geht\'s? 😍','Omg das ist so cool! Du lernst echt schnell! ✨']
-};
-
-const notesData = [
-  {id:1,title:'Artigos - Dica rápida',content:'Der = masculino, Das = neutro, Die = feminino.',date:'2026-05-04'},
-  {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam no presente.',date:'2026-05-03'}
-];
-
-const reviewData = [
-  {type:'grammar',title:'Der vs. Das vs. Die',desc:'Artigos definidos em alemão têm três gêneros.',icon:'📝',solved:false},
-  {type:'vocab',title:'Zahlen (Números)',desc:'Números de 1 a 100 em alemão.',icon:'🔢',solved:false}
-];
-
-// ==================== CARREGAR MÓDULOS DO SUPABASE ====================
+// ==================== DEBUG: CARREGAR MÓDULOS SEM FILTROS ====================
 async function loadModulesFromSupabase() {
   const client = getSupabase();
   if (!client) {
-    console.error('[Supabase] SDK não carregado. Verifique <script> no index.html');
+    console.error('❌ Supabase SDK não carregado');
     return;
   }
 
   try {
-    console.log('[Supabase] Buscando study_modules...');
+    console.log('🔍 [DEBUG] Query 1: SELECT * FROM study_modules LIMIT 5');
     
-    // 1. Busca módulos
-    const {  modules, error: modError } = await client
+    // QUERY 1: Sem filtros - só para ver se há dados
+    const {  raw, error: err1 } = await client
+      .from('study_modules')
+      .select('*')
+      .limit(5);
+    
+    console.log('📦 Raw response:', raw);
+    console.log('❌ Error:', err1);
+    
+    if (err1) {
+      console.error('❌ Erro na query:', err1);
+      return;
+    }
+    
+    if (!raw || raw.length === 0) {
+      console.warn('⚠️ Tabela vazia ou RLS bloqueando. Execute no SQL Editor:');
+      console.warn('CREATE POLICY "Leitura pública" ON study_modules FOR SELECT USING (true);');
+      return;
+    }
+    
+    // QUERY 2: Com filtros originais
+    console.log('\n🔍 [DEBUG] Query 2: Com filtros level + active');
+    const {  filtered, error: err2 } = await client
       .from('study_modules')
       .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order, active')
       .in('level', ['A1','A2','B1'])
       .order('sort_order', {ascending:true});
-
-    if (modError) throw modError;
-    console.log('[Supabase] Módulos encontrados:', modules ? modules.length : 0);
     
-    if (!modules || modules.length === 0) {
-      console.warn('[Supabase] Nenhum módulo retornado');
-      return;
+    console.log('📦 Filtered response:', filtered);
+    console.log('❌ Error:', err2);
+    
+    if (err2) throw err2;
+    
+    // Se filtered estiver vazio mas raw não, o problema é o filtro
+    if (raw.length > 0 && (!filtered || filtered.length === 0)) {
+      console.warn('⚠️ Filtros estão excluindo os dados! Verifique:');
+      console.warn('  • Os valores de "level" estão em MAIÚSCULO? (A1, não a1)');
+      console.warn('  • O campo "active" é boolean true ou string "true"?');
+      console.warn('  • Há políticas RLS aplicando filtros adicionais?');
     }
-
-    // 2. Busca lições (capítulos)
-    console.log('[Supabase] Buscando study_lessons...');
-    const {  lessons, error: lessError } = await client
-      .from('study_lessons')
-      .select('module_slug, slug, title_pt, title_de, summary_pt, quick_rule_pt, sort_order')
-      .order('sort_order', {ascending:true});
-
-    if (lessError) console.warn('[Supabase] Erro em lessons:', lessError);
-    console.log('[Supabase] Lições encontradas:', lessons ? lessons.length : 0);
-
-    // 3. Transforma para formato da UI
-    const formatted = {A1:[], A2:[], B1:[]};
     
-    modules.forEach(function(mod) {
-      // Filtra apenas levels válidos
-      if (!mod.level || ['A1','A2','B1'].indexOf(mod.level) === -1) return;
+    // Transforma dados válidos
+    if (filtered && filtered.length > 0) {
+      const {  lessons } = await client
+        .from('study_lessons')
+        .select('module_slug, slug, title_pt, title_de, summary_pt, sort_order')
+        .order('sort_order', {ascending:true});
       
-      // Filtra lições deste módulo
-      const modLessons = (lessons || []).filter(function(l) { return l.module_slug === mod.slug; });
+      const formatted = {A1:[], A2:[], B1:[]};
       
-      // Cria chapters a partir das lessons
-      const chapters = modLessons.map(function(l, idx) {
-        // Deriva tipo baseado no título
-        let type = 'vocab';
-        var titleLower = (l.title_pt || '').toLowerCase();
-        if (titleLower.indexOf('gram') >= 0 || titleLower.indexOf('verbo') >= 0) type = 'gramática';
-        else if (titleLower.indexOf('kultur') >= 0 || titleLower.indexOf('cultura') >= 0) type = 'cultura';
-        else if (titleLower.indexOf('prátic') >= 0 || titleLower.indexOf('dialog') >= 0) type = 'prática';
-        
-        // Verifica progresso local (inicia tudo como NÃO concluído)
-        var isCompleted = userProgress[l.slug] ? userProgress[l.slug].completed : false;
-        
-        return {
+      filtered.forEach(function(mod) {
+        const modLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
+        const chapters = modLessons.map((l, idx) => ({
           name: l.title_pt || l.title_de || 'Lição '+(idx+1),
-          type: type,
-          done: isCompleted,  // ✅ PROBLEMA 2: inicia como false
+          type: 'vocab',
+          done: false,
           slug: l.slug,
-          summary: l.summary_pt,
           sort_order: l.sort_order
+        }));
+        
+        const module = {
+          id: mod.chapter_number || mod.slug,
+          slug: mod.slug,
+          title: mod.title_de || mod.title_pt,
+          translation: mod.title_pt,
+          status: mod.chapter_number === 1 ? 'available' : 'locked',
+          chapters: chapters.length > 0 ? chapters : [{name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro'}],
+          sort_order: mod.sort_order
         };
+        
+        if (formatted[mod.level]) formatted[mod.level].push(module);
       });
-
-      // Se não houver lições, cria placeholders
-      var finalChapters = chapters.length > 0 ? chapters : [
-        {name:'Introdução',type:'vocab',done:false,slug:mod.slug+'-intro',summary:'',sort_order:1},
-        {name:'Gramática Básica',type:'gramática',done:false,slug:mod.slug+'-gram',summary:'',sort_order:2},
-        {name:'Prática',type:'prática',done:false,slug:mod.slug+'-prac',summary:'',sort_order:3}
-      ];
-
-      // Ordena capítulos por sort_order
-      finalChapters.sort(function(a,b) { return (a.sort_order||0) - (b.sort_order||0); });
-
-      // ✅ PROBLEMA 3: Lógica de desbloqueio sequencial
-      var moduleStatus = 'locked';
-      if (mod.chapter_number === 1) moduleStatus = 'available'; // Só módulo 1 disponível
-
-      var module = {
-        id: mod.chapter_number || mod.slug,
-        slug: mod.slug,
-        title: mod.title_de || mod.title_pt,
-        translation: mod.title_pt,
-        focus: mod.focus,
-        status: moduleStatus,
-        chapters: finalChapters,
-        sort_order: mod.sort_order
-      };
       
-      if (formatted[mod.level]) formatted[mod.level].push(module);
-    });
-
-    // Ordena módulos
-    ['A1','A2','B1'].forEach(function(level) {
-      formatted[level].sort(function(a,b) { return (a.sort_order||0) - (b.sort_order||0); });
-    });
-
-    modulesData = formatted;
-    modulesLoaded = true;
-    console.log('✅ Módulos carregados:', Object.keys(formatted).map(function(l){return l+':'+formatted[l].length;}));
+      ['A1','A2','B1'].forEach(level => {
+        formatted[level].sort((a,b) => (a.sort_order||0) - (b.sort_order||0));
+      });
+      
+      modulesData = formatted;
+      modulesLoaded = true;
+      console.log('✅ Módulos carregados:', Object.keys(formatted).map(l => l+':'+formatted[l].length));
+    }
     
   } catch (err) {
-    console.error('❌ Erro ao carregar módulos:', err);
+    console.error('❌ Erro fatal:', err);
   } finally {
-    renderModules(); // ✅ Garante UI atualizada
+    renderModules();
   }
 }
 
-// ==================== ABRIR LIÇÃO (com lógica de desbloqueio) ====================
-window.openLesson = function(lessonSlug, lessonName, lessonType, chapterIndex, moduleStatus) {
-  console.log('📖 Abrindo:', lessonSlug, lessonName, lessonType, 'Cap:', chapterIndex);
-  
-  // Bloqueia se módulo não disponível
-  if (moduleStatus === 'locked') {
-    alert('🔒 Complete o módulo anterior primeiro.');
-    return;
-  }
-  
-  // ✅ PROBLEMA 3: Só libera capítulo 0 ou se anterior estiver concluído
-  if (chapterIndex > 0) {
-    var prevDone = false;
-    for (var level in modulesData) {
-      for (var mi=0; mi<modulesData[level].length; mi++) {
-        var mod = modulesData[level][mi];
-        if (mod.chapters && mod.chapters[chapterIndex-1] && mod.chapters[chapterIndex-1].done) {
-          prevDone = true; break;
-        }
-      }
-    }
-    if (!prevDone) {
-      alert('🔒 Complete o capítulo anterior primeiro.');
-      return;
-    }
-  }
-  
-  // Mostra conteúdo (substituir por navegação real)
-  var content = '📚 ' + lessonName + '\n\nTipo: ' + lessonType + '\nSlug: ' + lessonSlug;
-  if (lessonType === 'vocab') content += '\n\n[Vocabulário: palavras + áudio]';
-  else if (lessonType === 'gramática') content += '\n\n[Gramática: explicação + exercícios]';
-  else if (lessonType === 'prática') content += '\n\n[Prática: diálogo interativo]';
-  else if (lessonType === 'cultura') content += '\n\n[Cultura: texto + curiosidades]';
-  content += '\n\n[Em breve: conteúdo completo]';
-  
-  alert(content);
-  
-  // ✅ Marca como concluído após "estudar"
-  markLessonComplete(lessonSlug, 10);
-};
-
-// ==================== MARCAR LIÇÃO COMO COMPLETA ====================
-function markLessonComplete(lessonSlug, xpReward) {
-  if (!userProgress[lessonSlug]) userProgress[lessonSlug] = {completed:false};
-  
-  if (!userProgress[lessonSlug].completed) {
-    userProgress[lessonSlug].completed = true;
-    
-    // Atualiza modulesData para refletir progresso
-    for (var level in modulesData) {
-      for (var mi=0; mi<modulesData[level].length; mi++) {
-        var mod = modulesData[level][mi];
-        for (var ci=0; ci<mod.chapters.length; ci++) {
-          if (mod.chapters[ci].slug === lessonSlug) {
-            mod.chapters[ci].done = true;
-            break;
-          }
-        }
-      }
-    }
-    
-    renderModules(); // Atualiza UI
-    addXP(xpReward || 10, 'Lição concluída');
-  }
-}
-
-// ==================== NAVIGATION ====================
-function navigateTo(page) {
-  currentPage = page;
-  var pages = document.querySelectorAll('.page');
-  for (var i=0; i<pages.length; i++) pages[i].classList.remove('active');
-  var target = document.getElementById('page-' + page);
-  if (target) target.classList.add('active');
-  
-  var items = document.querySelectorAll('.sidebar-item, .sidebar-link, .nav-pill, .bottom-nav-item');
-  for (var j=0; j<items.length; j++) {
-    if (items[j].dataset && items[j].dataset.page === page) items[j].classList.add('active');
-    else items[j].classList.remove('active');
-  }
-  
-  var titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
-  var titleEl = document.getElementById('topbarTitle');
-  if (titleEl) titleEl.textContent = titles[page] || page;
-  
-  if (page === 'modules') renderModules();
-  if (page === 'flashcards') renderFlashcard();
-  if (page === 'shadowing') renderShadowPhrase();
-  if (page === 'notes') renderNotes();
-  if (page === 'review') renderReview();
-  closeSidebar();
-}
-
-function toggleSidebar() {
-  var sb = document.getElementById('sidebar');
-  var ov = document.getElementById('overlay');
-  if (sb) sb.classList.toggle('open');
-  if (ov) ov.classList.toggle('active');
-}
-function closeSidebar() {
-  var sb = document.getElementById('sidebar');
-  var ov = document.getElementById('overlay');
-  if (sb) sb.classList.remove('open');
-  if (ov) ov.classList.remove('active');
-}
-var overlay = document.getElementById('overlay');
-if (overlay) overlay.addEventListener('click', closeSidebar);
-
-function updateGreeting() {
-  var h = new Date().getHours();
-  var greeting = 'Willkommen zurück! 👋';
-  if (h < 12) greeting = 'Guten Morgen! ☀️';
-  else if (h < 18) greeting = 'Guten Tag! 🌤️';
-  else greeting = 'Guten Abend! 🌙';
-  var el = document.getElementById('greetingText');
-  if (el) el.textContent = greeting;
-}
-
-// ==================== MODULES (com tags clicáveis) ====================
+// ==================== RENDER SIMPLES ====================
 function renderModules() {
-  var list = document.getElementById('moduleList');
+  const list = document.getElementById('moduleList');
   if (!list) return;
   
   if (!modulesLoaded) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos do Supabase...</p>';
+    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando...</p>';
     return;
   }
   
-  var modules = modulesData[currentLevel] || [];
+  const modules = modulesData[currentLevel] || [];
   if (modules.length === 0) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.<br><small>Execute 03_a1_data.sql no Supabase.</small></p>';
+    list.innerHTML = '<p class="text-center text-red-500 py-6">Nenhum módulo encontrado. <br><small>Verifique RLS e filtros no console.</small></p>';
     return;
   }
   
-  var html = '';
-  for (var mi=0; mi<modules.length; mi++) {
-    var m = modules[mi];
-    var statusText = m.status === 'available' ? '🔓 Disponível' : (m.status === 'locked' ? '🔒 Bloqueado' : '✓ Concluído');
-    var statusClass = m.status === 'available' ? 'status-available' : (m.status === 'locked' ? 'status-locked' : 'status-done');
-    
-    html += '<div class="module-card" data-slug="'+(m.slug||'')+'">';
-    html += '<div class="module-header">';
-    html += '<div class="module-header-left">';
-    html += '<div class="module-num">'+m.id+'</div>';
-    html += '<div><div class="module-title">'+m.title+'</div><div class="module-sub">'+(m.translation||'')+'</div>';
-    if (m.focus) html += '<div class="module-focus">🎯 '+m.focus+'</div>';
-    html += '</div></div>';
-    html += '<span class="module-status '+statusClass+'">'+statusText+'</span>';
-    html += '</div>';
-    html += '<div class="module-chapters">';
-    
-    for (var ci=0; ci<m.chapters.length; ci++) {
-      var c = m.chapters[ci];
-      // ✅ PROBLEMA 3: Lógica de desbloqueio sequencial
-      var isAvailable = m.status === 'available' && (ci === 0 || (ci > 0 && m.chapters[ci-1].done));
-      var clickable = isAvailable;
-      
-      html += '<div class="chapter-item '+(clickable ? 'clickable' : 'locked')+'" ';
-      if (clickable) {
-        html += 'onclick="openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\','+ci+',\''+m.status+'\')" ';
-      }
-      html += 'data-slug="'+(c.slug||'')+'" data-type="'+c.type+'">';
-      html += '<div class="chapter-check '+(c.done ? 'done' : '')+'">'+(c.done ? '✓' : '')+'</div>';
-      html += '<span class="chapter-name">'+c.name+'</span>';
-      // ✅ PROBLEMA 4: Tag clicável com event.stopPropagation
-      html += '<span class="chapter-type-badge '+c.type+'" onclick="event.stopPropagation(); openLesson(\''+c.slug+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.type+'\','+ci+',\''+m.status+'\')">'+c.type+'</span>';
-      html += '</div>';
-    }
-    html += '</div></div>';
-  }
-  list.innerHTML = html;
+  list.innerHTML = modules.map(m => `
+    <div class="module-card">
+      <div class="module-header">
+        <div class="module-num">${m.id}</div>
+        <div>
+          <div class="module-title">${m.title}</div>
+          <div class="module-sub">${m.translation||''}</div>
+        </div>
+        <span class="module-status">${m.status==='available'?'🔓 Disponível':'🔒 Bloqueado'}</span>
+      </div>
+      <div class="module-chapters">
+        ${m.chapters.map(c => `
+          <div class="chapter-item">
+            <span class="chapter-name">${c.name}</span>
+            <span class="chapter-type">${c.type}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
 }
 
-// Tabs de nível
-var levelTabs = document.querySelectorAll('.level-tab');
-for (var lt=0; lt<levelTabs.length; lt++) {
-  (function(tab) {
-    tab.addEventListener('click', function() {
-      for (var i=0; i<levelTabs.length; i++) levelTabs[i].classList.remove('active');
-      tab.classList.add('active');
-      currentLevel = tab.dataset.level;
-      if (!modulesLoaded) loadModulesFromSupabase();
-      else renderModules();
-    });
-  })(levelTabs[lt]);
-}
-
-// ==================== FLASHCARDS ====================
-function renderFlashcard() {
-  var card = flashcardsData[currentCardIndex];
-  if (!card) return;
-  var els = {word:document.getElementById('fcWord'),trans:document.getElementById('fcTranslation'),ex:document.getElementById('fcExample'),prog:document.getElementById('fcProgress'),lvl:document.getElementById('fcLevel'),fc:document.getElementById('flashcard')};
-  if (els.word) els.word.textContent = card.word;
-  if (els.trans) els.trans.textContent = card.translation;
-  if (els.ex) els.ex.textContent = '"'+card.example+'"';
-  if (els.prog) els.prog.textContent = (currentCardIndex+1)+' / '+flashcardsData.length;
-  if (els.lvl) els.lvl.textContent = 'Nível '+currentLevel;
-  if (els.fc) els.fc.classList.remove('flipped');
-}
-function flipCard() { var fc=document.getElementById('flashcard'); if(fc) fc.classList.toggle('flipped'); }
-function nextCard() { currentCardIndex=(currentCardIndex+1)%flashcardsData.length; renderFlashcard(); addXP(5); }
-function cardAction(action) { if(action==='like') addXP(10); else addXP(2); nextCard(); }
-
-// ==================== SHADOWING ====================
-function renderShadowPhrase() {
-  var phrase = shadowPhrases[currentShadowIndex];
-  if (!phrase) return;
-  var els = {de:document.getElementById('shadowGerman'),pt:document.getElementById('shadowTranslation'),prog:document.getElementById('shadowProgress')};
-  if (els.de) els.de.textContent = phrase.german;
-  if (els.pt) els.pt.textContent = phrase.translation;
-  if (els.prog) els.prog.textContent = 'Frase '+(currentShadowIndex+1)+' de '+shadowPhrases.length;
-}
-function playShadowAudio() {
-  var phrase = shadowPhrases[currentShadowIndex];
-  if (!phrase || !('speechSynthesis' in window)) { alert('Seu navegador não suporta síntese de voz.'); return; }
-  var u = new SpeechSynthesisUtterance(phrase.german);
-  u.lang='de-DE'; u.rate=0.85;
-  speechSynthesis.speak(u);
-  addXP(3);
-}
-function nextShadowPhrase() { currentShadowIndex=(currentShadowIndex+1)%shadowPhrases.length; renderShadowPhrase(); addXP(5); }
-
-// ==================== CHATBOT ====================
-function selectChar(charKey) {
-  currentChar = charKey;
-  var btns = document.querySelectorAll('.char-btn');
-  for (var i=0; i<btns.length; i++) btns[i].classList.toggle('active', btns[i].dataset && btns[i].dataset.char===charKey);
-  var ch = characters[charKey];
-  var msgs = document.getElementById('chatMessages');
-  if (msgs) { msgs.innerHTML=''; addBotMessage(ch.systemMsg.split('.')[0] || 'Olá!'); }
-}
-function addBotMessage(text) {
-  var msgs = document.getElementById('chatMessages');
-  if (!msgs) return;
-  var ch = characters[currentChar];
-  var div = document.createElement('div');
-  div.className = 'chat-msg bot';
-  div.innerHTML = '<div class="msg-avatar" style="background:'+ch.color+'">'+ch.name[0]+'</div><div class="msg-bubble">'+escHtml(text)+'</div>';
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-function addUserMessage(text) {
-  var msgs = document.getElementById('chatMessages');
-  if (!msgs) return;
-  var div = document.createElement('div');
-  div.className = 'chat-msg user';
-  div.innerHTML = '<div class="msg-avatar">US</div><div class="msg-bubble">'+escHtml(text)+'</div>';
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-function sendChat() {
-  var input = document.getElementById('chatInput');
-  var text = input ? input.value.trim() : '';
-  if (!text) return;
-  if (input) input.value = '';
-  addUserMessage(text);
-  var sendBtn = document.getElementById('sendBtn');
-  if (sendBtn) sendBtn.disabled = true;
-  
-  setTimeout(function() {
-    var responses = botResponses[currentChar] || botResponses.anna;
-    var response = responses[Math.floor(Math.random()*responses.length)];
-    addBotMessage(response);
-    if (sendBtn) sendBtn.disabled = false;
-  }, 1200);
-}
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
-
-// ==================== NOTES ====================
-function renderNotes() {
-  var grid = document.getElementById('notesGrid');
-  if (!grid) return;
-  if (notes.length === 0) { grid.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:40px">Nenhuma anotação ainda.</p>'; return; }
-  var html='';
-  for (var i=0; i<notes.length; i++) {
-    var n = notes[i];
-    html += '<div class="note-card"><h4>'+escHtml(n.title)+'</h4><p>'+escHtml(n.content)+'</p><div class="note-date">'+n.date+'</div><div class="note-actions"><button onclick="editNote('+n.id+')">Editar</button><button class="del" onclick="deleteNote('+n.id+')">Excluir</button></div></div>';
-  }
-  grid.innerHTML = html;
-}
-function openNoteModal(id) {
-  editingNoteId = id || null;
-  var modal = document.getElementById('noteModal');
-  if (!modal) return;
-  modal.classList.remove('hidden');
-  var titleInput = document.getElementById('noteTitle');
-  var contentInput = document.getElementById('noteContent');
-  var titleEl = document.getElementById('noteModalTitle');
-  if (id) {
-    var note = null;
-    for (var i=0; i<notes.length; i++) if (notes[i].id===id) { note=notes[i]; break; }
-    if (titleEl) titleEl.textContent='Editar Anotação';
-    if (titleInput && note) titleInput.value = note.title;
-    if (contentInput && note) contentInput.value = note.content;
-  } else {
-    if (titleEl) titleEl.textContent='Nova Anotação';
-    if (titleInput) titleInput.value='';
-    if (contentInput) contentInput.value='';
-  }
-}
-function closeNoteModal() { var m=document.getElementById('noteModal'); if(m) m.classList.add('hidden'); editingNoteId=null; }
-function saveNote() {
-  var titleInput = document.getElementById('noteTitle');
-  var contentInput = document.getElementById('noteContent');
-  var title = titleInput ? titleInput.value.trim() : '';
-  var content = contentInput ? contentInput.value.trim() : '';
-  if (!title || !content) return;
-  if (editingNoteId) {
-    for (var i=0; i<notes.length; i++) if (notes[i].id===editingNoteId) { notes[i].title=title; notes[i].content=content; break; }
-  } else {
-    notes.unshift({id:Date.now(),title:title,content:content,date:new Date().toISOString().split('T')[0]});
-  }
-  closeNoteModal();
-  renderNotes();
-  addXP(10);
-}
-function editNote(id) { openNoteModal(id); }
-function deleteNote(id) { notes = notes.filter(function(n){return n.id!==id;}); renderNotes(); }
-
-// ==================== REVIEW ====================
-function renderReview() {
-  var container = document.getElementById('reviewCards');
-  if (!container) return;
-  var iconColors = {'grammar':'rgba(249,115,22,.15)','vocab':'rgba(168,85,247,.15)','prática':'rgba(59,130,246,.15)'};
-  var iconTextColors = {'grammar':'var(--accent)','vocab':'var(--purple)','prática':'var(--blue)'};
-  var html='';
-  for (var i=0; i<reviewItems.length; i++) {
-    var r = reviewItems[i];
-    html += '<div class="review-card"><div class="review-icon" style="background:'+(iconColors[r.type]||'rgba(249,115,22,.15)')+';color:'+(iconTextColors[r.type]||'var(--accent)')+'"><span style="font-size:1.2rem">'+r.icon+'</span></div><div class="review-content"><h4>'+r.title+'</h4><p>'+r.desc+'</p><div class="review-actions"><button class="btn btn-primary btn-sm" onclick="markReviewDone('+i+')">'+(r.solved?'Revisar novamente':'Marcar como revisado')+'</button></div></div></div>';
-  }
-  container.innerHTML = html;
-}
-function markReviewDone(index) { reviewItems[index].solved = !reviewItems[index].solved; renderReview(); addXP(15); }
-
-// ==================== XP SYSTEM ====================
-function addXP(amount, reason) {
-  xp = Math.min(xp + amount, 3000);
-  updateUI();
-  showToast('+'+amount+' XP: '+(reason||'Atividade'), 'success');
-}
-function updateUI() {
-  var els = {xpNum:document.getElementById('xpNum'),streakNum:document.getElementById('streakNum'),levelLabel:document.getElementById('levelLabel'),progressBar:document.getElementById('progressBar'),xpFill:document.getElementById('xpFill'),xpText:document.getElementById('xpText'),metricProgress:document.getElementById('metricProgress')};
-  if (els.xpNum) els.xpNum.innerText = xp;
-  if (els.streakNum) els.streakNum.innerText = streak;
-  if (els.levelLabel) els.levelLabel.innerText = currentLevel;
-  if (els.progressBar) els.progressBar.style.width = Math.min((xp%500)/500*100,100)+'%';
-  if (els.xpFill) els.xpFill.style.width = Math.min((xp/3000)*100,100)+'%';
-  if (els.xpText) els.xpText.textContent = xp.toLocaleString('pt-BR')+' / 3.000';
-  if (els.metricProgress) els.metricProgress.textContent = Math.round((xp/3000)*100)+'%';
-}
-function showToast(msg, type) {
-  var toast = document.createElement('div');
-  toast.className = 'toast '+(type||'info');
-  toast.innerText = msg;
-  document.body.appendChild(toast);
-  setTimeout(function(){ toast.remove(); }, 3000);
-}
-
-// ==================== INIT ====================
-function initAuth() {
-  var uid = localStorage.getItem('dh-user-id') || 'guest-'+Math.random().toString(36).substr(2,9);
-  localStorage.setItem('dh-user-id', uid);
-}
-function setupNavigation() {
-  var btns = document.querySelectorAll('.sidebar-item, .sidebar-link, .nav-pill, .bottom-nav-item');
-  for (var i=0; i<btns.length; i++) {
-    (function(btn){
-      btn.addEventListener('click', function(e){
-        var pageId = btn.dataset ? btn.dataset.page : null;
-        if (pageId) navigateTo(pageId);
-        if (btn.classList && btn.classList.contains('bottom-nav-item')) {
-          var bns = document.querySelectorAll('.bottom-nav-item');
-          for (var j=0; j<bns.length; j++) bns[j].classList.remove('active');
-          btn.classList.add('active');
-        }
-      });
-    })(btns[i]);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  initAuth();
-  setupNavigation();
-  
-  var savedXP = parseInt(localStorage.getItem('dh-xp')||'0');
-  var savedStreak = parseInt(localStorage.getItem('dh-streak')||'0');
-  if (savedXP) xp = savedXP;
-  if (savedStreak) streak = savedStreak;
-  
-  notes = JSON.parse(JSON.stringify(notesData));
-  reviewItems = JSON.parse(JSON.stringify(reviewData));
-  
-  updateGreeting();
-  updateUI();
-  
-  // ✅ Carrega módulos do Supabase PRIMEIRO
-  loadModulesFromSupabase();
-  
-  renderFlashcard();
-  renderShadowPhrase();
-  selectChar('anna');
-  renderNotes();
-  renderReview();
-  
-  console.log('🇩🇪 Deutsch Hub v2.0 iniciado! (Dados via Supabase)');
+// Tabs
+document.querySelectorAll('.level-tab')?.forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentLevel = tab.dataset.level;
+    renderModules();
+  });
 });
 
-// Expor funções globais
-window.navigateTo = navigateTo;
-window.toggleSidebar = toggleSidebar;
-window.flipCard = flipCard;
-window.nextCard = nextCard;
-window.cardAction = cardAction;
-window.playShadowAudio = playShadowAudio;
-window.nextShadowPhrase = nextShadowPhrase;
-window.selectChar = selectChar;
-window.sendChat = sendChat;
-window.openNoteModal = openNoteModal;
-window.closeNoteModal = closeNoteModal;
-window.saveNote = saveNote;
-window.editNote = editNote;
-window.deleteNote = deleteNote;
-window.markReviewDone = markReviewDone;
-window.openLesson = openLesson;
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🚀 Iniciando...');
+  loadModulesFromSupabase();
+});
 </script>
 </body>
 </html>
