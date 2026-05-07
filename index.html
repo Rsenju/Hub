@@ -834,10 +834,12 @@ input,textarea{font-family:inherit;outline:none}
   // Expor imediatamente após declaração para os onclick inline funcionarem
   window.navigateTo = navigateTo;
 
-  // Listener global para elementos com data-nav (substitui onclicks inline)
+  // Listener global para navegação — captura data-nav (explore cards) e data-page (sidebar)
   document.addEventListener('click', function(e) {
-    const target = e.target.closest('[data-nav]');
-    if (target) navigateTo(target.dataset.nav);
+    const target = e.target.closest('[data-nav], [data-page]');
+    if (!target) return;
+    const page = target.dataset.nav || target.dataset.page;
+    if (page) navigateTo(page);
   });
 
   function toggleSidebar() {
