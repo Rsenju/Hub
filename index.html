@@ -11,10 +11,10 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
---bg:#0f172a;--card:#1e293b;--card-hover:#273549;--accent:#f97316;--accent-dark:#ea580c;
---text:#e2e8f0;--text-muted:#94a3b8;--text-dim:#64748b;--border:#334155;--success:#22c55e;
---danger:#ef4444;--warning:#eab308;--purple:#a855f7;--blue:#3b82f6;--radius:12px;
---sidebar-w:260px;--topbar-h:64px;
+  --bg:#0f172a;--card:#1e293b;--card-hover:#273549;--accent:#f97316;--accent-dark:#ea580c;
+  --text:#e2e8f0;--text-muted:#94a3b8;--text-dim:#64748b;--border:#334155;--success:#22c55e;
+  --danger:#ef4444;--warning:#eab308;--purple:#a855f7;--blue:#3b82f6;--radius:12px;
+  --sidebar-w:260px;--topbar-h:64px;
 }
 html{font-size:15px}
 body{font-family:'Martel Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
@@ -27,7 +27,7 @@ input,textarea{font-family:inherit;outline:none}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-/* Sidebar */
+/* ── Sidebar ── */
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .3s}
 .sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
 .sidebar-logo{display:flex;align-items:center;gap:10px}
@@ -37,42 +37,42 @@ input,textarea{font-family:inherit;outline:none}
 .sidebar-nav{flex:1;overflow-y:auto;padding:16px 12px}
 .sidebar-section{margin-bottom:20px}
 .sidebar-section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);padding:0 8px;margin-bottom:8px}
-.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:all .2s;color:var(--text-muted);font-size:.9rem}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:all .2s;color:var(--text-muted);font-size:.9rem;user-select:none}
 .sidebar-item:hover{background:var(--card-hover);color:var(--text)}
 .sidebar-item.active{background:rgba(249,115,22,.15);color:var(--accent)}
-.sidebar-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-item svg{width:18px;height:18px;flex-shrink:0;pointer-events:none}
 .sidebar-footer{padding:16px 12px;border-top:1px solid var(--border)}
 .xp-section{margin-bottom:12px}
 .xp-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-muted);margin-bottom:6px}
 .xp-bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
-.xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),#fb923c);border-radius:4px;transition:width .5s ease}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),#fb923c);border-radius:4px;transition:width .5s ease;width:0%}
 .streak-section{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(249,115,22,.08);border-radius:8px}
 .streak-section svg{width:20px;height:20px;color:var(--accent)}
 .streak-text{font-size:.85rem;color:var(--text-muted)}
 .streak-count{color:var(--accent);font-weight:700}
 
-/* Topbar */
+/* ── Topbar ── */
 .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(15,23,42,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:90}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .topbar-title{font-size:1.1rem;font-family:'Lora',serif}
 .topbar-right{display:flex;align-items:center;gap:16px}
-.topbar-btn{width:38px;height:38px;border-radius:8px;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all .2s}
+.topbar-btn{width:38px;height:38px;border-radius:8px;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all .2s;border:none;cursor:pointer}
 .topbar-btn:hover{color:var(--text);background:var(--card-hover)}
 .topbar-btn svg{width:18px;height:18px}
 .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
 
-/* Main Content */
+/* ── Main ── */
 .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
 .page{display:none;padding:28px;animation:fadeIn .3s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* Dashboard */
+/* ── Dashboard ── */
 .greeting{margin-bottom:28px}
 .greeting h2{font-size:1.8rem;margin-bottom:4px}
 .greeting p{color:var(--text-muted);font-size:.9rem}
 .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
-.metric-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);transition:all .2s}
+.metric-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);transition:all .2s;cursor:pointer}
 .metric-card:hover{border-color:var(--accent);transform:translateY(-2px)}
 .metric-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
 .metric-icon svg{width:22px;height:22px}
@@ -85,7 +85,7 @@ input,textarea{font-family:inherit;outline:none}
 .progress-bar{flex:1;height:10px;background:var(--bg);border-radius:5px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#fb923c);border-radius:5px;transition:width .5s}
 .progress-text{font-size:.85rem;color:var(--text-muted);white-space:nowrap}
-.btn{padding:10px 20px;border-radius:8px;font-size:.9rem;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn{padding:10px 20px;border-radius:8px;font-size:.9rem;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover{background:var(--accent-dark);transform:translateY(-1px)}
 .btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
@@ -96,145 +96,201 @@ input,textarea{font-family:inherit;outline:none}
 .section-title{font-size:1.3rem;margin-bottom:16px;display:flex;align-items:center;gap:10px}
 .section-title svg{width:22px;height:22px;color:var(--accent)}
 .explore-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
-.explore-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);cursor:pointer;transition:all .25s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.explore-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);cursor:pointer;transition:all .25s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;user-select:none}
 .explore-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 24px rgba(249,115,22,.12)}
-.explore-card .icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center}
-.explore-card .icon svg{width:24px;height:24px}
-.explore-card h4{font-size:.95rem}
-.explore-card p{font-size:.75rem;color:var(--text-muted)}
+.explore-card .icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.explore-card .icon svg{width:24px;height:24px;pointer-events:none}
+.explore-card h4{font-size:.95rem;pointer-events:none}
+.explore-card p{font-size:.75rem;color:var(--text-muted);pointer-events:none}
 
-/* Modules */
-.level-tabs{display:flex;gap:8px;margin-bottom:24px}
+/* ── Modules ── */
+.level-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
 .level-tab{padding:8px 20px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s}
 .level-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.level-tab:hover:not(.active){border-color:var(--accent)}
+.level-tab:hover:not(.active){border-color:var(--accent);color:var(--text)}
 .module-list{display:flex;flex-direction:column;gap:12px}
-.module-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;transition:all .2s}
-.module-card:hover{border-color:var(--accent)}
-.module-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer}
-.module-header-left{display:flex;align-items:center;gap:14px}
-.module-num{width:36px;height:36px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:var(--accent)}
-.module-title{font-size:1rem}
+.module-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;transition:border-color .2s}
+.module-card:hover{border-color:rgba(249,115,22,.4)}
+.module-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;gap:12px}
+.module-header-left{display:flex;align-items:flex-start;gap:14px;flex:1;min-width:0}
+.module-num{width:36px;height:36px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:var(--accent);flex-shrink:0}
+.module-title{font-size:1rem;font-family:'Lora',serif}
 .module-sub{font-size:.8rem;color:var(--text-muted)}
-.module-status{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600}
-.status-done{background:rgba(34,197,94,.15);color:var(--success)}
-.status-current{background:rgba(249,115,22,.15);color:var(--accent)}
-.status-locked{background:rgba(100,116,139,.15);color:var(--text-dim)}
-.module-chapters{padding:0 20px 16px;display:none}
+.module-focus{font-size:.75rem;color:var(--text-dim);margin-top:2px;line-height:1.4}
+.module-status{padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;white-space:nowrap;flex-shrink:0}
+.status-available{background:rgba(34,197,94,.12);color:var(--success)}
+.status-locked{background:rgba(100,116,139,.12);color:var(--text-dim)}
+.module-chapters{padding:0 20px 16px;border-top:1px solid var(--border);display:none}
 .module-chapters.open{display:block}
-.chapter-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(51,65,85,.5)}
+.chapter-item{display:flex;align-items:center;gap:12px;padding:10px 8px;border-bottom:1px solid rgba(51,65,85,.4);cursor:pointer;transition:all .2s;border-radius:6px}
 .chapter-item:last-child{border-bottom:none}
-.chapter-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.chapter-item:hover{background:rgba(249,115,22,.07);padding-left:14px}
+.chapter-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0;transition:all .3s}
 .chapter-check.done{border-color:var(--success);background:var(--success);color:#fff}
-.chapter-check.current{border-color:var(--accent);color:var(--accent)}
-.chapter-name{font-size:.9rem;flex:1}
-.chapter-type{font-size:.7rem;color:var(--text-dim);background:var(--bg);padding:3px 10px;border-radius:12px}
+.chapter-name{font-size:.88rem;flex:1;line-height:1.3}
+.chapter-type-badge{font-size:.7rem;color:var(--text-dim);background:var(--bg);padding:3px 10px;border-radius:12px;flex-shrink:0}
+.chapter-type-badge.vocab{color:#3b82f6;background:rgba(59,130,246,.1)}
+.chapter-type-badge.gramática{color:#a855f7;background:rgba(168,85,247,.1)}
+.chapter-type-badge.cultura{color:#22c55e;background:rgba(34,197,94,.1)}
+.chapter-type-badge.prova{color:#ef4444;background:rgba(239,68,68,.1)}
 
-/* Flashcards */
+/* ── Lesson Modal ── */
+.lesson-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s}
+.lesson-modal-overlay.hidden{display:none!important}
+.lesson-modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:780px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.lesson-modal-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}
+.lesson-modal-header h3{font-size:1.05rem;flex:1;min-width:0}
+.lesson-modal-badge{font-size:.72rem;padding:3px 10px;border-radius:12px;background:rgba(249,115,22,.15);color:var(--accent);white-space:nowrap}
+.lesson-modal-body{padding:24px;overflow-y:auto;flex:1}
+.lesson-section{margin-bottom:24px}
+.lesson-section-title{font-size:.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:10px;font-family:'Rambla',sans-serif}
+.lesson-dialog{background:var(--bg);border-radius:10px;padding:16px;font-size:.85rem;line-height:1.9;white-space:pre-wrap;border:1px solid var(--border)}
+.lesson-rule-box{background:rgba(249,115,22,.07);border-left:3px solid var(--accent);padding:14px 16px;border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.6}
+.lesson-examples{display:flex;flex-direction:column;gap:10px}
+.lesson-example{background:var(--bg);border-radius:8px;padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.86rem;border:1px solid var(--border)}
+.lesson-example .de{color:var(--accent);font-style:italic}
+.lesson-example .pt{color:var(--text-muted)}
+.lesson-example .note{grid-column:1/-1;font-size:.74rem;color:var(--text-dim);background:rgba(255,255,255,.03);padding:4px 8px;border-radius:4px}
+.lesson-vocab{display:flex;flex-wrap:wrap;gap:8px}
+.vocab-pill{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.82rem;display:flex;gap:8px;align-items:center}
+.vocab-pill .vde{color:var(--accent);font-weight:600}
+.vocab-pill .vpt{color:var(--text-muted)}
+.lesson-modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:12px;flex-wrap:wrap}
+.lesson-xp-badge{font-size:.82rem;color:var(--accent);background:rgba(249,115,22,.1);padding:6px 12px;border-radius:8px;font-weight:600}
+
+/* ── Exercises ── */
+.exercise-card{background:var(--bg);border-radius:10px;padding:18px;margin-bottom:12px;border:1px solid var(--border)}
+.exercise-prompt{font-size:.92rem;margin-bottom:14px;font-weight:600;line-height:1.4}
+.exercise-sub{font-size:.8rem;color:var(--text-dim);margin-bottom:10px;font-style:italic}
+.exercise-options{display:flex;flex-direction:column;gap:8px}
+.exercise-option{padding:10px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:.87rem;transition:all .2s;background:var(--card);color:var(--text);text-align:left}
+.exercise-option:hover:not(.disabled){border-color:var(--accent);background:rgba(249,115,22,.06)}
+.exercise-option.correct{border-color:var(--success)!important;background:rgba(34,197,94,.1)!important;color:var(--success)!important;font-weight:600}
+.exercise-option.wrong{border-color:var(--danger)!important;background:rgba(239,68,68,.1)!important;color:var(--danger)!important}
+.exercise-option.disabled{pointer-events:none}
+.exercise-fill{display:flex;gap:8px;align-items:center}
+.exercise-fill input{flex:1;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;transition:border-color .2s}
+.exercise-fill input:focus{border-color:var(--accent)}
+.exercise-feedback{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:.84rem;display:none;line-height:1.5}
+.exercise-feedback.show{display:block}
+.exercise-feedback.ok{background:rgba(34,197,94,.08);color:var(--success);border:1px solid rgba(34,197,94,.2)}
+.exercise-feedback.err{background:rgba(239,68,68,.08);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
+
+/* ── Flashcards ── */
 .flashcard-container{display:flex;flex-direction:column;align-items:center;max-width:520px;margin:0 auto}
 .flashcard-progress{width:100%;display:flex;justify-content:space-between;margin-bottom:20px;font-size:.85rem;color:var(--text-muted)}
 .flashcard{width:100%;aspect-ratio:16/10;perspective:1000px;cursor:pointer;margin-bottom:24px}
 .flashcard-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
 .flashcard.flipped .flashcard-inner{transform:rotateY(180deg)}
-.flashcard-front,.flashcard-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center}
+.flashcard-front,.flashcard-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;gap:8px}
 .flashcard-front{background:var(--card);border:1px solid var(--border)}
-.flashcard-back{background:linear-gradient(135deg,var(--card),#1e3a5f);border:1px solid var(--accent);transform:rotateY(180deg)}
-.flashcard-front .word{font-size:1.8rem;font-family:'Lora',serif;margin-bottom:8px}
-.flashcard-front .hint{font-size:.85rem;color:var(--text-muted)}
-.flashcard-back .translation{font-size:1.6rem;font-family:'Lora',serif;margin-bottom:8px;color:var(--accent)}
-.flashcard-back .example{font-size:.85rem;color:var(--text-muted);font-style:italic}
+.flashcard-back{background:linear-gradient(135deg,#1e2d45,#1e3a5f);border:1px solid var(--accent);transform:rotateY(180deg)}
+.flashcard-front .word{font-size:1.8rem;font-family:'Lora',serif}
+.flashcard-front .hint{font-size:.82rem;color:var(--text-muted)}
+.flashcard-back .translation{font-size:1.5rem;font-family:'Lora',serif;color:var(--accent)}
+.flashcard-back .example{font-size:.83rem;color:var(--text-muted);font-style:italic}
 .flashcard-actions{display:flex;gap:12px}
-.fc-btn{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--card);color:var(--text-muted);transition:all .2s}
+.fc-btn{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--card);color:var(--text-muted);transition:all .2s;cursor:pointer}
 .fc-btn:hover{transform:scale(1.1)}
 .fc-btn.next{background:var(--accent);color:#fff;border-color:var(--accent)}
-.fc-btn.like:hover{color:var(--success);border-color:var(--success)}
-.fc-btn.dislike:hover{color:var(--danger);border-color:var(--danger)}
+.fc-btn.like:hover{color:var(--success);border-color:var(--success);background:rgba(34,197,94,.08)}
+.fc-btn.dislike:hover{color:var(--danger);border-color:var(--danger);background:rgba(239,68,68,.08)}
 .fc-btn svg{width:20px;height:20px}
 
-/* Shadowing */
+/* ── Shadowing ── */
 .shadow-container{max-width:600px;margin:0 auto}
-.shadow-header{text-align:center;margin-bottom:28px}
-.shadow-phrase{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;text-align:center;margin-bottom:16px}
-.shadow-phrase .german{font-size:1.6rem;font-family:'Lora',serif;margin-bottom:8px;color:var(--accent)}
+.shadow-phrase{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;text-align:center;margin-bottom:20px}
+.shadow-phrase .german{font-size:1.5rem;font-family:'Lora',serif;margin-bottom:10px;color:var(--accent)}
 .shadow-phrase .translation{font-size:.95rem;color:var(--text-muted)}
-.shadow-controls{display:flex;justify-content:center;gap:16px;margin-bottom:24px}
-.shadow-btn{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.shadow-controls{display:flex;justify-content:center;gap:16px;margin-bottom:20px}
+.shadow-btn{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s;cursor:pointer;border:none}
 .shadow-btn:hover{transform:scale(1.1)}
 .shadow-btn.listen{background:var(--accent);color:#fff}
-.shadow-btn.repeat{background:var(--card);border:1px solid var(--border);color:var(--text-muted)}
-.shadow-btn svg{width:24px;height:24px}
+.shadow-btn.next-phrase{background:var(--card);border:1px solid var(--border);color:var(--text-muted)}
+.shadow-btn.next-phrase:hover{border-color:var(--accent);color:var(--accent)}
+.shadow-btn svg{width:22px;height:22px}
 .shadow-progress{text-align:center;color:var(--text-muted);font-size:.85rem}
 
-/* Chatbot */
-.chat-container{max-width:700px;margin:0 auto;display:flex;flex-direction:column;height:calc(100vh - var(--topbar-h) - 56px)}
-.chat-characters{display:flex;gap:10px;margin-bottom:16px;overflow-x:auto;padding-bottom:8px}
+/* ── Chatbot ── */
+.chat-container{max-width:700px;margin:0 auto;display:flex;flex-direction:column;height:calc(100vh - var(--topbar-h) - 120px)}
+.chat-characters{display:flex;gap:10px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;flex-shrink:0}
 .char-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:24px;background:var(--card);border:1px solid var(--border);cursor:pointer;transition:all .2s;white-space:nowrap}
 .char-btn.active{border-color:var(--accent);background:rgba(249,115,22,.1)}
 .char-btn:hover:not(.active){border-color:var(--accent)}
-.char-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}
-.char-btn .char-name{font-size:.85rem;font-weight:600}
-.char-btn .char-role{font-size:.7rem;color:var(--text-muted)}
-.chat-messages{flex:1;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column;gap:12px}
-.chat-msg{display:flex;gap:10px;max-width:80%;animation:msgIn .3s ease}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.char-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+.char-name{font-size:.85rem;font-weight:600}
+.char-role{font-size:.7rem;color:var(--text-muted)}
+.chat-messages{flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:12px}
+.chat-msg{display:flex;gap:10px;max-width:82%;animation:msgIn .3s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .chat-msg.user{align-self:flex-end;flex-direction:row-reverse}
 .chat-msg .msg-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
 .chat-msg.bot .msg-avatar{background:var(--accent);color:#fff}
 .chat-msg.user .msg-avatar{background:var(--blue);color:#fff}
-.msg-bubble{padding:12px 16px;border-radius:16px;font-size:.9rem;line-height:1.5}
+.msg-bubble{padding:12px 16px;border-radius:16px;font-size:.88rem;line-height:1.5}
 .chat-msg.bot .msg-bubble{background:var(--card);border:1px solid var(--border);border-top-left-radius:4px}
 .chat-msg.user .msg-bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px}
-.chat-input-area{display:flex;gap:10px;padding-top:12px;border-top:1px solid var(--border)}
-.chat-input{flex:1;padding:12px 16px;border-radius:12px;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:.9rem}
+.chat-input-area{display:flex;gap:10px;padding-top:12px;border-top:1px solid var(--border);flex-shrink:0}
+.chat-input{flex:1;padding:12px 16px;border-radius:12px;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:.9rem;transition:border-color .2s}
 .chat-input:focus{border-color:var(--accent)}
-.chat-send{width:44px;height:44px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chat-send{width:44px;height:44px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
 .chat-send:hover{background:var(--accent-dark)}
 .chat-send svg{width:20px;height:20px}
-.typing-indicator{display:flex;gap:4px;padding:12px 16px}
+.typing-indicator{display:flex;gap:4px;padding:4px 0}
 .typing-indicator span{width:8px;height:8px;border-radius:50%;background:var(--text-dim);animation:typing 1.2s infinite}
 .typing-indicator span:nth-child(2){animation-delay:.2s}
 .typing-indicator span:nth-child(3){animation-delay:.4s}
 @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
 
-/* Notes */
-.notes-container{max-width:700px;margin:0 auto}
+/* ── Notes ── */
+.notes-container{max-width:720px;margin:0 auto}
 .notes-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.note-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:all .2s}
+.note-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:border-color .2s}
 .note-card:hover{border-color:var(--accent)}
-.note-card h4{font-size:.95rem;margin-bottom:6px}
-.note-card p{font-size:.85rem;color:var(--text-muted);line-height:1.5;margin-bottom:10px}
-.note-card .note-date{font-size:.7rem;color:var(--text-dim)}
-.note-card .note-actions{display:flex;gap:6px;margin-top:8px}
-.note-card .note-actions button{padding:4px 10px;border-radius:6px;font-size:.75rem;background:var(--bg);color:var(--text-muted);transition:all .2s}
-.note-card .note-actions button:hover{color:var(--text)}
-.note-card .note-actions button.del:hover{color:var(--danger)}
-.note-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
-.note-modal.hidden{display:none}
+.note-card h4{font-size:.92rem;margin-bottom:6px}
+.note-card p{font-size:.84rem;color:var(--text-muted);line-height:1.5;margin-bottom:10px}
+.note-date{font-size:.7rem;color:var(--text-dim)}
+.note-actions{display:flex;gap:6px;margin-top:8px}
+.note-actions button{padding:4px 10px;border-radius:6px;font-size:.75rem;background:var(--bg);color:var(--text-muted);border:none;cursor:pointer;transition:color .2s}
+.note-actions button:hover{color:var(--text)}
+.note-actions button.del:hover{color:var(--danger)}
+.note-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.note-modal.hidden{display:none!important}
 .note-modal-content{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:90%;max-width:500px}
 .note-modal-content h3{margin-bottom:16px}
-.note-modal-content input,.note-modal-content textarea{width:100%;padding:10px 14px;border-radius:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);margin-bottom:12px;font-size:.9rem}
+.note-modal-content input,.note-modal-content textarea{width:100%;padding:10px 14px;border-radius:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);margin-bottom:12px;font-size:.9rem;transition:border-color .2s}
+.note-modal-content input:focus,.note-modal-content textarea:focus{border-color:var(--accent)}
 .note-modal-content textarea{min-height:120px;resize:vertical}
-.note-modal-content textarea:focus,.note-modal-content input:focus{border-color:var(--accent)}
 .note-modal-actions{display:flex;justify-content:flex-end;gap:10px}
 
-/* Review */
-.review-container{max-width:700px;margin:0 auto}
+/* ── Review ── */
+.review-container{max-width:720px;margin:0 auto}
 .review-header{margin-bottom:24px}
 .review-header p{color:var(--text-muted);font-size:.9rem;margin-top:4px}
 .review-cards{display:flex;flex-direction:column;gap:14px}
-.review-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;gap:16px;align-items:flex-start;transition:all .2s}
+.review-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;gap:16px;align-items:flex-start;transition:border-color .2s}
 .review-card:hover{border-color:var(--accent)}
-.review-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.review-icon svg{width:20px;height:20px}
+.review-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem}
 .review-content{flex:1}
-.review-content h4{font-size:.95rem;margin-bottom:4px}
-.review-content p{font-size:.85rem;color:var(--text-muted);line-height:1.5}
+.review-content h4{font-size:.92rem;margin-bottom:4px}
+.review-content p{font-size:.83rem;color:var(--text-muted);line-height:1.5}
 .review-actions{display:flex;gap:8px;margin-top:10px}
-.review-actions button{padding:6px 14px;border-radius:6px;font-size:.8rem;transition:all .2s}
 
-/* Mobile */
-.mobile-toggle{display:none;position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;z-index:150;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(249,115,22,.3)}
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:.86rem;font-weight:600;z-index:9999;animation:toastIn .3s ease;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:320px}
+.toast.success{background:var(--success);color:#fff}
+.toast.error{background:var(--danger);color:#fff}
+.toast.info{background:var(--blue);color:#fff}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Loading ── */
+.loading-state{text-align:center;padding:60px 20px;color:var(--text-muted);line-height:1.6}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Mobile ── */
+.mobile-toggle{display:none;position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;z-index:150;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(249,115,22,.35);border:none;cursor:pointer}
 .mobile-toggle svg{width:22px;height:22px}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
 .overlay.active{display:block}
@@ -242,37 +298,38 @@ input,textarea{font-family:inherit;outline:none}
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0)}
+  .topbar,.main{left:0;margin-left:0}
   .topbar{left:0}
-  .main{margin-left:0}
   .mobile-toggle{display:flex}
-  .overlay.active{display:block}
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
   .explore-grid{grid-template-columns:repeat(2,1fr)}
+  .lesson-example{grid-template-columns:1fr}
+  .lesson-modal-footer{flex-direction:column;align-items:stretch}
 }
 @media(max-width:480px){
   .metrics-grid{grid-template-columns:1fr}
-  .explore-grid{grid-template-columns:1fr 1fr}
-  .page{padding:20px 16px}
+  .page{padding:16px}
+  .lesson-modal{max-height:96vh}
 }
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
+<!-- ── Sidebar ── -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">
-      <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#f97316"/><text x="18" y="24" text-anchor="middle" fill="#fff" font-size="16" font-weight="700" font-family="serif">D</text></svg>
+      <svg viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#f97316"/><text x="18" y="25" text-anchor="middle" fill="#fff" font-size="18" font-weight="700" font-family="Georgia,serif">D</text></svg>
       <div>
         <h1>Deutsch Hub</h1>
-        <div class="sidebar-version">v2.0 · Beta</div>
+        <div class="sidebar-version">v2.1 · Beta</div>
       </div>
     </div>
   </div>
   <nav class="sidebar-nav">
     <div class="sidebar-section">
       <div class="sidebar-section-title">Core</div>
-      <div class="sidebar-item active" data-page="dashboard">
+      <div class="sidebar-item" data-page="dashboard">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Dashboard
       </div>
@@ -310,20 +367,19 @@ input,textarea{font-family:inherit;outline:none}
   </nav>
   <div class="sidebar-footer">
     <div class="xp-section">
-      <div class="xp-label"><span>XP Total</span><span id="xpText">2.450 / 3.000</span></div>
-      <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:82%"></div></div>
+      <div class="xp-label"><span>XP Total</span><span id="xpText">0 / 3.000</span></div>
+      <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
     </div>
     <div class="streak-section">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 23c-4.97 0-9-3.58-9-8 0-3.07 2.31-6.64 4.5-8.5.5-.42 1.24-.2 1.44.38.16.47.07.96-.16 1.32C7.8 9.8 7.5 11.1 8 12.5c.15.42.62.58.95.32.72-.55 1.55-1.32 2.05-2.32.32-.64 1.2-.64 1.52 0 .6 1.2 1.65 2.5 2.48 3.5.25.3.2.72-.1 1.02C16.5 16.5 14.5 18.5 12 18.5c-2.21 0-4-1.79-4-4 0-1.1.45-2.1 1.17-2.83.38-.38 1.02-.1 1.02.43v.4c0 1.1.9 2 2 2s2-.9 2-2c0-2.21-1.79-4-4-4-.55 0-1 .45-1 1s.45 1 1 1c1.1 0 2 .9 2 2s-.9 2-2 2c-.55 0-1-.45-1-1 0-.55-.45-1-1-1-1.66 0-3 1.34-3 3 0 2.21 1.79 4 4 4 2.5 0 4.5-2 4.5-4.5 0-1.5-.5-2.5-1-3.5-.5-1-.5-2 0-3s1.5-2 2.5-2c1 0 2 1 2 2 0 4-3.58 8-9 8z"/></svg>
-      <div class="streak-text"><span class="streak-count" id="streakCount">12</span> dias consecutivos</div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.19 4 10.12 4 13.5 4 18.8 8.2 23 13.5 23c5.3 0 9.5-4.2 9.5-9.5 0-4.79-3.34-8.79-7.8-9.83z"/></svg>
+      <div class="streak-text"><span class="streak-count" id="streakCount">0</span> dias seguidos</div>
     </div>
   </div>
 </aside>
 
-<!-- Overlay for mobile -->
 <div class="overlay" id="overlay"></div>
 
-<!-- Topbar -->
+<!-- ── Topbar ── -->
 <header class="topbar">
   <div class="topbar-left">
     <h3 class="topbar-title" id="topbarTitle">Dashboard</h3>
@@ -332,127 +388,119 @@ input,textarea{font-family:inherit;outline:none}
     <button class="topbar-btn" title="Notificações">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </button>
-    <button class="topbar-btn" title="Configurações">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
-    <div class="avatar">US</div>
+    <div class="avatar">DE</div>
   </div>
 </header>
 
-<!-- Main Content -->
+<!-- ── Pages ── -->
 <main class="main">
-  <!-- Dashboard Page -->
-  <div class="page active" id="page-dashboard">
+
+  <!-- Dashboard -->
+  <div class="page" id="page-dashboard">
     <div class="greeting">
-      <h2 id="greetingText">Willkommen zurück! 👋</h2>
+      <h2>Willkommen zurück! 👋</h2>
       <p class="subtitle">Continue seu aprendizado de alemão hoje.</p>
     </div>
     <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-icon" style="background:rgba(249,115,22,.15);color:var(--accent)">
+      <div class="metric-card" data-page="modules">
+        <div class="metric-icon" style="background:rgba(249,115,22,.12);color:var(--accent)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
         <div class="metric-value" id="metricLevel">A1</div>
         <div class="metric-label">Nível Atual</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-icon" style="background:rgba(34,197,94,.15);color:var(--success)">
+      <div class="metric-card" data-page="modules">
+        <div class="metric-icon" style="background:rgba(34,197,94,.12);color:var(--success)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <div class="metric-value" id="metricChapters">7</div>
-        <div class="metric-label">Capítulos Concluídos</div>
+        <div class="metric-value" id="metricChapters">0</div>
+        <div class="metric-label">Lições Concluídas</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-icon" style="background:rgba(168,85,247,.15);color:var(--purple)">
+      <div class="metric-card" data-page="flashcards">
+        <div class="metric-icon" style="background:rgba(168,85,247,.12);color:var(--purple)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
         </div>
-        <div class="metric-value" id="metricCards">48</div>
+        <div class="metric-value" id="metricCards">0</div>
         <div class="metric-label">Flashcards Estudados</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-icon" style="background:rgba(59,130,246,.15);color:var(--blue)">
+      <div class="metric-card" data-page="review">
+        <div class="metric-icon" style="background:rgba(59,130,246,.12);color:var(--blue)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
-        <div class="metric-value" id="metricProgress">82%</div>
+        <div class="metric-value" id="metricProgress">0%</div>
         <div class="metric-label">Progresso Geral</div>
       </div>
     </div>
     <div class="module-current">
-      <h3>Módulo Atual: A1 - Kapitel 3</h3>
-      <p class="sub">Einkaufen und Essen</p>
+      <h3 id="currentModuleTitle">Módulo Atual · A1 Capítulo 1</h3>
+      <p class="sub" id="currentModuleSub">Saudações, Alfabeto e Primeiros Verbos</p>
       <div class="progress-row">
-        <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
-        <span class="progress-text">45%</span>
+        <div class="progress-bar"><div class="progress-fill" id="currentProgress" style="width:0%"></div></div>
+        <span class="progress-text" id="currentProgressText">0%</span>
       </div>
-      <button class="btn btn-primary" data-nav="modules">Continuar Aprendendo →</button>
+      <button class="btn btn-primary" data-page="modules">Continuar Aprendendo →</button>
     </div>
     <h3 class="section-title">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       Explorar
     </h3>
     <div class="explore-grid">
-      <div class="explore-card" data-nav="modules">
-        <div class="icon" style="background:rgba(249,115,22,.15);color:var(--accent)">
+      <div class="explore-card" data-page="modules">
+        <div class="icon" style="background:rgba(249,115,22,.12);color:var(--accent)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         </div>
-        <h4>Módulos</h4>
-        <p>Aprenda de forma progressiva</p>
+        <h4>Módulos</h4><p>Aprenda progressivamente</p>
       </div>
-      <div class="explore-card" data-nav="chatbot">
-        <div class="icon" style="background:rgba(59,130,246,.15);color:var(--blue)">
+      <div class="explore-card" data-page="chatbot">
+        <div class="icon" style="background:rgba(59,130,246,.12);color:var(--blue)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <h4>Chatbot</h4>
-        <p>Pratique conversação</p>
+        <h4>Chatbot</h4><p>Pratique conversação</p>
       </div>
-      <div class="explore-card" data-nav="flashcards">
-        <div class="icon" style="background:rgba(168,85,247,.15);color:var(--purple)">
+      <div class="explore-card" data-page="flashcards">
+        <div class="icon" style="background:rgba(168,85,247,.12);color:var(--purple)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
         </div>
-        <h4>Flashcards</h4>
-        <p>Memorização ativa</p>
+        <h4>Flashcards</h4><p>Memorização ativa</p>
       </div>
-      <div class="explore-card" data-nav="shadowing">
-        <div class="icon" style="background:rgba(34,197,94,.15);color:var(--success)">
+      <div class="explore-card" data-page="shadowing">
+        <div class="icon" style="background:rgba(34,197,94,.12);color:var(--success)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
         </div>
-        <h4>Shadowing</h4>
-        <p>Treino de pronúncia</p>
+        <h4>Shadowing</h4><p>Treino de pronúncia</p>
       </div>
-      <div class="explore-card" data-nav="notes">
-        <div class="icon" style="background:rgba(234,179,8,.15);color:var(--warning)">
+      <div class="explore-card" data-page="notes">
+        <div class="icon" style="background:rgba(234,179,8,.12);color:var(--warning)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
-        <h4>Anotações</h4>
-        <p>Organize seu estudo</p>
+        <h4>Anotações</h4><p>Organize seu estudo</p>
       </div>
-      <div class="explore-card" data-nav="review">
-        <div class="icon" style="background:rgba(239,68,68,.15);color:var(--danger)">
+      <div class="explore-card" data-page="review">
+        <div class="icon" style="background:rgba(239,68,68,.12);color:var(--danger)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         </div>
-        <h4>Revisão</h4>
-        <p>Reforce seus erros</p>
+        <h4>Revisão</h4><p>Reforce seu aprendizado</p>
       </div>
     </div>
   </div>
 
-<!-- Modules Page -->
-<div class="page" id="page-modules">
-  <h2 class="section-title" style="margin-bottom:20px">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-    Módulos de Aprendizado
-  </h2>
-  <div class="level-tabs" id="levelTabs">
-    <button class="level-tab active" data-level="A1">A1 · Iniciante</button>
-    <button class="level-tab" data-level="A2">A2 · Intermediário</button>
-    <button class="level-tab" data-level="B1">B1 · Independente</button>
+  <!-- Módulos -->
+  <div class="page" id="page-modules">
+    <h2 class="section-title" style="margin-bottom:20px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Módulos de Aprendizado
+    </h2>
+    <div class="level-tabs" id="levelTabs">
+      <button class="level-tab active" data-level="A1">A1 · Iniciante</button>
+      <button class="level-tab" data-level="A2">A2 · Básico</button>
+      <button class="level-tab" data-level="B1">B1 · Intermediário</button>
+    </div>
+    <div class="module-list" id="moduleList">
+      <div class="loading-state"><div class="loading-spinner"></div>Carregando módulos do Supabase…</div>
+    </div>
   </div>
-  <div class="module-list" id="moduleList">
-    <p class="text-center text-gray-500 py-6">Carregando módulos do Supabase...</p>
-  </div>
-</div>
 
-  <!-- Flashcards Page -->
+  <!-- Flashcards -->
   <div class="page" id="page-flashcards">
     <h2 class="section-title" style="margin-bottom:20px">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
@@ -460,64 +508,60 @@ input,textarea{font-family:inherit;outline:none}
     </h2>
     <div class="flashcard-container">
       <div class="flashcard-progress">
-        <span id="fcProgress">1 / 20</span>
+        <span id="fcProgress">— / —</span>
         <span id="fcLevel">Nível A1</span>
       </div>
-      <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="flashcard" id="flashcard">
         <div class="flashcard-inner">
           <div class="flashcard-front">
-            <div class="word" id="fcWord">Hallo</div>
-            <div class="hint">Clique para virar</div>
+            <div class="word" id="fcWord">Carregando…</div>
+            <div class="hint">Clique para revelar</div>
           </div>
           <div class="flashcard-back">
-            <div class="translation" id="fcTranslation">Olá</div>
-            <div class="example" id="fcExample">"Hallo, wie geht es dir?"</div>
+            <div class="translation" id="fcTranslation"></div>
+            <div class="example" id="fcExample"></div>
           </div>
         </div>
       </div>
       <div class="flashcard-actions">
-        <button class="fc-btn dislike" onclick="cardAction('dislike')" title="Não gostei">
+        <button class="fc-btn dislike" id="btnDislike" title="Não lembrei">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
         </button>
-        <button class="fc-btn next" onclick="nextCard()" title="Próximo">
+        <button class="fc-btn next" id="btnNextCard" title="Próximo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
         </button>
-        <button class="fc-btn like" onclick="cardAction('like')" title="Gostei">
+        <button class="fc-btn like" id="btnLike" title="Lembrei!">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Shadowing Page -->
+  <!-- Shadowing -->
   <div class="page" id="page-shadowing">
     <h2 class="section-title" style="margin-bottom:20px">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       Shadowing
     </h2>
     <div class="shadow-container">
-      <div class="shadow-header">
-        <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:8px">Ouça a frase e repita em voz alta</p>
-      </div>
+      <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:20px;text-align:center">Ouça a frase e repita em voz alta para treinar pronúncia</p>
       <div class="shadow-phrase">
-        <div class="german" id="shadowGerman">Guten Morgen, wie geht es Ihnen?</div>
-        <div class="translation" id="shadowTranslation">Bom dia, como vai?</div>
+        <div class="german" id="shadowGerman">—</div>
+        <div class="translation" id="shadowTranslation">—</div>
       </div>
       <div class="shadow-controls">
-        <button class="shadow-btn listen" onclick="playShadowAudio()" title="Ouvir">
+        <button class="shadow-btn listen" id="btnShadowPlay" title="Ouvir frase">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
         </button>
-        <button class="shadow-btn repeat" onclick="nextShadowPhrase()" title="Próxima frase">
+        <button class="shadow-btn next-phrase" id="btnShadowNext" title="Próxima frase">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
       </div>
-      <div class="shadow-progress">
-        <span id="shadowProgress">Frase 1 de 10</span>
-      </div>
+      <div class="shadow-progress"><span id="shadowProgress">— de —</span></div>
     </div>
   </div>
 
-  <!-- Chatbot Page -->
+  <!-- Chatbot -->
   <div class="page" id="page-chatbot">
     <h2 class="section-title" style="margin-bottom:16px">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -544,20 +588,20 @@ input,textarea{font-family:inherit;outline:none}
       </div>
       <div class="chat-messages" id="chatMessages">
         <div class="chat-msg bot">
-          <div class="msg-avatar">A</div>
+          <div class="msg-avatar" style="background:#f97316">A</div>
           <div class="msg-bubble">Hallo! Ich bin Anna, deine Deutschlehrerin. Wie geht es dir heute? 😊</div>
         </div>
       </div>
       <div class="chat-input-area">
-        <input type="text" class="chat-input" id="chatInput" placeholder="Digite sua mensagem em alemão..." onkeydown="if(event.key==='Enter')sendMessage()">
-        <button class="chat-send" onclick="sendMessage()">
+        <input class="chat-input" id="chatInput" type="text" placeholder="Digite em alemão…" autocomplete="off">
+        <button class="chat-send" id="btnSendChat">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Notes Page -->
+  <!-- Anotações -->
   <div class="page" id="page-notes">
     <div class="notes-container">
       <div class="notes-header">
@@ -565,28 +609,31 @@ input,textarea{font-family:inherit;outline:none}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Anotações
         </h2>
-        <button class="btn btn-primary btn-sm" onclick="openNoteModal()">+ Nova Nota</button>
+        <button class="btn btn-primary btn-sm" id="btnNewNote">+ Nova Nota</button>
       </div>
       <div class="notes-grid" id="notesGrid"></div>
     </div>
   </div>
 
-  <!-- Review Page -->
+  <!-- Revisão -->
   <div class="page" id="page-review">
     <div class="review-container">
       <div class="review-header">
-        <h2 class="section-title" style="margin-bottom:0">
+        <h2 class="section-title" style="margin-bottom:4px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           Revisão
         </h2>
         <p>Revise os conteúdos mais difíceis para reforçar seu aprendizado.</p>
       </div>
-      <div class="review-cards" id="reviewCards"></div>
+      <div class="review-cards" id="reviewCards">
+        <div class="loading-state"><div class="loading-spinner"></div>Carregando…</div>
+      </div>
     </div>
   </div>
+
 </main>
 
-<!-- Mobile Toggle -->
+<!-- Mobile toggle -->
 <button class="mobile-toggle" id="mobileToggle">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
@@ -595,461 +642,733 @@ input,textarea{font-family:inherit;outline:none}
 <div class="note-modal hidden" id="noteModal">
   <div class="note-modal-content">
     <h3 id="noteModalTitle">Nova Anotação</h3>
-    <input type="text" id="noteTitle" placeholder="Título da nota...">
-    <textarea id="noteContent" placeholder="Escreva sua anotação..."></textarea>
+    <input type="text" id="noteTitle" placeholder="Título da nota…">
+    <textarea id="noteContent" placeholder="Escreva sua anotação…"></textarea>
     <div class="note-modal-actions">
-      <button class="btn btn-ghost btn-sm" onclick="closeNoteModal()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="saveNote()">Salvar</button>
+      <button class="btn btn-ghost btn-sm" id="btnCloseNote">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="btnSaveNote">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lesson Modal -->
+<div class="lesson-modal-overlay hidden" id="lessonModal">
+  <div class="lesson-modal">
+    <div class="lesson-modal-header">
+      <h3 id="lessonModalTitle">Lição</h3>
+      <span class="lesson-modal-badge" id="lessonModalBadge">vocab</span>
+      <button class="btn btn-ghost btn-sm" id="btnCloseLesson" style="margin-left:auto">✕</button>
+    </div>
+    <div class="lesson-modal-body" id="lessonModalBody"></div>
+    <div class="lesson-modal-footer">
+      <span class="lesson-xp-badge" id="lessonXpBadge">+10 XP ao concluir</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" id="btnPrevLesson">← Anterior</button>
+        <button class="btn btn-primary btn-sm" id="btnCompleteLesson">✓ Concluir</button>
+        <button class="btn btn-secondary btn-sm" id="btnNextLesson">Próxima →</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-  // ==================== CONFIG SUPABASE ====================
-  const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZWZpcWF4aWx1Zm5ld215Y3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTkwNjEsImV4cCI6MjA5Mjk5NTA2MX0.YDa6Iia2obbhxFk55NzRzgMADRpqonXIa0w-zc3qVM0';
-  let supabaseClient = null;
+// ═══════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════
+const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZWZpcWF4aWx1Zm5ld215Y3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTkwNjEsImV4cCI6MjA5Mjk5NTA2MX0.YDa6Iia2obbhxFk55NzRzgMADRpqonXIa0w-zc3qVM0';
+let _sb = null;
+const getSB = () => {
+  if (!_sb && window.supabase) _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return _sb;
+};
 
-  function getSupabase() {
-    if (!supabaseClient && window.supabase) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    }
-    return supabaseClient;
-  }
+// ═══════════════════════════════════════════════
+// STATE — tudo começa zerado
+// ═══════════════════════════════════════════════
+const S = {
+  page: 'dashboard',
+  level: 'A1',
+  xp: 0,
+  streak: 0,
+  chaptersCompleted: 0,
+  cardsStudied: 0,
+  modulesData: { A1:[], A2:[], B1:[] },
+  modulesLoaded: false,
+  flashcards: [],
+  fcLoaded: false,
+  fcIndex: 0,
+  shadowIndex: 0,
+  shadowPhrases: [
+    {de:'Guten Morgen, wie geht es Ihnen?',    pt:'Bom dia, como vai? (formal)'},
+    {de:'Ich möchte einen Kaffee, bitte.',      pt:'Eu gostaria de um café, por favor.'},
+    {de:'Wo ist der nächste Bahnhof?',          pt:'Onde fica a próxima estação?'},
+    {de:'Das Wetter ist heute sehr schön.',     pt:'O tempo está muito bonito hoje.'},
+    {de:'Können Sie das bitte wiederholen?',    pt:'Pode repetir isso, por favor?'},
+    {de:'Ich spreche ein bisschen Deutsch.',    pt:'Eu falo um pouco de alemão.'},
+    {de:'Wie viel kostet das, bitte?',          pt:'Quanto custa isso, por favor?'},
+    {de:'Entschuldigung, wo ist die Toilette?', pt:'Com licença, onde fica o banheiro?'},
+  ],
+  currentChar: 'anna',
+  notes: [],
+  editingNoteId: null,
+  lesson: null,
+  lessonList: [],
+  lessonIndex: 0,
+};
 
-  // ==================== STATE ====================
-  let modulesData = { A1: [], A2: [], B1: [] };
-  let modulesLoaded = false;
-  let currentLevel = 'A1';
-  let xp = 2450;
-  let streak = 12;
+const CHARS = {
+  anna:         {name:'Anna',        color:'#f97316', replies:['Sehr gut! 🎉 (Muito bem!)', 'Das ist richtig! (Correto!)', 'Wunderbar! Weiter so! (Maravilha!)']},
+  lukas:        {name:'Lukas',       color:'#3b82f6', replies:['Hey, alles klar! (Tudo bem?)', 'Cool! Das klingt super!', 'Na, wie läuft\'s? (Como vai?)']},
+  herr_mueller: {name:'H. Müller',   color:'#22c55e', replies:['Guten Tag. Sehr bemerkenswert. (Notável.)', 'Ausgezeichnet! (Excelente!)', 'Sehr korrekt. Bitte weiter üben.']},
+  lisa:         {name:'Lisa',        color:'#a855f7', replies:['Omg das ist so cool!! ✨', 'Ich liebe Deutsch! 🥨', 'Yay! Du lernst so schnell!! 😍']},
+};
 
-  // Dados estáticos (Flashcards, Shadowing, etc)
-  const flashcardsData = [
-    {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
-    {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
-    {word:'Danke',translation:'Obrigado',example:'Danke schön!'},
-    {word:'Bitte',translation:'Por favor',example:'Ein Wasser, bitte.'},
-    {word:'Entschuldigung',translation:'Desculpe',example:'Entschuldigung, wo ist der Bahnhof?'},
-    {word:'Ja',translation:'Sim',example:'Ja, ich verstehe.'},
-    {word:'Nein',translation:'Não',example:'Nein, danke.'},
-    {word:'Auf Wiedersehen',translation:'Adeus',example:'Auf Wiedersehen und gute Reise!'},
-    {word:'Ich heiße...',translation:'Eu me chamo...',example:'Ich heiße Maria.'},
-    {word:'Wie geht es Ihnen?',translation:'Como vai? (formal)',example:'Wie geht es Ihnen heute?'}
-  ];
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function navigateTo(page) {
+  if (!page) return;
+  S.page = page;
 
-  const shadowPhrases = [
-    {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai? (formal)'},
-    {german:'Ich möchte einen Kaffee, bitte.',translation:'Eu gostaria de um café, por favor.'},
-    {german:'Wo ist der nächste Bahnhof?',translation:'Onde fica a próxima estação de trem?'},
-    {german:'Das Wetter ist heute sehr schön.',translation:'O tempo está muito bonito hoje.'},
-    {german:'Können Sie das bitte wiederholen?',translation:'Pode repetir isso, por favor?'}
-  ];
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
 
-  const characters = {
-    anna:{name:'Anna',role:'Professora',color:'#f97316',systemMsg:'Você é Anna, uma professora de alemão paciente.'},
-    lukas:{name:'Lukas',role:'Colega',color:'#3b82f6',systemMsg:'Você é Lukas, um colega amigável.'},
-    herr_mueller:{name:'Herr Müller',role:'Formal',color:'#22c55e',systemMsg:'Você é Herr Müller, formal e educado.'},
-    lisa:{name:'Lisa',role:'Amiga',color:'#a855f7',systemMsg:'Você é Lisa, amiga descontraída.'}
-  };
+  document.querySelectorAll('.sidebar-item').forEach(el =>
+    el.classList.toggle('active', el.dataset.page === page));
 
-  const botResponses = {
-    anna:['Sehr gut! Deine Aussprache verbessert sich! 🎉','Das ist richtig! Du machst große Fortschritte.'],
-    lukas:['Hey, alles klar! Was machst du heute Abend?','Cool! Ich war letztes Wochenende in Berlin.'],
-    herr_mueller:['Guten Tag. Ihre Fortschritte sind bemerkenswert.','Sehr korrekt. Ich empfehle Ihnen weiter zu üben.'],
-    lisa:['Hey!! Wie geht\'s? 😍','Omg das ist so cool! Du lernst echt schnell! ✨']
-  };
+  const TITLES = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',
+    shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
+  const el = document.getElementById('topbarTitle');
+  if (el) el.textContent = TITLES[page] || page;
 
-  const notesData = [
-    {id:1,title:'Artigos - Dica rápida',content:'Der = masculino, Das = neutro, Die = feminino.',date:'2026-05-04'},
-    {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam no presente.',date:'2026-05-03'}
-  ];
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('overlay')?.classList.remove('active');
 
-  const reviewData = [
-    {type:'grammar',title:'Der vs. Das vs. Die',desc:'Artigos definidos em alemão têm três gêneros.',icon:'📝',solved:false},
-    {type:'vocab',title:'Zahlen (Números)',desc:'Números de 1 a 100 em alemão.',icon:'🔢',solved:false}
-  ];
+  if (page === 'modules')    renderModules();
+  if (page === 'flashcards') { loadFlashcards(); renderFlashcard(); }
+  if (page === 'shadowing')  renderShadow();
+  if (page === 'notes')      renderNotes();
+  if (page === 'review')     renderReview();
+}
 
-  let notes = JSON.parse(JSON.stringify(notesData));
-  let reviewItems = JSON.parse(JSON.stringify(reviewData));
-  let currentCardIndex = 0;
-  let currentShadowIndex = 0;
-  let currentChar = 'anna';
-  let editingNoteId = null;
+// Listener único — trata todos os data-page que não são level-tab ou char-btn
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-page]');
+  if (!el) return;
+  if (el.classList.contains('level-tab') || el.classList.contains('char-btn')) return;
+  navigateTo(el.dataset.page);
+});
 
-  // ==================== CARREGAR MÓDULOS DO SUPABASE ====================
-  async function loadModulesFromSupabase() {
-    const supabase = getSupabase();
-    if (!supabase) {
-      console.error('Supabase client not initialized');
-      modulesLoaded = true;
-      renderModules();
-      return;
-    }
+// Sidebar mobile
+const toggleSidebar = () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('active');
+};
+document.getElementById('mobileToggle').addEventListener('click', toggleSidebar);
+document.getElementById('overlay').addEventListener('click', toggleSidebar);
 
-    try {
-      // Carregar módulos ativos por nível
-      const { data: modules, error: modulesError } = await supabase
-        .from('study_modules')
-        .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order, active')
-        .eq('active', true)
-        .in('level', ['A1', 'A2', 'B1'])
-        .order('sort_order', { ascending: true });
-
-      if (modulesError) throw modulesError;
-
-      // Carregar lessons para cada módulo
-      const { data: lessons, error: lessonsError } = await supabase
-        .from('study_lessons')
-        .select('slug, module_slug, title_pt, title_de, summary_pt, quick_rule_pt, examples, key_phrases, mini_notes, sort_order, active')
-        .eq('active', true);
-
-      if (lessonsError) throw lessonsError;
-
-      // Estruturar dados por nível
-      const structured = { A1: [], A2: [], B1: [] };
-      
-      if (modules) {
-        for (const mod of modules) {
-          const levelLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
-          
-          const chapters = levelLessons.map((l, idx) => ({
-            slug: l.slug,
-            name: l.title_pt || l.title_de || 'Sem título',
-            type: getLessonType(l.slug),
-            done: false, // Pode ser integrado com user_progress depois
-            summary: l.summary_pt,
-            quickRule: l.quick_rule_pt,
-            examples: l.examples,
-            keyPhrases: l.key_phrases,
-            miniNotes: l.mini_notes
-          }));
-
-          structured[mod.level].push({
-            id: mod.chapter_number,
-            slug: mod.slug,
-            title: mod.title_de || mod.title_pt,
-            translation: mod.title_pt,
-            focus: mod.focus,
-            status: mod.chapter_number <= 3 ? 'available' : 'locked', // Lógica simples de progresso
-            chapters: chapters.sort((a,b) => (a.sort_order||0) - (b.sort_order||0))
-          });
-        }
-      }
-
-      modulesData = structured;
-      modulesLoaded = true;
-      renderModules();
-      
-    } catch (err) {
-      console.error('Erro ao carregar módulos:', err);
-      modulesLoaded = true;
-      renderModules();
-      showToast('Não foi possível carregar os módulos. Usando dados locais.', 'error');
-    }
-  }
-
-  function getLessonType(slug) {
-    if (slug.includes('-l1-')) return 'vocab';
-    if (slug.includes('-l2-')) return 'gramática';
-    if (slug.includes('-l3-')) return 'cultura';
-    if (slug.includes('exam')) return 'prova';
-    return 'prática';
-  }
-
-  // ==================== RENDER MODULES ====================
-  function renderModules() {
-    const list = document.getElementById('moduleList');
-    if (!list) return;
-
-    if (!modulesLoaded) {
-      list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos do Supabase...</p>';
-      return;
-    }
-
-    const modules = modulesData[currentLevel] || [];
-    if (modules.length === 0) {
-      list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.</p>';
-      return;
-    }
-
-    list.innerHTML = modules.map(m => {
-      const statusText = m.status === 'available' ? '🔓 Disponível' : '🔒 Bloqueado';
-      const statusClass = m.status === 'available' ? 'status-available' : 'status-locked';
-      
-      let chaptersHtml = m.chapters.map(c => `
-        <div class="chapter-item clickable" onclick="openLesson('${c.slug}', '${c.name.replace(/'/g,"\\'")}', '${c.type}')">
-          <div class="chapter-check ${c.done ? 'done' : ''}">${c.done ? '✓' : ''}</div>
-          <span class="chapter-name">${c.name}</span>
-          <span class="chapter-type-badge ${c.type}">${c.type}</span>
-        </div>
-      `).join('');
-
-      return `
-        <div class="module-card" data-slug="${m.slug}">
-          <div class="module-header">
-            <div class="module-header-left">
-              <div class="module-num">${m.id}</div>
-              <div>
-                <div class="module-title">${m.title}</div>
-                <div class="module-sub">${m.translation || ''}</div>
-              </div>
-            </div>
-            <span class="module-status ${statusClass}">${statusText}</span>
-          </div>
-          <div class="module-chapters">${chaptersHtml}</div>
-        </div>`;
-    }).join('');
-  }
-
-  // ==================== ABRIR LIÇÃO ====================
-  window.openLesson = function(slug, name, type) {
-    alert(`📖 Abrindo: ${name}\nTipo: ${type}\nSlug: ${slug}`);
-    addXP(10, 'Lição iniciada');
-  };
-
-  // ==================== NAVIGATION ====================
-  function navigateTo(page) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const target = document.getElementById('page-' + page);
-    if (target) target.classList.add('active');
-    
-    document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(item => {
-      item.classList.toggle('active', item.dataset.page === page);
-    });
-    
-    const titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
-    const titleEl = document.getElementById('topbarTitle');
-    if (titleEl) titleEl.textContent = titles[page] || page;
-    
-    if (page === 'modules') renderModules();
-    if (page === 'flashcards') renderFlashcard();
-    if (page === 'shadowing') renderShadowPhrase();
-    if (page === 'notes') renderNotes();
-    if (page === 'review') renderReview();
-    
-    document.getElementById('sidebar')?.classList.remove('open');
-    document.getElementById('overlay')?.classList.remove('active');
-  }
-  // Expor imediatamente após declaração para os onclick inline funcionarem
-  window.navigateTo = navigateTo;
-
-  // Listener global para navegação — captura data-nav (explore cards) e data-page (sidebar)
-  document.addEventListener('click', function(e) {
-    const target = e.target.closest('[data-nav], [data-page]');
-    if (!target) return;
-    const page = target.dataset.nav || target.dataset.page;
-    if (page) navigateTo(page);
+// Level tabs
+document.querySelectorAll('.level-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    S.level = tab.dataset.level;
+    renderModules();
   });
+});
 
-  function toggleSidebar() {
-    document.getElementById('sidebar')?.classList.toggle('open');
-    document.getElementById('overlay')?.classList.toggle('active');
-  }
-  window.toggleSidebar = toggleSidebar;
-  document.getElementById('overlay')?.addEventListener('click', toggleSidebar);
-  document.getElementById('mobileToggle')?.addEventListener('click', toggleSidebar);
+// ═══════════════════════════════════════════════
+// XP — começa em 0
+// ═══════════════════════════════════════════════
+function addXP(amount, reason) {
+  S.xp = Math.min(S.xp + amount, 9999);
+  const pct = Math.min((S.xp / 3000) * 100, 100);
+  const fill = document.getElementById('xpFill');
+  const txt  = document.getElementById('xpText');
+  if (fill) fill.style.width = pct + '%';
+  if (txt)  txt.textContent = S.xp.toLocaleString('pt-BR') + ' / 3.000';
+  updateMetrics();
+  if (reason) toast('+' + amount + ' XP — ' + reason, 'success');
+}
 
-  document.querySelectorAll('.level-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentLevel = tab.dataset.level;
-      renderModules();
-    });
-  });
+function updateMetrics() {
+  const pct = S.xp > 0 ? Math.min(Math.round((S.xp / 3000) * 100), 100) : 0;
+  setText('metricProgress', pct + '%');
+  setText('metricChapters', S.chaptersCompleted);
+  setText('metricCards', S.cardsStudied);
+  const p = document.getElementById('currentProgress');
+  const t = document.getElementById('currentProgressText');
+  if (p) p.style.width = pct + '%';
+  if (t) t.textContent = pct + '%';
+}
 
-  // ==================== FLASHCARDS ====================
-  function renderFlashcard() {
-    const card = flashcardsData[currentCardIndex];
-    if (!card) return;
-    document.getElementById('fcWord').textContent = card.word;
-    document.getElementById('fcTranslation').textContent = card.translation;
-    document.getElementById('fcExample').textContent = `"${card.example}"`;
-    document.getElementById('fcProgress').textContent = `${currentCardIndex + 1} / ${flashcardsData.length}`;
-    document.getElementById('fcLevel').textContent = `Nível ${currentLevel}`;
-    document.getElementById('flashcard')?.classList.remove('flipped');
-  }
-  window.flipCard = () => document.getElementById('flashcard')?.classList.toggle('flipped');
-  window.nextCard = () => { currentCardIndex = (currentCardIndex + 1) % flashcardsData.length; renderFlashcard(); addXP(5); };
-  window.cardAction = (action) => { if(action==='like') addXP(10); else addXP(2); nextCard(); };
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
 
-  // ==================== SHADOWING ====================
-  function renderShadowPhrase() {
-    const phrase = shadowPhrases[currentShadowIndex];
-    if (!phrase) return;
-    document.getElementById('shadowGerman').textContent = phrase.german;
-    document.getElementById('shadowTranslation').textContent = phrase.translation;
-    document.getElementById('shadowProgress').textContent = `Frase ${currentShadowIndex + 1} de ${shadowPhrases.length}`;
-  }
-  window.playShadowAudio = () => {
-    const phrase = shadowPhrases[currentShadowIndex]?.german;
-    if (!phrase || !('speechSynthesis' in window)) return alert('Seu navegador não suporta síntese de voz.');
-    const u = new SpeechSynthesisUtterance(phrase);
-    u.lang = 'de-DE'; u.rate = 0.85;
-    speechSynthesis.speak(u);
-    addXP(3);
-  };
-  window.nextShadowPhrase = () => { currentShadowIndex = (currentShadowIndex + 1) % shadowPhrases.length; renderShadowPhrase(); addXP(5); };
+function toast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
 
-  // ==================== CHATBOT ====================
-  function initChatbot() {
-    document.querySelectorAll('.char-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentChar = btn.dataset.char;
-        const ch = characters[currentChar];
-        const msgs = document.getElementById('chatMessages');
-        if (msgs) msgs.innerHTML = `<div class="chat-msg bot"><div class="msg-avatar" style="background:${ch.color}">${ch.name[0]}</div><div class="msg-bubble">Hallo! Ich bin ${ch.name}. Wie kann ich dir helfen? 😊</div></div>`;
+// ═══════════════════════════════════════════════
+// SUPABASE — Módulos
+// ═══════════════════════════════════════════════
+async function loadModules() {
+  const sb = getSB();
+  if (!sb) { S.modulesLoaded = true; renderModules(); return; }
+  try {
+    const [{ data: mods, error: me }, { data: lessons, error: le }, { data: exs }] = await Promise.all([
+      sb.from('study_modules').select('*').eq('active', true).in('level',['A1','A2','B1']).order('sort_order'),
+      sb.from('study_lessons').select('*').eq('active', true).order('sort_order'),
+      sb.from('study_exercises').select('*').eq('active', true).order('sort_order'),
+    ]);
+    if (me) throw me;
+    if (le) throw le;
+
+    const structured = { A1:[], A2:[], B1:[] };
+    for (const mod of (mods || [])) {
+      const modLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
+      structured[mod.level]?.push({
+        id:          mod.chapter_number,
+        slug:        mod.slug,
+        title:       mod.title_de || mod.title_pt,
+        translation: mod.title_pt,
+        focus:       mod.focus,
+        status:      'available',
+        chapters: modLessons.map(l => ({
+          slug:      l.slug,
+          name:      l.title_pt || l.title_de || 'Sem título',
+          type:      lessonType(l.slug),
+          done:      false,
+          summary:   l.summary_pt,
+          quickRule: l.quick_rule_pt,
+          examples:  l.examples || [],
+          keyPhrases:l.key_phrases || [],
+          miniNotes: l.mini_notes || [],
+          exercises: (exs || []).filter(ex => ex.lesson_slug === l.slug),
+        })),
       });
-    });
-  }
-  initChatbot();
-
-  window.sendMessage = () => {
-    const input = document.getElementById('chatInput');
-    const text = input?.value.trim();
-    if (!text) return;
-    input.value = '';
-    const msgs = document.getElementById('chatMessages');
-    if (!msgs) return;
-    
-    msgs.innerHTML += `<div class="chat-msg user"><div class="msg-avatar">US</div><div class="msg-bubble">${escapeHtml(text)}</div></div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-    addXP(8, 'Mensagem enviada');
-    
-    const typingId = 'typing-' + Date.now();
-    msgs.innerHTML += `<div class="chat-msg bot" id="${typingId}"><div class="msg-avatar">${characters[currentChar].name[0]}</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-    
-    setTimeout(() => {
-      const responses = botResponses[currentChar];
-      const response = responses[Math.floor(Math.random() * responses.length)];
-      const el = document.getElementById(typingId);
-      if (el) el.querySelector('.msg-bubble').textContent = response;
-      msgs.scrollTop = msgs.scrollHeight;
-    }, 1200);
-  };
-
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  // ==================== NOTES ====================
-  function renderNotes() {
-    const grid = document.getElementById('notesGrid');
-    if (!grid) return;
-    if (notes.length === 0) {
-      grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px">Nenhuma anotação ainda.</p>';
-      return;
     }
-    grid.innerHTML = notes.map(n => `
-      <div class="note-card">
-        <h4>${escapeHtml(n.title)}</h4>
-        <p>${escapeHtml(n.content)}</p>
-        <div class="note-date">${n.date}</div>
-        <div class="note-actions">
-          <button onclick="editNote(${n.id})">Editar</button>
-          <button class="del" onclick="deleteNote(${n.id})">Excluir</button>
-        </div>
+    S.modulesData = structured;
+    S.modulesLoaded = true;
+    renderModules();
+  } catch(err) {
+    console.error(err);
+    S.modulesLoaded = true;
+    document.getElementById('moduleList').innerHTML =
+      '<div class="loading-state" style="color:var(--danger)">❌ Erro ao carregar módulos.<br><small>' + err.message + '</small></div>';
+    toast('Erro ao carregar módulos', 'error');
+  }
+}
+
+function lessonType(slug) {
+  if (!slug) return 'prática';
+  if (slug.includes('-l1-')) return 'vocab';
+  if (slug.includes('-l2-')) return 'gramática';
+  if (slug.includes('-l3-')) return 'cultura';
+  if (slug.includes('exam'))  return 'prova';
+  return 'prática';
+}
+
+// ═══════════════════════════════════════════════
+// RENDER MODULES
+// ═══════════════════════════════════════════════
+function renderModules() {
+  const list = document.getElementById('moduleList');
+  if (!list) return;
+  if (!S.modulesLoaded) {
+    list.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Carregando…</div>';
+    return;
+  }
+  const mods = S.modulesData[S.level] || [];
+  if (!mods.length) {
+    list.innerHTML = '<div class="loading-state">Nenhum módulo encontrado para ' + S.level + '.<br><small>Execute os arquivos SQL no Supabase.</small></div>';
+    return;
+  }
+
+  list.innerHTML = mods.map(m => {
+    const chapHtml = m.chapters.map(c => `
+      <div class="chapter-item" data-slug="${c.slug}" data-mod="${m.slug}">
+        <div class="chapter-check ${c.done?'done':''}">${c.done?'✓':''}</div>
+        <span class="chapter-name">${esc(c.name)}</span>
+        <span class="chapter-type-badge ${c.type}">${c.type}</span>
       </div>`).join('');
-  }
-  window.openNoteModal = (id) => {
-    editingNoteId = id || null;
-    const modal = document.getElementById('noteModal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    const titleInput = document.getElementById('noteTitle');
-    const contentInput = document.getElementById('noteContent');
-    const titleEl = document.getElementById('noteModalTitle');
-    if (id) {
-      const note = notes.find(n => n.id === id);
-      if (titleEl) titleEl.textContent = 'Editar Anotação';
-      if (titleInput && note) titleInput.value = note.title;
-      if (contentInput && note) contentInput.value = note.content;
-    } else {
-      if (titleEl) titleEl.textContent = 'Nova Anotação';
-      if (titleInput) titleInput.value = '';
-      if (contentInput) contentInput.value = '';
-    }
-  };
-  window.closeNoteModal = () => { document.getElementById('noteModal')?.classList.add('hidden'); editingNoteId = null; };
-  window.saveNote = () => {
-    const title = document.getElementById('noteTitle')?.value.trim();
-    const content = document.getElementById('noteContent')?.value.trim();
-    if (!title || !content) return;
-    if (editingNoteId) {
-      const note = notes.find(n => n.id === editingNoteId);
-      if (note) { note.title = title; note.content = content; }
-    } else {
-      notes.unshift({id:Date.now(),title,content,date:new Date().toISOString().split('T')[0]});
-    }
-    closeNoteModal();
-    renderNotes();
-    addXP(10, 'Anotação salva');
-  };
-  window.editNote = (id) => openNoteModal(id);
-  window.deleteNote = (id) => { notes = notes.filter(n => n.id !== id); renderNotes(); };
 
-  // ==================== REVIEW ====================
-  function renderReview() {
-    const container = document.getElementById('reviewCards');
-    if (!container) return;
-    const iconColors = {'grammar':'rgba(249,115,22,.15)','vocab':'rgba(168,85,247,.15)','prática':'rgba(59,130,246,.15)'};
-    const iconTextColors = {'grammar':'var(--accent)','vocab':'var(--purple)','prática':'var(--blue)'};
-    container.innerHTML = reviewItems.map((r,i) => `
-      <div class="review-card">
-        <div class="review-icon" style="background:${iconColors[r.type]||'rgba(249,115,22,.15)'};color:${iconTextColors[r.type]||'var(--accent)'}">
-          <span style="font-size:1.2rem">${r.icon}</span>
-        </div>
-        <div class="review-content">
-          <h4>${r.title}</h4>
-          <p>${r.desc}</p>
-          <div class="review-actions">
-            <button class="btn btn-primary btn-sm" onclick="markReviewDone(${i})">${r.solved?'Revisar novamente':'Marcar como revisado'}</button>
+    return `
+      <div class="module-card">
+        <div class="module-header" data-toggle="${m.slug}">
+          <div class="module-header-left">
+            <div class="module-num">${m.id}</div>
+            <div>
+              <div class="module-title">${esc(m.title)}</div>
+              <div class="module-sub">${esc(m.translation||'')}</div>
+              ${m.focus ? `<div class="module-focus">${esc(m.focus)}</div>` : ''}
+            </div>
           </div>
+          <span class="module-status status-available">🔓 Disponível</span>
         </div>
-      </div>`).join('');
-  }
-  window.markReviewDone = (index) => { reviewItems[index].solved = !reviewItems[index].solved; renderReview(); addXP(15, 'Revisão concluída'); };
+        <div class="module-chapters" id="chap-${m.slug}">${chapHtml}</div>
+      </div>`;
+  }).join('');
 
-  // ==================== XP SYSTEM ====================
-  function addXP(amount, reason) {
-    xp = Math.min(xp + amount, 3000);
-    const pct = (xp / 3000) * 100;
-    const fill = document.getElementById('xpFill');
-    const text = document.getElementById('xpText');
-    const metric = document.getElementById('metricProgress');
-    if (fill) fill.style.width = pct + '%';
-    if (text) text.textContent = `${xp.toLocaleString('pt-BR')} / 3.000`;
-    if (metric) metric.textContent = Math.round(pct) + '%';
-    if (reason) showToast(`+${amount} XP: ${reason}`, 'success');
-  }
-  function showToast(msg, type) {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type||'info'}`;
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-  }
-
-  // ==================== INIT ====================
-  document.addEventListener('DOMContentLoaded', async () => {
-    navigateTo('dashboard');
-    await loadModulesFromSupabase();
-    renderFlashcard();
-    renderShadowPhrase();
-    renderNotes();
-    renderReview();
-    console.log('🇩🇪 Deutsch Hub v2.0 iniciado!');
+  // Acordeão
+  list.querySelectorAll('[data-toggle]').forEach(h => {
+    h.addEventListener('click', () =>
+      document.getElementById('chap-' + h.dataset.toggle)?.classList.toggle('open'));
   });
 
-  // Expor funções globais adicionais
-  window.loadModulesFromSupabase = loadModulesFromSupabase;
-</>
+  // Abrir lição
+  list.querySelectorAll('.chapter-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.stopPropagation();
+      openLesson(item.dataset.slug, item.dataset.mod);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════
+// LESSON MODAL
+// ═══════════════════════════════════════════════
+function openLesson(lessonSlug, modSlug) {
+  const mod = Object.values(S.modulesData).flat().find(m => m.slug === modSlug);
+  if (!mod) return;
+  const idx = mod.chapters.findIndex(c => c.slug === lessonSlug);
+  if (idx === -1) return;
+  S.lessonList  = mod.chapters;
+  S.lessonIndex = idx;
+  S.lesson      = mod.chapters[idx];
+  buildLesson();
+  document.getElementById('lessonModal').classList.remove('hidden');
+}
+
+function buildLesson() {
+  const L = S.lesson;
+  if (!L) return;
+  setText('lessonModalTitle', L.name);
+  setText('lessonModalBadge', L.type);
+  const xpAmt = L.exercises?.length ? L.exercises.length * 10 : 20;
+  setText('lessonXpBadge', '+' + xpAmt + ' XP ao concluir');
+  document.getElementById('btnPrevLesson').style.visibility = S.lessonIndex > 0 ? 'visible' : 'hidden';
+  document.getElementById('btnNextLesson').style.visibility = S.lessonIndex < S.lessonList.length - 1 ? 'visible' : 'hidden';
+
+  let html = '';
+
+  if (L.summary) html += `
+    <div class="lesson-section">
+      <div class="lesson-section-title">📖 Diálogo / Conteúdo</div>
+      <div class="lesson-dialog">${esc(L.summary)}</div>
+    </div>`;
+
+  if (L.quickRule) html += `
+    <div class="lesson-section">
+      <div class="lesson-section-title">⚡ Regra Rápida</div>
+      <div class="lesson-rule-box">${esc(L.quickRule)}</div>
+    </div>`;
+
+  const exArr = Array.isArray(L.examples) ? L.examples : [];
+  if (exArr.length) html += `
+    <div class="lesson-section">
+      <div class="lesson-section-title">💬 Exemplos</div>
+      <div class="lesson-examples">${exArr.map(e => `
+        <div class="lesson-example">
+          <div class="de">${esc(e.de||'')}</div>
+          <div class="pt">${esc(e.pt||'')}</div>
+          ${e.note ? `<div class="note">💡 ${esc(e.note)}</div>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+
+  const vocab = Array.isArray(L.keyPhrases) ? L.keyPhrases : [];
+  if (vocab.length) html += `
+    <div class="lesson-section">
+      <div class="lesson-section-title">📚 Vocabulário</div>
+      <div class="lesson-vocab">${vocab.map(v => `
+        <div class="vocab-pill">
+          <span class="vde">${esc(v.de||'')}</span>
+          <span class="vpt">${esc(v.pt||'')}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+
+  const exs = L.exercises || [];
+  if (exs.length) html += `
+    <div class="lesson-section">
+      <div class="lesson-section-title">✏️ Exercícios</div>
+      ${exs.map((ex, i) => buildExercise(ex, i)).join('')}
+    </div>`;
+
+  if (!html) html = '<p style="color:var(--text-muted);text-align:center;padding:48px 0">Conteúdo em breve.</p>';
+
+  const body = document.getElementById('lessonModalBody');
+  body.innerHTML = html;
+  body.scrollTop = 0;
+
+  body.querySelectorAll('.exercise-option').forEach(btn =>
+    btn.addEventListener('click', () => checkOption(btn)));
+  body.querySelectorAll('.exercise-fill .check-btn').forEach(btn =>
+    btn.addEventListener('click', () => checkFill(btn)));
+  body.querySelectorAll('.exercise-fill input').forEach(inp =>
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') checkFill(inp.nextElementSibling); }));
+}
+
+function buildExercise(ex, i) {
+  if (ex.exercise_type === 'choose_option') {
+    const opts = Array.isArray(ex.options) ? ex.options : [];
+    return `<div class="exercise-card" id="ex-${i}">
+      <div class="exercise-prompt">${esc(ex.prompt_pt)}</div>
+      ${ex.prompt_de ? `<div class="exercise-sub">${esc(ex.prompt_de)}</div>` : ''}
+      <div class="exercise-options">
+        ${opts.map(o => `<button class="exercise-option"
+          data-idx="${i}" data-answer="${escAttr(ex.answer)}"
+          data-value="${escAttr(o)}" data-exp="${escAttr(ex.explanation_pt||'')}"
+          >${esc(o)}</button>`).join('')}
+      </div>
+      <div class="exercise-feedback" id="fb-${i}"></div>
+    </div>`;
+  }
+  if (ex.exercise_type === 'fill_blank' || ex.exercise_type === 'translate_to_de') {
+    return `<div class="exercise-card" id="ex-${i}">
+      <div class="exercise-prompt">${esc(ex.prompt_pt)}</div>
+      ${ex.prompt_de ? `<div class="exercise-sub">${esc(ex.prompt_de)}</div>` : ''}
+      <div class="exercise-fill">
+        <input type="text" placeholder="Sua resposta…"
+          data-idx="${i}" data-answer="${escAttr(ex.answer)}" data-exp="${escAttr(ex.explanation_pt||'')}">
+        <button class="btn btn-primary btn-sm check-btn" data-idx="${i}">Verificar</button>
+      </div>
+      <div class="exercise-feedback" id="fb-${i}"></div>
+    </div>`;
+  }
+  return `<div class="exercise-card">
+    <div class="exercise-prompt">${esc(ex.prompt_pt)}</div>
+    <div style="color:var(--text-muted);font-size:.85rem;margin-top:6px">Reflita e responda em voz alta.</div>
+  </div>`;
+}
+
+function checkOption(btn) {
+  const i   = btn.dataset.idx;
+  const ans = btn.dataset.answer?.trim().toLowerCase();
+  const val = btn.dataset.value?.trim().toLowerCase();
+  const exp = btn.dataset.exp;
+  const ok  = val === ans;
+  document.querySelectorAll(`.exercise-option[data-idx="${i}"]`).forEach(b => b.classList.add('disabled'));
+  btn.classList.add(ok ? 'correct' : 'wrong');
+  const fb = document.getElementById('fb-' + i);
+  if (fb) {
+    fb.className = 'exercise-feedback show ' + (ok ? 'ok' : 'err');
+    fb.textContent = ok ? '✓ Correto! ' + (exp || '') : '✗ Correto: ' + btn.dataset.answer + '. ' + (exp || '');
+  }
+  addXP(ok ? 10 : 2, ok ? 'Exercício correto' : 'Exercício respondido');
+}
+
+function checkFill(btn) {
+  const i   = btn.dataset.idx;
+  const inp = document.querySelector(`.exercise-fill input[data-idx="${i}"]`);
+  if (!inp || inp.disabled) return;
+  const ans = inp.dataset.answer?.trim().toLowerCase();
+  const val = inp.value.trim().toLowerCase();
+  const exp = inp.dataset.exp;
+  const ok  = val === ans;
+  inp.disabled = true; btn.disabled = true;
+  inp.style.borderColor = ok ? 'var(--success)' : 'var(--danger)';
+  const fb = document.getElementById('fb-' + i);
+  if (fb) {
+    fb.className = 'exercise-feedback show ' + (ok ? 'ok' : 'err');
+    fb.textContent = ok ? '✓ Correto! ' + (exp || '') : '✗ Correto: ' + inp.dataset.answer + '. ' + (exp || '');
+  }
+  addXP(ok ? 10 : 2, ok ? 'Exercício correto' : 'Exercício respondido');
+}
+
+function closeLesson() { document.getElementById('lessonModal').classList.add('hidden'); }
+function completeLesson() {
+  const L = S.lesson;
+  if (!L || L.done) { closeLesson(); return; }
+  L.done = true;
+  S.chaptersCompleted++;
+  const xp = L.exercises?.length ? L.exercises.length * 10 : 20;
+  addXP(xp, 'Lição "' + L.name + '" concluída');
+  // Atualiza check na lista
+  const chk = document.querySelector(`.chapter-item[data-slug="${L.slug}"] .chapter-check`);
+  if (chk) { chk.classList.add('done'); chk.textContent = '✓'; }
+  closeLesson();
+}
+function navLesson(dir) {
+  const next = S.lessonIndex + dir;
+  if (next < 0 || next >= S.lessonList.length) return;
+  S.lessonIndex = next;
+  S.lesson = S.lessonList[next];
+  buildLesson();
+}
+
+document.getElementById('btnCloseLesson').addEventListener('click', closeLesson);
+document.getElementById('btnCompleteLesson').addEventListener('click', completeLesson);
+document.getElementById('btnPrevLesson').addEventListener('click', () => navLesson(-1));
+document.getElementById('btnNextLesson').addEventListener('click', () => navLesson(1));
+document.getElementById('lessonModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('lessonModal')) closeLesson();
+});
+
+// ═══════════════════════════════════════════════
+// FLASHCARDS — Supabase
+// ═══════════════════════════════════════════════
+async function loadFlashcards() {
+  if (S.fcLoaded) return;
+  const sb = getSB();
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from('flashcards_v2')
+      .select('slug,level,front_de,back_pt,example_de,explanation_pt')
+      .eq('active', true).order('level').order('created_at');
+    if (error) throw error;
+    if (data?.length) { S.flashcards = data; S.fcLoaded = true; renderFlashcard(); }
+  } catch(e) { console.error('Flashcards:', e); }
+}
+
+function renderFlashcard() {
+  const data = S.flashcards;
+  if (!data.length) {
+    setText('fcWord', 'Nenhum flashcard carregado');
+    return;
+  }
+  const c = data[S.fcIndex];
+  setText('fcWord', c.front_de);
+  setText('fcTranslation', c.back_pt);
+  setText('fcExample', c.example_de ? '"' + c.example_de + '"' : '');
+  setText('fcProgress', (S.fcIndex + 1) + ' / ' + data.length);
+  setText('fcLevel', 'Nível ' + c.level);
+  document.getElementById('flashcard')?.classList.remove('flipped');
+}
+
+document.getElementById('flashcard').addEventListener('click', () =>
+  document.getElementById('flashcard').classList.toggle('flipped'));
+document.getElementById('btnNextCard').addEventListener('click', () => {
+  S.fcIndex = (S.fcIndex + 1) % (S.flashcards.length || 1);
+  S.cardsStudied++; renderFlashcard(); addXP(5, 'Flashcard estudado'); updateMetrics();
+});
+document.getElementById('btnLike').addEventListener('click', () => {
+  S.cardsStudied++; S.fcIndex = (S.fcIndex + 1) % (S.flashcards.length || 1);
+  renderFlashcard(); addXP(10, 'Flashcard dominado!'); updateMetrics();
+});
+document.getElementById('btnDislike').addEventListener('click', () => {
+  S.cardsStudied++; S.fcIndex = (S.fcIndex + 1) % (S.flashcards.length || 1);
+  renderFlashcard(); addXP(2, 'Flashcard para revisar'); updateMetrics();
+});
+
+// ═══════════════════════════════════════════════
+// SHADOWING
+// ═══════════════════════════════════════════════
+function renderShadow() {
+  const p = S.shadowPhrases[S.shadowIndex];
+  if (!p) return;
+  setText('shadowGerman', p.de);
+  setText('shadowTranslation', p.pt);
+  setText('shadowProgress', 'Frase ' + (S.shadowIndex + 1) + ' de ' + S.shadowPhrases.length);
+}
+document.getElementById('btnShadowPlay').addEventListener('click', () => {
+  const phrase = S.shadowPhrases[S.shadowIndex]?.de;
+  if (!phrase) return;
+  if (!window.speechSynthesis) return toast('Navegador não suporta síntese de voz', 'error');
+  const u = new SpeechSynthesisUtterance(phrase);
+  u.lang = 'de-DE'; u.rate = 0.82;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+  addXP(3, 'Frase ouvida');
+});
+document.getElementById('btnShadowNext').addEventListener('click', () => {
+  S.shadowIndex = (S.shadowIndex + 1) % S.shadowPhrases.length;
+  renderShadow(); addXP(5, 'Shadowing praticado');
+});
+
+// ═══════════════════════════════════════════════
+// CHATBOT
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.char-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    S.currentChar = btn.dataset.char;
+    const ch = CHARS[S.currentChar];
+    const msgs = document.getElementById('chatMessages');
+    if (msgs) msgs.innerHTML = `
+      <div class="chat-msg bot">
+        <div class="msg-avatar" style="background:${ch.color}">${ch.name[0]}</div>
+        <div class="msg-bubble">Hallo! Ich bin ${ch.name}. Wie kann ich dir helfen? 😊</div>
+      </div>`;
+  });
+});
+
+function sendMessage() {
+  const inp  = document.getElementById('chatInput');
+  const text = inp?.value.trim();
+  if (!text) return;
+  inp.value = '';
+  const msgs = document.getElementById('chatMessages');
+  if (!msgs) return;
+
+  msgs.innerHTML += `<div class="chat-msg user">
+    <div class="msg-avatar">US</div>
+    <div class="msg-bubble">${esc(text)}</div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  addXP(8, 'Mensagem enviada');
+
+  const id = 'typing-' + Date.now();
+  const ch = CHARS[S.currentChar];
+  msgs.innerHTML += `<div class="chat-msg bot" id="${id}">
+    <div class="msg-avatar" style="background:${ch.color}">${ch.name[0]}</div>
+    <div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    const replies = ch.replies;
+    const reply   = replies[Math.floor(Math.random() * replies.length)];
+    const el = document.getElementById(id);
+    if (el) el.querySelector('.msg-bubble').textContent = reply;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1100);
+}
+
+document.getElementById('btnSendChat').addEventListener('click', sendMessage);
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// ═══════════════════════════════════════════════
+// NOTES
+// ═══════════════════════════════════════════════
+function renderNotes() {
+  const grid = document.getElementById('notesGrid');
+  if (!grid) return;
+  if (!S.notes.length) {
+    grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px;grid-column:1/-1">Nenhuma anotação ainda. Clique em + Nova Nota.</p>';
+    return;
+  }
+  grid.innerHTML = S.notes.map(n => `
+    <div class="note-card">
+      <h4>${esc(n.title)}</h4>
+      <p>${esc(n.content)}</p>
+      <div class="note-date">${n.date}</div>
+      <div class="note-actions">
+        <button data-edit="${n.id}">Editar</button>
+        <button class="del" data-del="${n.id}">Excluir</button>
+      </div>
+    </div>`).join('');
+
+  grid.querySelectorAll('[data-edit]').forEach(b =>
+    b.addEventListener('click', () => openNoteModal(Number(b.dataset.edit))));
+  grid.querySelectorAll('[data-del]').forEach(b =>
+    b.addEventListener('click', () => {
+      S.notes = S.notes.filter(n => n.id !== Number(b.dataset.del));
+      renderNotes();
+    }));
+}
+
+function openNoteModal(id) {
+  S.editingNoteId = id || null;
+  document.getElementById('noteModal').classList.remove('hidden');
+  const note = id ? S.notes.find(n => n.id === id) : null;
+  setText('noteModalTitle', id ? 'Editar Anotação' : 'Nova Anotação');
+  document.getElementById('noteTitle').value   = note?.title   || '';
+  document.getElementById('noteContent').value = note?.content || '';
+}
+
+document.getElementById('btnNewNote').addEventListener('click',   () => openNoteModal(null));
+document.getElementById('btnCloseNote').addEventListener('click', () =>
+  document.getElementById('noteModal').classList.add('hidden'));
+document.getElementById('btnSaveNote').addEventListener('click', () => {
+  const title   = document.getElementById('noteTitle')?.value.trim();
+  const content = document.getElementById('noteContent')?.value.trim();
+  if (!title || !content) return toast('Preencha título e conteúdo', 'error');
+  if (S.editingNoteId) {
+    const n = S.notes.find(n => n.id === S.editingNoteId);
+    if (n) { n.title = title; n.content = content; }
+  } else {
+    S.notes.unshift({ id: Date.now(), title, content, date: new Date().toISOString().split('T')[0] });
+  }
+  document.getElementById('noteModal').classList.add('hidden');
+  renderNotes();
+  addXP(10, 'Anotação salva');
+});
+
+// ═══════════════════════════════════════════════
+// REVIEW
+// ═══════════════════════════════════════════════
+function renderReview() {
+  const container = document.getElementById('reviewCards');
+  if (!container) return;
+  const items = [];
+  Object.values(S.modulesData).forEach(mods =>
+    mods.forEach(mod =>
+      mod.chapters.forEach(c => {
+        if (c.exercises?.length) items.push({ ...c, modTitle: mod.title });
+      })));
+
+  if (!items.length) {
+    container.innerHTML = '<div class="loading-state">Complete lições nos Módulos para ver itens de revisão aqui.</div>';
+    return;
+  }
+
+  const colors = {vocab:'rgba(59,130,246,.12)',gramática:'rgba(168,85,247,.12)',cultura:'rgba(34,197,94,.12)',prática:'rgba(249,115,22,.12)',prova:'rgba(239,68,68,.12)'};
+  const tcols  = {vocab:'var(--blue)',gramática:'var(--purple)',cultura:'var(--success)',prática:'var(--accent)',prova:'var(--danger)'};
+  const icons  = {vocab:'📚',gramática:'📝',cultura:'🌍',prática:'⚙️',prova:'🏆'};
+
+  container.innerHTML = items.map(r => `
+    <div class="review-card">
+      <div class="review-icon" style="background:${colors[r.type]||colors.prática};color:${tcols[r.type]||tcols.prática}">
+        ${icons[r.type]||'📖'}
+      </div>
+      <div class="review-content">
+        <h4>${esc(r.name)}</h4>
+        <p>${esc(r.modTitle)}</p>
+        <div class="review-actions">
+          <button class="btn btn-primary btn-sm" data-review-slug="${r.slug}" data-review-mod="${r.modTitle}">
+            ${r.done ? 'Revisar novamente' : 'Revisar'}
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  container.querySelectorAll('[data-review-slug]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slug = btn.dataset.reviewSlug;
+      Object.values(S.modulesData).forEach(mods =>
+        mods.forEach(mod => {
+          const ch = mod.chapters.find(c => c.slug === slug);
+          if (ch) openLesson(ch.slug, mod.slug);
+        }));
+      addXP(15, 'Revisão iniciada');
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function esc(str) {
+  if (str == null) return '';
+  const d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
+}
+function escAttr(str) {
+  return String(str||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  updateMetrics();           // tudo em 0
+  navigateTo('dashboard');
+  await loadModules();       // carrega do Supabase
+  renderShadow();
+  renderNotes();
+  console.log('🇩🇪 Deutsch Hub v2.1');
+});
+</script>
 </body>
 </html>
-
