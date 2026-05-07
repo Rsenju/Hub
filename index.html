@@ -606,403 +606,440 @@ input,textarea{font-family:inherit;outline:none}
 
 <script>
   // ==================== CONFIG SUPABASE ====================
-const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZWZpcWF4aWx1Zm5ld215Y3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTkwNjEsImV4cCI6MjA5Mjk5NTA2MX0.YDa6Iia2obbhxFk55NzRzgMADRpqonXIa0w-zc3qVM0';
-let supabaseClient = null;
+  const SUPABASE_URL = 'https://htefiqaxilufnewmycut.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0ZWZpcWF4aWx1Zm5ld215Y3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTkwNjEsImV4cCI6MjA5Mjk5NTA2MX0.YDa6Iia2obbhxFk55NzRzgMADRpqonXIa0w-zc3qVM0';
+  let supabaseClient = null;
 
-function getSupabase() {
-  if (!supabaseClient && window.supabase) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  }
-  return supabaseClient;
-}
-
-// ==================== STATE ====================
-let modulesData = { A1: [], A2: [], B1: [] };
-let modulesLoaded = false;
-let currentLevel = 'A1';
-let xp = 2450;
-let streak = 12;
-
-// Dados estáticos (Flashcards, Shadowing, etc)
-const flashcardsData = [
-  {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
-  {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
-  {word:'Danke',translation:'Obrigado',example:'Danke schön!'},
-  {word:'Bitte',translation:'Por favor',example:'Ein Wasser, bitte.'},
-  {word:'Entschuldigung',translation:'Desculpe',example:'Entschuldigung, wo ist der Bahnhof?'},
-  {word:'Ja',translation:'Sim',example:'Ja, ich verstehe.'},
-  {word:'Nein',translation:'Não',example:'Nein, danke.'},
-  {word:'Auf Wiedersehen',translation:'Adeus',example:'Auf Wiedersehen und gute Reise!'},
-  {word:'Ich heiße...',translation:'Eu me chamo...',example:'Ich heiße Maria.'},
-  {word:'Wie geht es Ihnen?',translation:'Como vai? (formal)',example:'Wie geht es Ihnen heute?'}
-];
-
-const shadowPhrases = [
-  {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai? (formal)'},
-  {german:'Ich möchte einen Kaffee, bitte.',translation:'Eu gostaria de um café, por favor.'},
-  {german:'Wo ist der nächste Bahnhof?',translation:'Onde fica a próxima estação de trem?'},
-  {german:'Das Wetter ist heute sehr schön.',translation:'O tempo está muito bonito hoje.'},
-  {german:'Können Sie das bitte wiederholen?',translation:'Pode repetir isso, por favor?'}
-];
-
-const characters = {
-  anna:{name:'Anna',role:'Professora',color:'#f97316',systemMsg:'Você é Anna, uma professora de alemão paciente.'},
-  lukas:{name:'Lukas',role:'Colega',color:'#3b82f6',systemMsg:'Você é Lukas, um colega amigável.'},
-  herr_mueller:{name:'Herr Müller',role:'Formal',color:'#22c55e',systemMsg:'Você é Herr Müller, formal e educado.'},
-  lisa:{name:'Lisa',role:'Amiga',color:'#a855f7',systemMsg:'Você é Lisa, amiga descontraída.'}
-};
-
-const botResponses = {
-  anna:['Sehr gut! Deine Aussprache verbessert sich! 🎉','Das ist richtig! Du machst große Fortschritte.'],
-  lukas:['Hey, alles klar! Was machst du heute Abend?','Cool! Ich war letztes Wochenende in Berlin.'],
-  herr_mueller:['Guten Tag. Ihre Fortschritte sind bemerkenswert.','Sehr korrekt. Ich empfehle Ihnen weiter zu üben.'],
-  lisa:['Hey!! Wie geht\'s? 😍','Omg das ist so cool! Du lernst echt schnell! ✨']
-};
-
-const notesData = [
-  {id:1,title:'Artigos - Dica rápida',content:'Der = masculino, Das = neutro, Die = feminino.',date:'2026-05-04'},
-  {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam no presente.',date:'2026-05-03'}
-];
-
-const reviewData = [
-  {type:'grammar',title:'Der vs. Das vs. Die',desc:'Artigos definidos em alemão têm três gêneros.',icon:'📝',solved:false},
-  {type:'vocab',title:'Zahlen (Números)',desc:'Números de 1 a 100 em alemão.',icon:'🔢',solved:false}
-];
-
-let notes = JSON.parse(JSON.stringify(notesData));
-let reviewItems = JSON.parse(JSON.stringify(reviewData));
-let currentCardIndex = 0;
-let currentShadowIndex = 0;
-let currentChar = 'anna';
-let editingNoteId = null;
-
-// ==================== CARREGAR MÓDULOS DO SUPABASE ====================
-async function loadModulesFromSupabase() {
-  const client = getSupabase();
-  if (!client) {
-    console.error('❌ Supabase SDK não encontrado');
-    return;
+  function getSupabase() {
+    if (!supabaseClient && window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+    return supabaseClient;
   }
 
-  try {
-    console.log('🔍 [Supabase] Buscando módulos...');
-    console.log('🔑 URL:', SUPABASE_URL);
-    
-    // Teste: conta quantos registros existem (ignora RLS para debug)
-    const { count, error: countError } = await client
-      .from('study_modules')
-      .select('*', { count: 'exact', head: true })
-      .in('level', ['A1', 'A2', 'B1']);
-      
-    console.log('📊 Total de módulos no banco (com filtros):', count);
-    if (countError) console.error('❌ Erro na contagem:', countError);
+  // ==================== STATE ====================
+  let modulesData = { A1: [], A2: [], B1: [] };
+  let modulesLoaded = false;
+  let currentLevel = 'A1';
+  let xp = 2450;
+  let streak = 12;
 
-    // Query principal
-    const {  modules, error: modError } = await client
-      .from('study_modules')
-      .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order')
-      .in('level', ['A1', 'A2', 'B1'])
-      .order('sort_order', { ascending: true });
+  // Dados estáticos (Flashcards, Shadowing, etc)
+  const flashcardsData = [
+    {word:'Hallo',translation:'Olá',example:'Hallo, wie geht es dir?'},
+    {word:'Guten Tag',translation:'Bom dia',example:'Guten Tag, Herr Müller.'},
+    {word:'Danke',translation:'Obrigado',example:'Danke schön!'},
+    {word:'Bitte',translation:'Por favor',example:'Ein Wasser, bitte.'},
+    {word:'Entschuldigung',translation:'Desculpe',example:'Entschuldigung, wo ist der Bahnhof?'},
+    {word:'Ja',translation:'Sim',example:'Ja, ich verstehe.'},
+    {word:'Nein',translation:'Não',example:'Nein, danke.'},
+    {word:'Auf Wiedersehen',translation:'Adeus',example:'Auf Wiedersehen und gute Reise!'},
+    {word:'Ich heiße...',translation:'Eu me chamo...',example:'Ich heiße Maria.'},
+    {word:'Wie geht es Ihnen?',translation:'Como vai? (formal)',example:'Wie geht es Ihnen heute?'}
+  ];
 
-    console.log('📦 [Supabase] Retornou:', modules?.length || 0, 'módulos');
-    console.log('🐛 Detalhes do erro (se houver):', modError);
-    
-    if (!modules || modules.length === 0) {
-      console.warn('⚠️ Lista vazia. Possíveis causas:');
-      console.warn('  1. RLS ativado sem política de leitura');
-      console.warn('  2. Chave de API incorreta (usando service_role?)');
-      console.warn('  3. Dados não inseridos com level IN (A1,A2,B1)');
-      console.warn('  4. Coluna "active" filtrando (se ainda usar .eq("active", true))');
+  const shadowPhrases = [
+    {german:'Guten Morgen, wie geht es Ihnen?',translation:'Bom dia, como vai? (formal)'},
+    {german:'Ich möchte einen Kaffee, bitte.',translation:'Eu gostaria de um café, por favor.'},
+    {german:'Wo ist der nächste Bahnhof?',translation:'Onde fica a próxima estação de trem?'},
+    {german:'Das Wetter ist heute sehr schön.',translation:'O tempo está muito bonito hoje.'},
+    {german:'Können Sie das bitte wiederholen?',translation:'Pode repetir isso, por favor?'}
+  ];
+
+  const characters = {
+    anna:{name:'Anna',role:'Professora',color:'#f97316',systemMsg:'Você é Anna, uma professora de alemão paciente.'},
+    lukas:{name:'Lukas',role:'Colega',color:'#3b82f6',systemMsg:'Você é Lukas, um colega amigável.'},
+    herr_mueller:{name:'Herr Müller',role:'Formal',color:'#22c55e',systemMsg:'Você é Herr Müller, formal e educado.'},
+    lisa:{name:'Lisa',role:'Amiga',color:'#a855f7',systemMsg:'Você é Lisa, amiga descontraída.'}
+  };
+
+  const botResponses = {
+    anna:['Sehr gut! Deine Aussprache verbessert sich! 🎉','Das ist richtig! Du machst große Fortschritte.'],
+    lukas:['Hey, alles klar! Was machst du heute Abend?','Cool! Ich war letztes Wochenende in Berlin.'],
+    herr_mueller:['Guten Tag. Ihre Fortschritte sind bemerkenswert.','Sehr korrekt. Ich empfehle Ihnen weiter zu üben.'],
+    lisa:['Hey!! Wie geht\'s? 😍','Omg das ist so cool! Du lernst echt schnell! ✨']
+  };
+
+  const notesData = [
+    {id:1,title:'Artigos - Dica rápida',content:'Der = masculino, Das = neutro, Die = feminino.',date:'2026-05-04'},
+    {id:2,title:'Verbos separáveis',content:'Prefixos como ab-, auf-, an- se separam no presente.',date:'2026-05-03'}
+  ];
+
+  const reviewData = [
+    {type:'grammar',title:'Der vs. Das vs. Die',desc:'Artigos definidos em alemão têm três gêneros.',icon:'📝',solved:false},
+    {type:'vocab',title:'Zahlen (Números)',desc:'Números de 1 a 100 em alemão.',icon:'🔢',solved:false}
+  ];
+
+  let notes = JSON.parse(JSON.stringify(notesData));
+  let reviewItems = JSON.parse(JSON.stringify(reviewData));
+  let currentCardIndex = 0;
+  let currentShadowIndex = 0;
+  let currentChar = 'anna';
+  let editingNoteId = null;
+
+  // ==================== CARREGAR MÓDULOS DO SUPABASE ====================
+  async function loadModulesFromSupabase() {
+    const supabase = getSupabase();
+    if (!supabase) {
+      console.error('Supabase client not initialized');
+      modulesLoaded = true;
+      renderModules();
+      return;
     }
 
-// ==================== RENDER MODULES ====================
-function renderModules() {
-  const list = document.getElementById('moduleList');
-  if (!list) return;
+    try {
+      // Carregar módulos ativos por nível
+      const { data: modules, error: modulesError } = await supabase
+        .from('study_modules')
+        .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order, active')
+        .eq('active', true)
+        .in('level', ['A1', 'A2', 'B1'])
+        .order('sort_order', { ascending: true });
 
-  if (!modulesLoaded) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos do Supabase...</p>';
-    return;
+      if (modulesError) throw modulesError;
+
+      // Carregar lessons para cada módulo
+      const { data: lessons, error: lessonsError } = await supabase
+        .from('study_lessons')
+        .select('slug, module_slug, title_pt, title_de, summary_pt, quick_rule_pt, examples, key_phrases, mini_notes, sort_order, active')
+        .eq('active', true);
+
+      if (lessonsError) throw lessonsError;
+
+      // Estruturar dados por nível
+      const structured = { A1: [], A2: [], B1: [] };
+      
+      if (modules) {
+        for (const mod of modules) {
+          const levelLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
+          
+          const chapters = levelLessons.map((l, idx) => ({
+            slug: l.slug,
+            name: l.title_pt || l.title_de || 'Sem título',
+            type: getLessonType(l.slug),
+            done: false, // Pode ser integrado com user_progress depois
+            summary: l.summary_pt,
+            quickRule: l.quick_rule_pt,
+            examples: l.examples,
+            keyPhrases: l.key_phrases,
+            miniNotes: l.mini_notes
+          }));
+
+          structured[mod.level].push({
+            id: mod.chapter_number,
+            slug: mod.slug,
+            title: mod.title_de || mod.title_pt,
+            translation: mod.title_pt,
+            focus: mod.focus,
+            status: mod.chapter_number <= 3 ? 'available' : 'locked', // Lógica simples de progresso
+            chapters: chapters.sort((a,b) => (a.sort_order||0) - (b.sort_order||0))
+          });
+        }
+      }
+
+      modulesData = structured;
+      modulesLoaded = true;
+      renderModules();
+      
+    } catch (err) {
+      console.error('Erro ao carregar módulos:', err);
+      modulesLoaded = true;
+      renderModules();
+      showToast('Não foi possível carregar os módulos. Usando dados locais.', 'error');
+    }
   }
 
-  const modules = modulesData[currentLevel] || [];
-  if (modules.length === 0) {
-    list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.</p>';
-    return;
+  function getLessonType(slug) {
+    if (slug.includes('-l1-')) return 'vocab';
+    if (slug.includes('-l2-')) return 'gramática';
+    if (slug.includes('-l3-')) return 'cultura';
+    if (slug.includes('exam')) return 'prova';
+    return 'prática';
   }
 
-  list.innerHTML = modules.map(m => {
-    const statusText = m.status === 'available' ? '🔓 Disponível' : '🔒 Bloqueado';
-    const statusClass = m.status === 'available' ? 'status-available' : 'status-locked';
-    
-    let chaptersHtml = m.chapters.map(c => `
-      <div class="chapter-item clickable" onclick="openLesson('${c.slug}', '${c.name.replace(/'/g,"\\'")}', '${c.type}')">
-        <div class="chapter-check ${c.done ? 'done' : ''}">${c.done ? '✓' : ''}</div>
-        <span class="chapter-name">${c.name}</span>
-        <span class="chapter-type-badge ${c.type}">${c.type}</span>
-      </div>
-    `).join('');
+  // ==================== RENDER MODULES ====================
+  function renderModules() {
+    const list = document.getElementById('moduleList');
+    if (!list) return;
 
-    return `
-      <div class="module-card" data-slug="${m.slug}">
-        <div class="module-header">
-          <div class="module-header-left">
-            <div class="module-num">${m.id}</div>
-            <div>
-              <div class="module-title">${m.title}</div>
-              <div class="module-sub">${m.translation || ''}</div>
-            </div>
-          </div>
-          <span class="module-status ${statusClass}">${statusText}</span>
+    if (!modulesLoaded) {
+      list.innerHTML = '<p class="text-center text-gray-500 py-6">Carregando módulos do Supabase...</p>';
+      return;
+    }
+
+    const modules = modulesData[currentLevel] || [];
+    if (modules.length === 0) {
+      list.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum módulo encontrado para '+currentLevel+'.</p>';
+      return;
+    }
+
+    list.innerHTML = modules.map(m => {
+      const statusText = m.status === 'available' ? '🔓 Disponível' : '🔒 Bloqueado';
+      const statusClass = m.status === 'available' ? 'status-available' : 'status-locked';
+      
+      let chaptersHtml = m.chapters.map(c => `
+        <div class="chapter-item clickable" onclick="openLesson('${c.slug}', '${c.name.replace(/'/g,"\\'")}', '${c.type}')">
+          <div class="chapter-check ${c.done ? 'done' : ''}">${c.done ? '✓' : ''}</div>
+          <span class="chapter-name">${c.name}</span>
+          <span class="chapter-type-badge ${c.type}">${c.type}</span>
         </div>
-        <div class="module-chapters">${chaptersHtml}</div>
-      </div>`;
-  }).join('');
-}
+      `).join('');
 
-// ==================== ABRIR LIÇÃO ====================
-window.openLesson = function(slug, name, type) {
-  alert(`📖 Abrindo: ${name}\nTipo: ${type}\nSlug: ${slug}`);
-  // Aqui você pode adicionar lógica para marcar como concluído e dar XP
-  addXP(10);
-};
+      return `
+        <div class="module-card" data-slug="${m.slug}">
+          <div class="module-header">
+            <div class="module-header-left">
+              <div class="module-num">${m.id}</div>
+              <div>
+                <div class="module-title">${m.title}</div>
+                <div class="module-sub">${m.translation || ''}</div>
+              </div>
+            </div>
+            <span class="module-status ${statusClass}">${statusText}</span>
+          </div>
+          <div class="module-chapters">${chaptersHtml}</div>
+        </div>`;
+    }).join('');
+  }
 
-// ==================== NAVIGATION ====================
-function navigateTo(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById('page-' + page);
-  if (target) target.classList.add('active');
-  
-  document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.page === page);
-  });
-  
-  const titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
-  const titleEl = document.getElementById('topbarTitle');
-  if (titleEl) titleEl.textContent = titles[page] || page;
-  
-  if (page === 'modules') renderModules();
-  if (page === 'flashcards') renderFlashcard();
-  if (page === 'shadowing') renderShadowPhrase();
-  if (page === 'notes') renderNotes();
-  if (page === 'review') renderReview();
-  
-  // Fechar sidebar mobile se aberta
-  document.getElementById('sidebar')?.classList.remove('open');
-  document.getElementById('overlay')?.classList.remove('active');
-}
+  // ==================== ABRIR LIÇÃO ====================
+  window.openLesson = function(slug, name, type) {
+    alert(`📖 Abrindo: ${name}\nTipo: ${type}\nSlug: ${slug}`);
+    addXP(10, 'Lição iniciada');
+  };
 
-function toggleSidebar() {
-  document.getElementById('sidebar')?.classList.toggle('open');
-  document.getElementById('overlay')?.classList.toggle('active');
-}
-document.getElementById('overlay')?.addEventListener('click', toggleSidebar);
+  // ==================== NAVIGATION ====================
+  function navigateTo(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + page);
+    if (target) target.classList.add('active');
+    
+    document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.page === page);
+    });
+    
+    const titles = {dashboard:'Dashboard',modules:'Módulos',flashcards:'Flashcards',shadowing:'Shadowing',chatbot:'Chatbot',notes:'Anotações',review:'Revisão'};
+    const titleEl = document.getElementById('topbarTitle');
+    if (titleEl) titleEl.textContent = titles[page] || page;
+    
+    if (page === 'modules') renderModules();
+    if (page === 'flashcards') renderFlashcard();
+    if (page === 'shadowing') renderShadowPhrase();
+    if (page === 'notes') renderNotes();
+    if (page === 'review') renderReview();
+    
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('overlay')?.classList.remove('active');
+  }
 
-// Tabs de nível
-document.querySelectorAll('.level-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    currentLevel = tab.dataset.level;
-    renderModules();
-  });
-});
+  function toggleSidebar() {
+    document.getElementById('sidebar')?.classList.toggle('open');
+    document.getElementById('overlay')?.classList.toggle('active');
+  }
+  document.getElementById('overlay')?.addEventListener('click', toggleSidebar);
 
-// ==================== FLASHCARDS ====================
-function renderFlashcard() {
-  const card = flashcardsData[currentCardIndex];
-  if (!card) return;
-  document.getElementById('fcWord').textContent = card.word;
-  document.getElementById('fcTranslation').textContent = card.translation;
-  document.getElementById('fcExample').textContent = `"${card.example}"`;
-  document.getElementById('fcProgress').textContent = `${currentCardIndex + 1} / ${flashcardsData.length}`;
-  document.getElementById('fcLevel').textContent = `Nível ${currentLevel}`;
-  document.getElementById('flashcard')?.classList.remove('flipped');
-}
-window.flipCard = () => document.getElementById('flashcard')?.classList.toggle('flipped');
-window.nextCard = () => { currentCardIndex = (currentCardIndex + 1) % flashcardsData.length; renderFlashcard(); addXP(5); };
-window.cardAction = (action) => { if(action==='like') addXP(10); else addXP(2); nextCard(); };
-
-// ==================== SHADOWING ====================
-function renderShadowPhrase() {
-  const phrase = shadowPhrases[currentShadowIndex];
-  if (!phrase) return;
-  document.getElementById('shadowGerman').textContent = phrase.german;
-  document.getElementById('shadowTranslation').textContent = phrase.translation;
-  document.getElementById('shadowProgress').textContent = `Frase ${currentShadowIndex + 1} de ${shadowPhrases.length}`;
-}
-window.playShadowAudio = () => {
-  const phrase = shadowPhrases[currentShadowIndex]?.german;
-  if (!phrase || !('speechSynthesis' in window)) return alert('Seu navegador não suporta síntese de voz.');
-  const u = new SpeechSynthesisUtterance(phrase);
-  u.lang = 'de-DE'; u.rate = 0.85;
-  speechSynthesis.speak(u);
-  addXP(3);
-};
-window.nextShadowPhrase = () => { currentShadowIndex = (currentShadowIndex + 1) % shadowPhrases.length; renderShadowPhrase(); addXP(5); };
-
-// ==================== CHATBOT ====================
-function initChatbot() {
-  document.querySelectorAll('.char-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentChar = btn.dataset.char;
-      const ch = characters[currentChar];
-      const msgs = document.getElementById('chatMessages');
-      if (msgs) msgs.innerHTML = `<div class="chat-msg bot"><div class="msg-avatar" style="background:${ch.color}">${ch.name[0]}</div><div class="msg-bubble">Hallo! Ich bin ${ch.name}. Wie kann ich dir helfen? 😊</div></div>`;
+  document.querySelectorAll('.level-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentLevel = tab.dataset.level;
+      renderModules();
     });
   });
-}
-initChatbot();
 
-window.sendMessage = () => {
-  const input = document.getElementById('chatInput');
-  const text = input?.value.trim();
-  if (!text) return;
-  input.value = '';
-  const msgs = document.getElementById('chatMessages');
-  if (!msgs) return;
-  
-  msgs.innerHTML += `<div class="chat-msg user"><div class="msg-avatar">US</div><div class="msg-bubble">${escapeHtml(text)}</div></div>`;
-  msgs.scrollTop = msgs.scrollHeight;
-  addXP(8);
-  
-  const typingId = 'typing-' + Date.now();
-  msgs.innerHTML += `<div class="chat-msg bot" id="${typingId}"><div class="msg-avatar">${characters[currentChar].name[0]}</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
-  msgs.scrollTop = msgs.scrollHeight;
-  
-  setTimeout(() => {
-    const responses = botResponses[currentChar];
-    const response = responses[Math.floor(Math.random() * responses.length)];
-    const el = document.getElementById(typingId);
-    if (el) el.querySelector('.msg-bubble').textContent = response;
+  // ==================== FLASHCARDS ====================
+  function renderFlashcard() {
+    const card = flashcardsData[currentCardIndex];
+    if (!card) return;
+    document.getElementById('fcWord').textContent = card.word;
+    document.getElementById('fcTranslation').textContent = card.translation;
+    document.getElementById('fcExample').textContent = `"${card.example}"`;
+    document.getElementById('fcProgress').textContent = `${currentCardIndex + 1} / ${flashcardsData.length}`;
+    document.getElementById('fcLevel').textContent = `Nível ${currentLevel}`;
+    document.getElementById('flashcard')?.classList.remove('flipped');
+  }
+  window.flipCard = () => document.getElementById('flashcard')?.classList.toggle('flipped');
+  window.nextCard = () => { currentCardIndex = (currentCardIndex + 1) % flashcardsData.length; renderFlashcard(); addXP(5); };
+  window.cardAction = (action) => { if(action==='like') addXP(10); else addXP(2); nextCard(); };
+
+  // ==================== SHADOWING ====================
+  function renderShadowPhrase() {
+    const phrase = shadowPhrases[currentShadowIndex];
+    if (!phrase) return;
+    document.getElementById('shadowGerman').textContent = phrase.german;
+    document.getElementById('shadowTranslation').textContent = phrase.translation;
+    document.getElementById('shadowProgress').textContent = `Frase ${currentShadowIndex + 1} de ${shadowPhrases.length}`;
+  }
+  window.playShadowAudio = () => {
+    const phrase = shadowPhrases[currentShadowIndex]?.german;
+    if (!phrase || !('speechSynthesis' in window)) return alert('Seu navegador não suporta síntese de voz.');
+    const u = new SpeechSynthesisUtterance(phrase);
+    u.lang = 'de-DE'; u.rate = 0.85;
+    speechSynthesis.speak(u);
+    addXP(3);
+  };
+  window.nextShadowPhrase = () => { currentShadowIndex = (currentShadowIndex + 1) % shadowPhrases.length; renderShadowPhrase(); addXP(5); };
+
+  // ==================== CHATBOT ====================
+  function initChatbot() {
+    document.querySelectorAll('.char-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentChar = btn.dataset.char;
+        const ch = characters[currentChar];
+        const msgs = document.getElementById('chatMessages');
+        if (msgs) msgs.innerHTML = `<div class="chat-msg bot"><div class="msg-avatar" style="background:${ch.color}">${ch.name[0]}</div><div class="msg-bubble">Hallo! Ich bin ${ch.name}. Wie kann ich dir helfen? 😊</div></div>`;
+      });
+    });
+  }
+  initChatbot();
+
+  window.sendMessage = () => {
+    const input = document.getElementById('chatInput');
+    const text = input?.value.trim();
+    if (!text) return;
+    input.value = '';
+    const msgs = document.getElementById('chatMessages');
+    if (!msgs) return;
+    
+    msgs.innerHTML += `<div class="chat-msg user"><div class="msg-avatar">US</div><div class="msg-bubble">${escapeHtml(text)}</div></div>`;
     msgs.scrollTop = msgs.scrollHeight;
-  }, 1200);
-};
+    addXP(8, 'Mensagem enviada');
+    
+    const typingId = 'typing-' + Date.now();
+    msgs.innerHTML += `<div class="chat-msg bot" id="${typingId}"><div class="msg-avatar">${characters[currentChar].name[0]}</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+    
+    setTimeout(() => {
+      const responses = botResponses[currentChar];
+      const response = responses[Math.floor(Math.random() * responses.length)];
+      const el = document.getElementById(typingId);
+      if (el) el.querySelector('.msg-bubble').textContent = response;
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 1200);
+  };
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
 
-// ==================== NOTES ====================
-function renderNotes() {
-  const grid = document.getElementById('notesGrid');
-  if (!grid) return;
-  if (notes.length === 0) {
-    grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px">Nenhuma anotação ainda.</p>';
-    return;
-  }
-  grid.innerHTML = notes.map(n => `
-    <div class="note-card">
-      <h4>${escapeHtml(n.title)}</h4>
-      <p>${escapeHtml(n.content)}</p>
-      <div class="note-date">${n.date}</div>
-      <div class="note-actions">
-        <button onclick="editNote(${n.id})">Editar</button>
-        <button class="del" onclick="deleteNote(${n.id})">Excluir</button>
-      </div>
-    </div>`).join('');
-}
-window.openNoteModal = (id) => {
-  editingNoteId = id || null;
-  const modal = document.getElementById('noteModal');
-  if (!modal) return;
-  modal.classList.remove('hidden');
-  const titleInput = document.getElementById('noteTitle');
-  const contentInput = document.getElementById('noteContent');
-  const titleEl = document.getElementById('noteModalTitle');
-  if (id) {
-    const note = notes.find(n => n.id === id);
-    if (titleEl) titleEl.textContent = 'Editar Anotação';
-    if (titleInput && note) titleInput.value = note.title;
-    if (contentInput && note) contentInput.value = note.content;
-  } else {
-    if (titleEl) titleEl.textContent = 'Nova Anotação';
-    if (titleInput) titleInput.value = '';
-    if (contentInput) contentInput.value = '';
-  }
-};
-window.closeNoteModal = () => { document.getElementById('noteModal')?.classList.add('hidden'); editingNoteId = null; };
-window.saveNote = () => {
-  const title = document.getElementById('noteTitle')?.value.trim();
-  const content = document.getElementById('noteContent')?.value.trim();
-  if (!title || !content) return;
-  if (editingNoteId) {
-    const note = notes.find(n => n.id === editingNoteId);
-    if (note) { note.title = title; note.content = content; }
-  } else {
-    notes.unshift({id:Date.now(),title,content,date:new Date().toISOString().split('T')[0]});
-  }
-  closeNoteModal();
-  renderNotes();
-  addXP(10);
-};
-window.editNote = (id) => openNoteModal(id);
-window.deleteNote = (id) => { notes = notes.filter(n => n.id !== id); renderNotes(); };
-
-// ==================== REVIEW ====================
-function renderReview() {
-  const container = document.getElementById('reviewCards');
-  if (!container) return;
-  const iconColors = {'grammar':'rgba(249,115,22,.15)','vocab':'rgba(168,85,247,.15)','prática':'rgba(59,130,246,.15)'};
-  const iconTextColors = {'grammar':'var(--accent)','vocab':'var(--purple)','prática':'var(--blue)'};
-  container.innerHTML = reviewItems.map((r,i) => `
-    <div class="review-card">
-      <div class="review-icon" style="background:${iconColors[r.type]||'rgba(249,115,22,.15)'};color:${iconTextColors[r.type]||'var(--accent)'}">
-        <span style="font-size:1.2rem">${r.icon}</span>
-      </div>
-      <div class="review-content">
-        <h4>${r.title}</h4>
-        <p>${r.desc}</p>
-        <div class="review-actions">
-          <button class="btn btn-primary btn-sm" onclick="markReviewDone(${i})">${r.solved?'Revisar novamente':'Marcar como revisado'}</button>
+  // ==================== NOTES ====================
+  function renderNotes() {
+    const grid = document.getElementById('notesGrid');
+    if (!grid) return;
+    if (notes.length === 0) {
+      grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px">Nenhuma anotação ainda.</p>';
+      return;
+    }
+    grid.innerHTML = notes.map(n => `
+      <div class="note-card">
+        <h4>${escapeHtml(n.title)}</h4>
+        <p>${escapeHtml(n.content)}</p>
+        <div class="note-date">${n.date}</div>
+        <div class="note-actions">
+          <button onclick="editNote(${n.id})">Editar</button>
+          <button class="del" onclick="deleteNote(${n.id})">Excluir</button>
         </div>
-      </div>
-    </div>`).join('');
-}
-window.markReviewDone = (index) => { reviewItems[index].solved = !reviewItems[index].solved; renderReview(); addXP(15); };
+      </div>`).join('');
+  }
+  window.openNoteModal = (id) => {
+    editingNoteId = id || null;
+    const modal = document.getElementById('noteModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    const titleInput = document.getElementById('noteTitle');
+    const contentInput = document.getElementById('noteContent');
+    const titleEl = document.getElementById('noteModalTitle');
+    if (id) {
+      const note = notes.find(n => n.id === id);
+      if (titleEl) titleEl.textContent = 'Editar Anotação';
+      if (titleInput && note) titleInput.value = note.title;
+      if (contentInput && note) contentInput.value = note.content;
+    } else {
+      if (titleEl) titleEl.textContent = 'Nova Anotação';
+      if (titleInput) titleInput.value = '';
+      if (contentInput) contentInput.value = '';
+    }
+  };
+  window.closeNoteModal = () => { document.getElementById('noteModal')?.classList.add('hidden'); editingNoteId = null; };
+  window.saveNote = () => {
+    const title = document.getElementById('noteTitle')?.value.trim();
+    const content = document.getElementById('noteContent')?.value.trim();
+    if (!title || !content) return;
+    if (editingNoteId) {
+      const note = notes.find(n => n.id === editingNoteId);
+      if (note) { note.title = title; note.content = content; }
+    } else {
+      notes.unshift({id:Date.now(),title,content,date:new Date().toISOString().split('T')[0]});
+    }
+    closeNoteModal();
+    renderNotes();
+    addXP(10, 'Anotação salva');
+  };
+  window.editNote = (id) => openNoteModal(id);
+  window.deleteNote = (id) => { notes = notes.filter(n => n.id !== id); renderNotes(); };
 
-// ==================== XP SYSTEM ====================
-function addXP(amount, reason) {
-  xp = Math.min(xp + amount, 3000);
-  const pct = (xp / 3000) * 100;
-  const fill = document.getElementById('xpFill');
-  const text = document.getElementById('xpText');
-  const metric = document.getElementById('metricProgress');
-  if (fill) fill.style.width = pct + '%';
-  if (text) text.textContent = `${xp.toLocaleString('pt-BR')} / 3.000`;
-  if (metric) metric.textContent = Math.round(pct) + '%';
-  if (reason) showToast(`+${amount} XP: ${reason}`, 'success');
-}
-function showToast(msg, type) {
-  const toast = document.createElement('div');
-  toast.className = `toast ${type||'info'}`;
-  toast.innerText = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
+  // ==================== REVIEW ====================
+  function renderReview() {
+    const container = document.getElementById('reviewCards');
+    if (!container) return;
+    const iconColors = {'grammar':'rgba(249,115,22,.15)','vocab':'rgba(168,85,247,.15)','prática':'rgba(59,130,246,.15)'};
+    const iconTextColors = {'grammar':'var(--accent)','vocab':'var(--purple)','prática':'var(--blue)'};
+    container.innerHTML = reviewItems.map((r,i) => `
+      <div class="review-card">
+        <div class="review-icon" style="background:${iconColors[r.type]||'rgba(249,115,22,.15)'};color:${iconTextColors[r.type]||'var(--accent)'}">
+          <span style="font-size:1.2rem">${r.icon}</span>
+        </div>
+        <div class="review-content">
+          <h4>${r.title}</h4>
+          <p>${r.desc}</p>
+          <div class="review-actions">
+            <button class="btn btn-primary btn-sm" onclick="markReviewDone(${i})">${r.solved?'Revisar novamente':'Marcar como revisado'}</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  window.markReviewDone = (index) => { reviewItems[index].solved = !reviewItems[index].solved; renderReview(); addXP(15, 'Revisão concluída'); };
 
-// ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', async () => {
-  navigateTo('dashboard');
-  // Carrega módulos do Supabase primeiro
-  await loadModulesFromSupabase();
-  
-  renderFlashcard();
-  renderShadowPhrase();
-  renderNotes();
-  renderReview();
-  console.log('🇩 Deutsch Hub v2.0 iniciado!');
-});
+  // ==================== XP SYSTEM ====================
+  function addXP(amount, reason) {
+    xp = Math.min(xp + amount, 3000);
+    const pct = (xp / 3000) * 100;
+    const fill = document.getElementById('xpFill');
+    const text = document.getElementById('xpText');
+    const metric = document.getElementById('metricProgress');
+    if (fill) fill.style.width = pct + '%';
+    if (text) text.textContent = `${xp.toLocaleString('pt-BR')} / 3.000`;
+    if (metric) metric.textContent = Math.round(pct) + '%';
+    if (reason) showToast(`+${amount} XP: ${reason}`, 'success');
+  }
+  function showToast(msg, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type||'info'}`;
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
 
-// Expor funções globais para onclick no HTML
-window.navigateTo = navigateTo;
-window.toggleSidebar = toggleSidebar;
-</script>
+  // ==================== INIT ====================
+  document.addEventListener('DOMContentLoaded', async () => {
+    navigateTo('dashboard');
+    await loadModulesFromSupabase();
+    renderFlashcard();
+    renderShadowPhrase();
+    renderNotes();
+    renderReview();
+    console.log('🇩🇪 Deutsch Hub v2.0 iniciado!');
+  });
+
+  // Expor funções globais
+  window.navigateTo = navigateTo;
+  window.toggleSidebar = toggleSidebar;
+  window.loadModulesFromSupabase = loadModulesFromSupabase;
+</>
 </body>
 </html>
 
