@@ -831,11 +831,14 @@ input,textarea{font-family:inherit;outline:none}
     document.getElementById('sidebar')?.classList.remove('open');
     document.getElementById('overlay')?.classList.remove('active');
   }
+  // Expor imediatamente após declaração para os onclick inline funcionarem
+  window.navigateTo = navigateTo;
 
   function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
     document.getElementById('overlay')?.classList.toggle('active');
   }
+  window.toggleSidebar = toggleSidebar;
   document.getElementById('overlay')?.addEventListener('click', toggleSidebar);
 
   document.querySelectorAll('.level-tab').forEach(tab => {
@@ -1035,9 +1038,7 @@ input,textarea{font-family:inherit;outline:none}
     console.log('🇩🇪 Deutsch Hub v2.0 iniciado!');
   });
 
-  // Expor funções globais
-  window.navigateTo = navigateTo;
-  window.toggleSidebar = toggleSidebar;
+  // Expor funções globais adicionais
   window.loadModulesFromSupabase = loadModulesFromSupabase;
 </>
 </body>
