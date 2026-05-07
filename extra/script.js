@@ -998,3 +998,77 @@ window.showPage = showPage;
 window.startBossFight = startBossFight;
 window.checkBossAnswer = checkBossAnswer;
 window.startShadowing = startShadowing;
+
+
+async function loadModulesFromSupabase() {
+  const client = getSupabase();
+  if (!client) {
+    console.error('❌ Supabase SDK não encontrado no window');
+    document.getElementById('moduleList').innerHTML = '<p class="text-red-500">Erro: SDK não carregado.</p>';
+    return;
+  }
+
+  try {
+    console.log('🔍 [Supabase] Buscando módulos...');
+
+    // ✅ QUERY OTIMIZADA: sem .eq('active', true) para evitar filtros fantasmas
+    const {  modules, error: modError } = await client
+      .from('study_modules')
+      .select('slug, level, chapter_number, title_pt, title_de, focus, sort_order')
+      .in('level', ['A1', 'A2', 'B1'])
+      .order('sort_order', { ascending: true });
+
+    if (modError) {
+      console.error('❌ [Supabase] Erro na query:', modError);
+      document.getElementById('moduleList').innerHTML = '<p class="text-red-500">Erro ao conectar com banco.</p>';
+      return;
+    }
+
+    console.log('📦 [Supabase] Retornou:', modules?.length || 0, 'módulos');
+
+    if (!modules || modules.length === 0) {
+      console.warn('⚠️ [Supabase] Lista vazia. Verifique se a política de RLS foi aplicada.');
+      document.getElementById('moduleList').innerHTML = '<p class="text-center text-gray-500 py-4">Nenhum módulo encontrado. Verifique o RLS no Supabase.</p>';
+      return;
+    }
+
+    // Busca lições associadas
+    const {  lessons } = await client
+      .from('study_lessons')
+      .select('module_slug, slug, title_pt, title_de, sort_order')
+      .order('sort_order', { ascending: true });
+
+    // Agrupa e formata para a UI
+    const formatted = { A1: [], A2: [], B1: [] };
+    
+    modules.forEach(mod => {
+      const modLessons = (lessons || []).filter(l => l.module_slug === mod.slug);
+      
+      const chapters = modLessons.map((l, idx) => ({
+        name: l.title_pt || l.title_de || `Lição ${idx + 1}`,
+        type: 'vocab', // Padrão, ajustável conforme necessidade
+        done: false,
+        slug: l.slug
+      }));
+
+      const moduleData = {
+        id: mod.chapter_number || mod.slug,
+        slug: mod.slug,
+        title: mod.title_de || mod.title_pt,
+        translation: mod.title_pt,
+        status: mod.chapter_number === 1 ? 'available' : 'locked', // Módulo 1 liberado, resto travado
+        chapters: chapters.length > 0 ? chapters : [{ name: 'Introdução', type: 'vocab', done: false }]
+      };
+
+      if (formatted[mod.level]) formatted[mod.level].push(moduleData);
+    });
+
+    modulesData = formatted;
+    modulesLoaded = true;
+    renderModules();
+    console.log('✅ [Supabase] Módulos carregados com sucesso!');
+
+  } catch (err) {
+    console.error('❌ [Supabase] Erro inesperado:', err);
+  }
+}
